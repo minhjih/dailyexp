@@ -24,7 +24,12 @@ class Paper(Base):
     abstract = Column(Text)
     authors = Column(JSON)
     published_date = Column(DateTime)
-    ai_summary = Column(Text)
+    ai_summary = Column(JSON)
+    core_claims = Column(Text)
+    methodology = Column(Text)
+    key_findings = Column(Text)
+    visual_elements = Column(JSON)
+    future_research = Column(Text)
     user_id = Column(Integer, ForeignKey("users.id"))
     
     user = relationship("User", back_populates="papers")
