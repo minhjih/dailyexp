@@ -10,10 +10,16 @@ dailyexp/
 │   └── Dockerfile
 ├── frontend/
 │   ├── lib/
-│   │   ├── main.dart
+│   │   ├── api/
 │   │   ├── models/
+│   │   ├── providers/
 │   │   ├── screens/
-│   │   ├── services/
-│   │   └── widgets/
+│   │   │   ├── auth/
+│   │   │   ├── papers/
+│   │   │   ├── scraps/
+│   │   │   └── groups/
+│   │   ├── widgets/
+│   │   ├── utils/
+│   │   └── theme/
 │   └── pubspec.yaml
 └── README.md 
