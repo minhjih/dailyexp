@@ -39,8 +39,14 @@ class Scrap(Base):
     __tablename__ = "scraps"
 
     id = Column(Integer, primary_key=True, index=True)
-    content = Column(Text)
+    content = Column(Text)  # 텍스트 내용
+    image_url = Column(String)  # 이미지 URL 저장
+    scrap_type = Column(String)  # 'text' 또는 'image'
+    note = Column(Text)  # 사용자의 메모
+    page_number = Column(Integer, nullable=True)  # 논문의 페이지 번호
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    
     user_id = Column(Integer, ForeignKey("users.id"))
     paper_id = Column(Integer, ForeignKey("papers.id"))
     
