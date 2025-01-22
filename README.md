@@ -22,7 +22,7 @@ DailyExp is an innovative research tracking and knowledge sharing platform desig
 - **AWS**: Cloud infrastructure and service hosting
 - **OpenAI**: AI-powered paper analysis and summarization
 - **FastAPI**: High-performance API development
-- <img alt="Python" src ="https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54"/> <img alt="AWS" src ="https://img.shields.io/badge/AWS-232F3E.svg?style=for-the-badge&logo=amazonwebservices&logoColor=white"/> <img alt="Openai" src ="https://img.shields.io/badge/OpenAI-412991?style=for-the-badge&logo=OpenAI&logoColor=white"/> 
+- <img alt="Python" src ="https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54"/> <img alt="AWS" src ="https://img.shields.io/badge/AWS-232F3E.svg?style=for-the-badge&logo=amazonwebservices&logoColor=white"/> <img alt="Openai" src ="https://img.shields.io/badge/OpenAI-412991?style=for-the-badge&logo=OpenAI&logoColor=white"/> <img alt="FastAPI" src ="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=FastAPI&logoColor=white"/> 
 
 ## Installation
 
