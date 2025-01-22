@@ -92,4 +92,44 @@ GET /auth/me
     "full_name": "User Name",
     "id": 1,
     "created_at": "2023-01-01T00:00:00"
-  } 
+  }
+
+## 스크랩 API
+
+### 스크랩 생성
+POST /scraps
+- 설명: 새로운 스크랩을 생성합니다
+- 인증: Bearer 토큰 필요
+- 요청 본문:
+  {
+    "content": "스크랩할 텍스트 내용",
+    "image_url": "이미지 URL",
+    "scrap_type": "text" 또는 "image",
+    "note": "사용자 메모",
+    "page_number": 1,
+    "paper_id": 123
+  }
+
+### 스크랩 목록 조회
+GET /scraps
+- 설명: 사용자의 스크랩 목록을 조회합니다
+- 인증: Bearer 토큰 필요
+- 쿼리 파라미터:
+  - paper_id: int (선택) - 특정 논문의 스크랩만 조회
+  - skip: int (선택, 기본값=0) - 건너뛸 항목 수
+  - limit: int (선택, 기본값=100) - 반환할 최대 항목 수
+
+### 스크랩 수정
+PUT /scraps/{scrap_id}
+- 설명: 기존 스크랩을 수정합니다
+- 인증: Bearer 토큰 필요
+- 요청 본문:
+  {
+    "content": "수정된 내용",
+    "note": "수정된 메모"
+  }
+
+### 스크랩 삭제
+DELETE /scraps/{scrap_id}
+- 설명: 스크랩을 삭제합니다
+- 인증: Bearer 토큰 필요 
