@@ -1,0 +1,19 @@
+dailyexp/
+├── backend/
+│   ├── app/
+│   │   ├── main.py
+│   │   ├── models/
+│   │   ├── routers/
+│   │   ├── services/
+│   │   └── utils/
+│   ├── requirements.txt
+│   └── Dockerfile
+├── frontend/
+│   ├── lib/
+│   │   ├── main.dart
+│   │   ├── models/
+│   │   ├── screens/
+│   │   ├── services/
+│   │   └── widgets/
+│   └── pubspec.yaml
+└── README.md 
