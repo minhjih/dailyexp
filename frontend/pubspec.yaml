@@ -36,19 +36,19 @@ dependencies:
   cupertino_icons: ^1.0.8
 
   # 상태 관리
-  provider: ^6.0.0
+  provider: ^6.1.2
   # API 통신
-  dio: ^5.0.0
+  dio: ^5.7.0
   # 로컬 저장소
-  shared_preferences: ^2.0.0
+  shared_preferences: ^2.3.5
   # JWT 처리
-  jwt_decoder: ^2.0.0
+  jwt_decoder: ^2.0.1
   # UI 컴포넌트
-  flutter_markdown: ^0.6.0
+  flutter_markdown: ^0.7.5
   # 이미지 처리
-  cached_network_image: ^3.0.0
+  cached_network_image: ^3.4.1
   # 폼 처리
-  form_field_validator: ^1.0.0
+  form_field_validator: ^1.1.0
 
 dev_dependencies:
   flutter_test:
