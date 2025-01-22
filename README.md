@@ -26,24 +26,6 @@ DailyExp is an innovative research tracking and knowledge sharing platform desig
 
 <img alt="Python" src ="https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54"/> <img alt="AWS" src ="https://img.shields.io/badge/AWS-232F3E.svg?style=for-the-badge&logo=amazonwebservices&logoColor=white"/> <img alt="Openai" src ="https://img.shields.io/badge/OpenAI-412991?style=for-the-badge&logo=OpenAI&logoColor=white"/> <img alt="FastAPI" src ="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=FastAPI&logoColor=white"/> 
 
-## Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/minhjih/dailyexp.git
-
-# Navigate to the project directory
-cd dailyexp
-
-# Run the server
-cd backend
-pip install -r requirements.txt
-uvicorn main:app --reload
-
-# Run the Flutter app (in a separate terminal)
-flutter pub get
-flutter run
-```
 
 ## Usage
 
@@ -55,11 +37,8 @@ flutter run
 6. Follow other researchers and gain insights from their work.
 
 
-## Contact
+## Commercial Contact
 
-Project Maintainer - [@minhjih](https://instagram.com/minhjih) - jhchoi0226@snu.ac.kr
+Project Maintainer - [@minhjih](https://www.linkedin.com/in/minhjih?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app) - jhchoi0226@snu.ac.kr
 
 Project Link: [https://github.com/minhjih/dailyexp](https://github.com/minhjih/dailyexp)
-
-# Api Endpoint
-[API endpoint](/backend/app/docs/api_endpoints.md)
