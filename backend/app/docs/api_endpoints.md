@@ -168,4 +168,61 @@ GET /scraps/search
 - 인증: Bearer 토큰 필요
 - 쿼리 파라미터:
   - query: str - 검색어
-  - tag_ids: List[int] - 태그 ID 목록 (선택) 
+  - tag_ids: List[int] - 태그 ID 목록 (선택)
+
+## 그룹 API
+
+### 그룹 생성
+POST /groups
+- 설명: 새로운 그룹을 생성합니다
+- 인증: Bearer 토큰 필요
+- 요청 본문:
+  {
+    "name": "그룹명",
+    "description": "그룹 설명"
+  }
+
+### 내 그룹 목록 조회
+GET /groups
+- 설명: 사용자가 속한 모든 그룹을 조회합니다
+- 인증: Bearer 토큰 필요
+
+### 그룹 멤버 추가
+POST /groups/{group_id}/members
+- 설명: 그룹에 새 멤버를 추가합니다
+- 인증: Bearer 토큰 필요 (그룹 관리자만 가능)
+- 요청 본문:
+  {
+    "user_id": 123,
+    "role": "member"
+  }
+
+### 논문 그룹 공유
+POST /groups/{group_id}/papers
+- 설명: 논문을 그룹과 공유합니다
+- 인증: Bearer 토큰 필요
+- 요청 본문:
+  {
+    "paper_id": 123,
+    "note": "공유 메모"
+  }
+
+### 스크랩 그룹 공유
+POST /groups/{group_id}/scraps
+- 설명: 스크랩을 그룹과 공유합니다
+- 인증: Bearer 토큰 필요
+- 요청 본문:
+  {
+    "scrap_id": 123,
+    "note": "공유 메모"
+  }
+
+### 그룹 공유 논문 조회
+GET /groups/{group_id}/papers
+- 설명: 그룹에 공유된 논문들을 조회합니다
+- 인증: Bearer 토큰 필요
+
+### 그룹 공유 스크랩 조회
+GET /groups/{group_id}/scraps
+- 설명: 그룹에 공유된 스크랩들을 조회합니다
+- 인증: Bearer 토큰 필요 
