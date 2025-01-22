@@ -40,7 +40,7 @@ dependencies:
   # API 통신
   dio: ^5.7.0
   # 로컬 저장소
-  shared_preferences: ^2.3.5
+  shared_preferences: ^2.2.0
   # JWT 처리
   jwt_decoder: ^2.0.1
   # UI 컴포넌트
@@ -49,6 +49,7 @@ dependencies:
   cached_network_image: ^3.4.1
   # 폼 처리
   form_field_validator: ^1.1.0
+  http: ^1.1.0
 
 dev_dependencies:
   flutter_test:

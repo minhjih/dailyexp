@@ -36,4 +36,21 @@ class AuthAPI {
       throw Exception('사용자 정보 조회 실패: ${e.toString()}');
     }
   }
+
+  static Future<Map<String, dynamic>> signup({
+    required String email,
+    required String password,
+    required String fullName,
+  }) async {
+    try {
+      final response = await _dio.post('/auth/signup', data: {
+        'email': email,
+        'password': password,
+        'full_name': fullName,
+      });
+      return response.data;
+    } catch (e) {
+      throw Exception('회원가입 실패: ${e.toString()}');
+    }
+  }
 }
