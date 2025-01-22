@@ -1,0 +1,5 @@
+1. PostgreSQL 설치 및 데이터베이스 생성
+2. OpenAI API 키 발급
+3. IEEE API 키 발급
+4. SECRET_KEY 생성
+5. .env 파일에 설정값 입력
