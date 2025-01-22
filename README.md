@@ -37,7 +37,7 @@ DailyExp is an innovative research tracking and knowledge sharing platform desig
 6. Follow other researchers and gain insights from their work.
 
 
-## Commercial Contact
+## Contact
 
 Project Maintainer - [@minhjih](https://www.linkedin.com/in/minhjih?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app) - jhchoi0226@snu.ac.kr
 
