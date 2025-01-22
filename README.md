@@ -26,21 +26,18 @@ DailyExp is an innovative research tracking and knowledge sharing platform desig
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/DailyExp.git
+git clone https://github.com/minhjih/dailyexp.git
 
 # Navigate to the project directory
-cd DailyExp
-
-# Install required packages
-pip install -r requirements.txt
-
-# Install frontend dependencies
-flutter pub get
+cd dailyexp
 
 # Run the server
+cd backend
+pip install -r requirements.txt
 uvicorn main:app --reload
 
 # Run the Flutter app (in a separate terminal)
+flutter pub get
 flutter run
 ```
 
