@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import papers, auth
+from .routers import papers, auth, scraps
 
 app = FastAPI(title="DailyExp API")
 
@@ -15,6 +15,7 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(papers.router)
+app.include_router(scraps.router)
 
 @app.get("/")
 async def root():
