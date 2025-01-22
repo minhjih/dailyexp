@@ -225,4 +225,37 @@ GET /groups/{group_id}/papers
 ### 그룹 공유 스크랩 조회
 GET /groups/{group_id}/scraps
 - 설명: 그룹에 공유된 스크랩들을 조회합니다
+- 인증: Bearer 토큰 필요
+
+## 댓글 API
+
+### 댓글 작성
+POST /comments
+- 설명: 새로운 댓글을 작성합니다
+- 인증: Bearer 토큰 필요
+- 요청 본문:
+  {
+    "content": "댓글 내용",
+    "target_type": "paper/scrap/group_paper/group_scrap",
+    "target_id": 123,
+    "parent_id": null  // 대댓글인 경우 부모 댓글 ID
+  }
+
+### 댓글 목록 조회
+GET /comments/target/{target_type}/{target_id}
+- 설명: 특정 대상의 댓글들을 조회합니다
+- 인증: Bearer 토큰 필요
+
+### 댓글 수정
+PUT /comments/{comment_id}
+- 설명: 댓글을 수정합니다
+- 인증: Bearer 토큰 필요
+- 요청 본문:
+  {
+    "content": "수정된 댓글 내용"
+  }
+
+### 댓글 삭제
+DELETE /comments/{comment_id}
+- 설명: 댓글을 삭제합니다
 - 인증: Bearer 토큰 필요 

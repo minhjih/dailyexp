@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, JSON, Boolean
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 from .database import Base
 import datetime
 
@@ -15,6 +15,9 @@ class User(Base):
     papers = relationship("Paper", back_populates="user")
     scraps = relationship("Scrap", back_populates="user")
     tags = relationship("Tag", back_populates="user")
+    owned_groups = relationship("Group", back_populates="owner")
+    group_memberships = relationship("GroupMember", back_populates="user")
+    comments = relationship("Comment", back_populates="user")
 
 class Paper(Base):
     __tablename__ = "papers"
@@ -35,6 +38,7 @@ class Paper(Base):
     
     user = relationship("User", back_populates="papers")
     scraps = relationship("Scrap", back_populates="paper")
+    group_shares = relationship("GroupSharedPaper", back_populates="paper")
 
 class Scrap(Base):
     __tablename__ = "scraps"
@@ -57,6 +61,7 @@ class Scrap(Base):
     paper = relationship("Paper", back_populates="scraps")
     tags = relationship("ScrapTag", back_populates="scrap")
     shares = relationship("SharedScrap", back_populates="scrap")
+    group_shares = relationship("GroupSharedScrap", back_populates="scrap")
 
 class Tag(Base):
     __tablename__ = "tags"
@@ -87,4 +92,78 @@ class SharedScrap(Base):
     shared_at = Column(DateTime, default=datetime.datetime.utcnow)
     
     scrap = relationship("Scrap", back_populates="shares")
-    shared_with_user = relationship("User") 
+    shared_with_user = relationship("User")
+
+class Group(Base):
+    __tablename__ = "groups"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String)
+    description = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    owner_id = Column(Integer, ForeignKey("users.id"))
+    
+    owner = relationship("User", back_populates="owned_groups")
+    members = relationship("GroupMember", back_populates="group")
+    shared_papers = relationship("GroupSharedPaper", back_populates="group")
+    shared_scraps = relationship("GroupSharedScrap", back_populates="group")
+
+class GroupMember(Base):
+    __tablename__ = "group_members"
+
+    id = Column(Integer, primary_key=True, index=True)
+    group_id = Column(Integer, ForeignKey("groups.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
+    role = Column(String)  # 'admin' 또는 'member'
+    joined_at = Column(DateTime, default=datetime.datetime.utcnow)
+    
+    group = relationship("Group", back_populates="members")
+    user = relationship("User", back_populates="group_memberships")
+
+class GroupSharedPaper(Base):
+    __tablename__ = "group_shared_papers"
+
+    id = Column(Integer, primary_key=True, index=True)
+    paper_id = Column(Integer, ForeignKey("papers.id"))
+    group_id = Column(Integer, ForeignKey("groups.id"))
+    shared_by_id = Column(Integer, ForeignKey("users.id"))
+    shared_at = Column(DateTime, default=datetime.datetime.utcnow)
+    note = Column(Text, nullable=True)
+    
+    paper = relationship("Paper", back_populates="group_shares")
+    group = relationship("Group", back_populates="shared_papers")
+    shared_by = relationship("User")
+
+class GroupSharedScrap(Base):
+    __tablename__ = "group_shared_scraps"
+
+    id = Column(Integer, primary_key=True, index=True)
+    scrap_id = Column(Integer, ForeignKey("scraps.id"))
+    group_id = Column(Integer, ForeignKey("groups.id"))
+    shared_by_id = Column(Integer, ForeignKey("users.id"))
+    shared_at = Column(DateTime, default=datetime.datetime.utcnow)
+    note = Column(Text, nullable=True)
+    
+    scrap = relationship("Scrap", back_populates="group_shares")
+    group = relationship("Group", back_populates="shared_scraps")
+    shared_by = relationship("User")
+
+class Comment(Base):
+    __tablename__ = "comments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    content = Column(Text)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    
+    # 댓글 작성자
+    user_id = Column(Integer, ForeignKey("users.id"))
+    user = relationship("User", back_populates="comments")
+    
+    # 댓글이 달린 대상 (논문/스크랩/그룹 공유)
+    target_type = Column(String)  # 'paper', 'scrap', 'group_paper', 'group_scrap'
+    target_id = Column(Integer)
+    
+    # 대댓글을 위한 필드
+    parent_id = Column(Integer, ForeignKey("comments.id"), nullable=True)
+    replies = relationship("Comment", backref=backref("parent", remote_side=[id])) 
