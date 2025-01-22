@@ -15,12 +15,16 @@ DailyExp is an innovative research tracking and knowledge sharing platform desig
 
 ### Frontend
 - **Flutter**: Cross-platform mobile application development
+<img alt="Flutter" src ="https://img.shields.io/badge/Flutter-02569B.svg?&style=for-the-badge&logo=Flutter&logoColor=white"/>
 
 ### Backend
 - **Python**: Server-side logic implementation
 - **AWS**: Cloud infrastructure and service hosting
 - **OpenAI**: AI-powered paper analysis and summarization
 - **FastAPI**: High-performance API development
+<img alt="Python" src ="https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54"/>
+<img alt="AWS" src ="https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white"/> 
+<img alt="Openai" src ="https://img.shields.io/badge/openai-000000?style=for-the-badge&logo=openai&logoColor=black"/> 
 
 ## Installation
 
@@ -50,19 +54,6 @@ flutter run
 5. Write and publicly post your personal reviews of papers.
 6. Follow other researchers and gain insights from their work.
 
-## Contributing
-
-To contribute to DailyExp:
-
-1. Fork this repository.
-2. Create a new feature branch (`git checkout -b feature/AmazingFeature`).
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
-4. Push to the branch (`git push origin feature/AmazingFeature`).
-5. Open a Pull Request.
-
-## License
-
-This project is distributed under the MIT License. See `LICENSE` file for more information.
 
 ## Contact
 
