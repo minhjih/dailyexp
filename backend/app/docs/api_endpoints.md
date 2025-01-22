@@ -26,6 +26,7 @@ GET /papers/search
 ## 논문 분석 API
 GET /papers/analyze/{paper_id}
 - 설명: GPT-4를 사용하여 특정 논문을 상세 분석합니다
+- 인증: Bearer 토큰 필요
 - 파라미터:
   - paper_id: str (필수) - IEEE 논문 ID
 - 응답 예시:
@@ -48,4 +49,47 @@ GET /papers/analyze/{paper_id}
       }
     ],
     "future_research": "향후 연구 방향..."
+  }
+
+## 인증 API
+
+### 회원가입
+POST /auth/signup
+- 설명: 새로운 사용자를 등록합니다
+- 요청 본문:
+  {
+    "email": "user@example.com",
+    "full_name": "User Name",
+    "password": "strongpassword"
+  }
+- 응답 예시:
+  {
+    "email": "user@example.com",
+    "full_name": "User Name",
+    "id": 1,
+    "created_at": "2023-01-01T00:00:00"
+  }
+
+### 로그인
+POST /auth/login
+- 설명: 사용자 로그인 및 액세스 토큰 발급
+- 요청 본문 (form-data):
+  - username: 이메일 주소
+  - password: 비밀번호
+- 응답 예시:
+  {
+    "access_token": "eyJ0eXAiOiJKV1QiLCJhbGc...",
+    "token_type": "bearer"
+  }
+
+### 내 정보 조회
+GET /auth/me
+- 설명: 현재 로그인한 사용자의 정보를 조회
+- 인증: Bearer 토큰 필요
+- 응답 예시:
+  {
+    "email": "user@example.com",
+    "full_name": "User Name",
+    "id": 1,
+    "created_at": "2023-01-01T00:00:00"
   } 
