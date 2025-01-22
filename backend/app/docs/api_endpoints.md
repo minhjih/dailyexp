@@ -132,4 +132,40 @@ PUT /scraps/{scrap_id}
 ### 스크랩 삭제
 DELETE /scraps/{scrap_id}
 - 설명: 스크랩을 삭제합니다
-- 인증: Bearer 토큰 필요 
+- 인증: Bearer 토큰 필요
+
+### 태그 생성
+POST /scraps/tags
+- 설명: 새로운 태그를 생성합니다
+- 인증: Bearer 토큰 필요
+- 요청 본문:
+  {
+    "name": "태그명"
+  }
+
+### 태그 목록 조회
+GET /scraps/tags
+- 설명: 사용자의 모든 태그를 조회합니다
+- 인증: Bearer 토큰 필요
+
+### 스크랩 공유
+POST /scraps/{scrap_id}/share
+- 설명: 스크랩을 다른 사용자와 공유합니다
+- 인증: Bearer 토큰 필요
+- 요청 본문:
+  {
+    "shared_with_user_id": 123
+  }
+
+### 공유받은 스크랩 조회
+GET /scraps/shared
+- 설명: 다른 사용자가 공유한 스크랩을 조회합니다
+- 인증: Bearer 토큰 필요
+
+### 스크랩 검색
+GET /scraps/search
+- 설명: 스크랩을 검색합니다
+- 인증: Bearer 토큰 필요
+- 쿼리 파라미터:
+  - query: str - 검색어
+  - tag_ids: List[int] - 태그 ID 목록 (선택) 

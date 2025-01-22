@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, JSON
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, JSON, Boolean
 from sqlalchemy.orm import relationship
 from .database import Base
 import datetime
@@ -14,6 +14,7 @@ class User(Base):
     
     papers = relationship("Paper", back_populates="user")
     scraps = relationship("Scrap", back_populates="user")
+    tags = relationship("Tag", back_populates="user")
 
 class Paper(Base):
     __tablename__ = "papers"
@@ -46,9 +47,44 @@ class Scrap(Base):
     page_number = Column(Integer, nullable=True)  # 논문의 페이지 번호
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    is_public = Column(Boolean, default=False)  # 공개 여부
+    search_vector = Column(Text)  # 검색을 위한 필드
     
     user_id = Column(Integer, ForeignKey("users.id"))
     paper_id = Column(Integer, ForeignKey("papers.id"))
     
     user = relationship("User", back_populates="scraps")
-    paper = relationship("Paper", back_populates="scraps") 
+    paper = relationship("Paper", back_populates="scraps")
+    tags = relationship("ScrapTag", back_populates="scrap")
+    shares = relationship("SharedScrap", back_populates="scrap")
+
+class Tag(Base):
+    __tablename__ = "tags"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+    user = relationship("User", back_populates="tags")
+    scraps = relationship("ScrapTag", back_populates="tag")
+
+class ScrapTag(Base):
+    __tablename__ = "scrap_tags"
+
+    scrap_id = Column(Integer, ForeignKey("scraps.id"), primary_key=True)
+    tag_id = Column(Integer, ForeignKey("tags.id"), primary_key=True)
+    
+    scrap = relationship("Scrap", back_populates="tags")
+    tag = relationship("Tag", back_populates="scraps")
+
+class SharedScrap(Base):
+    __tablename__ = "shared_scraps"
+
+    id = Column(Integer, primary_key=True, index=True)
+    scrap_id = Column(Integer, ForeignKey("scraps.id"))
+    shared_with_user_id = Column(Integer, ForeignKey("users.id"))
+    shared_at = Column(DateTime, default=datetime.datetime.utcnow)
+    
+    scrap = relationship("Scrap", back_populates="shares")
+    shared_with_user = relationship("User") 

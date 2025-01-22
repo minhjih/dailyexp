@@ -7,6 +7,7 @@ from ..schemas import scrap_schemas
 from ..utils.auth import get_current_user
 import os
 from datetime import datetime
+from sqlalchemy import or_, text
 
 router = APIRouter(
     prefix="/scraps",
@@ -90,4 +91,92 @@ async def delete_scrap(
     
     db.delete(scrap)
     db.commit()
-    return {"message": "스크랩이 삭제되었습니다"} 
+    return {"message": "스크랩이 삭제되었습니다"}
+
+@router.post("/tags", response_model=scrap_schemas.Tag)
+async def create_tag(
+    tag: scrap_schemas.TagCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """새로운 태그를 생성합니다."""
+    db_tag = models.Tag(name=tag.name, user_id=current_user.id)
+    db.add(db_tag)
+    db.commit()
+    db.refresh(db_tag)
+    return db_tag
+
+@router.get("/tags", response_model=List[scrap_schemas.Tag])
+async def get_tags(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """사용자의 모든 태그를 조회합니다."""
+    return db.query(models.Tag).filter(models.Tag.user_id == current_user.id).all()
+
+@router.post("/{scrap_id}/share", response_model=scrap_schemas.Scrap)
+async def share_scrap(
+    scrap_id: int,
+    share_data: scrap_schemas.SharedScrapCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """스크랩을 다른 사용자와 공유합니다."""
+    scrap = db.query(models.Scrap).filter(
+        models.Scrap.id == scrap_id,
+        models.Scrap.user_id == current_user.id
+    ).first()
+    
+    if not scrap:
+        raise HTTPException(status_code=404, detail="스크랩을 찾을 수 없습니다")
+        
+    shared_scrap = models.SharedScrap(
+        scrap_id=scrap_id,
+        shared_with_user_id=share_data.shared_with_user_id
+    )
+    db.add(shared_scrap)
+    db.commit()
+    return scrap
+
+@router.get("/shared", response_model=List[scrap_schemas.Scrap])
+async def get_shared_scraps(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """나와 공유된 스크랩들을 조회합니다."""
+    return db.query(models.Scrap).join(
+        models.SharedScrap
+    ).filter(
+        models.SharedScrap.shared_with_user_id == current_user.id
+    ).all()
+
+@router.get("/search", response_model=List[scrap_schemas.Scrap])
+async def search_scraps(
+    query: str,
+    tag_ids: Optional[List[int]] = None,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """스크랩을 검색합니다."""
+    search_query = db.query(models.Scrap).filter(
+        models.Scrap.user_id == current_user.id
+    )
+    
+    # 텍스트 검색
+    if query:
+        search_query = search_query.filter(
+            or_(
+                models.Scrap.content.ilike(f"%{query}%"),
+                models.Scrap.note.ilike(f"%{query}%")
+            )
+        )
+    
+    # 태그 필터링
+    if tag_ids:
+        search_query = search_query.join(
+            models.ScrapTag
+        ).filter(
+            models.ScrapTag.tag_id.in_(tag_ids)
+        )
+    
+    return search_query.all() 
