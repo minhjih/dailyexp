@@ -3,23 +3,35 @@ import '../models/user.dart';
 
 class AuthAPI {
   static final Dio _dio = Dio(BaseOptions(
-    baseUrl: 'http://localhost:8000', // 실제 서버 URL로 변경 필요
+    baseUrl: 'http://10.0.2.2:8000', // localhost 대신 10.0.2.2 사용
     contentType: 'application/json',
   ));
 
   static Future<Map<String, dynamic>> login(
       String email, String password) async {
     try {
+      final formData = FormData.fromMap({
+        'grant_type': 'password', // OAuth2 요구사항
+        'username': email,
+        'password': password,
+        'scope': '', // 선택적
+        'client_id': '', // 선택적
+        'client_secret': '' // 선택적
+      });
+
       final response = await _dio.post(
         '/auth/login',
-        data: {
-          'username': email, // FastAPI는 username으로 받음
-          'password': password,
-        },
+        data: formData,
+        options: Options(
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Accept': 'application/json',
+          },
+        ),
       );
       return response.data;
     } catch (e) {
-      throw Exception('로그인 실패: ${e.toString()}');
+      throw Exception('로그인 실패: $e');
     }
   }
 

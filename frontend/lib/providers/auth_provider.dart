@@ -6,7 +6,7 @@ import '../models/user.dart';
 import '../api/auth_api.dart';
 
 class AuthProvider with ChangeNotifier {
-  final String baseUrl = 'http://localhost:8000'; // 실제 서버 URL로 변경 필요
+  final String baseUrl = 'http://10.0.2.2:8000'; // Android 에뮬레이터용 URL로 수정
   User? _user;
   String? _token;
   bool _isLoading = false;

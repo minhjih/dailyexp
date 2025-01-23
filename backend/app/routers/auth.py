@@ -10,7 +10,8 @@ from ..utils.auth import (
     verify_password,
     create_access_token,
     get_password_hash,
-    ACCESS_TOKEN_EXPIRE_MINUTES
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+    get_current_user
 )
 
 router = APIRouter(

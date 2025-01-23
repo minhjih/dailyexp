@@ -37,7 +37,17 @@ class _SignupScreenState extends State<SignupScreen> {
           fullName: _fullNameController.text,
         );
         if (mounted) {
-          Navigator.of(context).pushReplacementNamed('/home');
+          // 회원가입 성공 후 로그인 페이지로 이동
+          Navigator.of(context)
+              .pop(); // 또는 Navigator.pushReplacementNamed(context, '/login');
+
+          // 성공 메시지 표시
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('회원가입이 완료되었습니다. 로그인해주세요.'),
+              backgroundColor: Colors.green,
+            ),
+          );
         }
       } catch (e) {
         if (mounted) {
