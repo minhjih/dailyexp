@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../models/user.dart';
+import 'dart:convert'; // jsonEncode를 위해 추가
 
 class AuthAPI {
   static final Dio _dio = Dio(BaseOptions(
@@ -10,27 +11,33 @@ class AuthAPI {
   static Future<Map<String, dynamic>> login(
       String email, String password) async {
     try {
-      final formData = FormData.fromMap({
-        'grant_type': 'password', // OAuth2 요구사항
-        'username': email,
+      // URL-encoded form data 형식으로 변경
+      final data = {
+        'username': email, // FastAPI는 'username' 필드를 기대함
         'password': password,
-        'scope': '', // 선택적
-        'client_id': '', // 선택적
-        'client_secret': '' // 선택적
-      });
+        'grant_type': 'password', // OAuth2 필수 파라미터
+      };
 
       final response = await _dio.post(
         '/auth/login',
-        data: formData,
+        data: data,
         options: Options(
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Accept': 'application/json',
-          },
+          contentType:
+              Headers.formUrlEncodedContentType, // form-urlencoded 형식 지정
+          validateStatus: (status) => status! < 500, // 4xx 에러도 처리하기 위해
         ),
       );
+
+      if (response.statusCode == 401) {
+        throw Exception('이메일 또는 비밀번호가 올바르지 않습니다');
+      }
+
       return response.data;
     } catch (e) {
+      if (e is DioException) {
+        print('Status code: ${e.response?.statusCode}');
+        print('Error response: ${e.response?.data}');
+      }
       throw Exception('로그인 실패: $e');
     }
   }

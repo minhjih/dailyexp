@@ -376,6 +376,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.2"
+  qs:
+    dependency: "direct main"
+    description:
+      name: qs
+      sha256: "1869914ceced60bc2eca422cb88daa351350633f7499ac9a684ebd6cb7179ad5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2"
   rxdart:
     dependency: transitive
     description:

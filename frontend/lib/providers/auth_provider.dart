@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
 import '../api/auth_api.dart';
@@ -21,27 +19,15 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/auth/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'email': email,
-          'password': password,
-        }),
-      );
+      final response = await AuthAPI.login(email, password);
+      _token = response['access_token'];
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        _token = data['access_token'];
-        // 토큰 저장
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('token', _token!);
+      // 토큰 저장
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token', _token!);
 
-        // 사용자 정보 가져오기
-        _user = await AuthAPI.getCurrentUser(_token!);
-      } else {
-        throw Exception('로그인 실패');
-      }
+      // 사용자 정보 가져오기
+      _user = await AuthAPI.getCurrentUser(_token!);
     } finally {
       _isLoading = false;
       notifyListeners();
