@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
 import '../api/auth_api.dart';
+import '../screens/main/main_screen.dart';
 
 class AuthProvider with ChangeNotifier {
   final String baseUrl = 'http://10.0.2.2:8000'; // Android 에뮬레이터용 URL로 수정
@@ -22,12 +23,13 @@ class AuthProvider with ChangeNotifier {
       final response = await AuthAPI.login(email, password);
       _token = response['access_token'];
 
-      // 토큰 저장
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', _token!);
 
-      // 사용자 정보 가져오기
       _user = await AuthAPI.getCurrentUser(_token!);
+      notifyListeners(); // 인증 상태 변경 알림
+    } catch (e) {
+      rethrow;
     } finally {
       _isLoading = false;
       notifyListeners();

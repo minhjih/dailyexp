@@ -5,6 +5,7 @@ import 'screens/auth/login_screen.dart';
 import 'screens/auth/signup_screen.dart';
 import 'screens/home/home_screen.dart'; // 이 파일은 아직 만들어야 함
 import 'screens/papers/paper_list_screen.dart';
+import 'screens/main/main_screen.dart'; // 추가
 import 'theme/colors.dart';
 
 void main() {
@@ -23,30 +24,20 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'DailyExp',
         theme: ThemeData(
-          primaryColor: primaryColor,
+          colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
           useMaterial3: true,
-          colorScheme: ColorScheme.light(
-            primary: primaryColor,
-            secondary: primaryLightColor,
-          ),
         ),
-        darkTheme: ThemeData(
-          brightness: Brightness.dark,
-          primaryColor: primaryLightColor,
-          useMaterial3: true,
-          colorScheme: ColorScheme.dark(
-            primary: primaryLightColor,
-            secondary: primaryColor,
-          ),
-        ),
-        initialRoute: '/login', // 초기 화면을 로그인으로 설정
         routes: {
-          '/login': (context) => const LoginScreen(),
           '/signup': (context) => const SignupScreen(),
-          '/home': (context) => const HomeScreen(), // 임시 홈 스크린
-          '/papers': (context) => const PaperListScreen(),
-          // 다른 라우트들은 나중에 추가
+          '/login': (context) => const LoginScreen(),
         },
+        home: Consumer<AuthProvider>(
+          builder: (context, auth, _) {
+            return auth.isAuthenticated
+                ? const MainScreen() // 인증된 사용자는 MainScreen으로
+                : const LoginScreen(); // 미인증 사용자는 LoginScreen으로
+          },
+        ),
       ),
     );
   }
