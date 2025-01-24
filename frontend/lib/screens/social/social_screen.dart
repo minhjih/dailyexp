@@ -15,7 +15,7 @@ class SocialScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const ScreenHeader(title: '친구'),
+        const ScreenHeader(title: '네트워크'),
         Expanded(
           child: DefaultTabController(
             length: 2,
@@ -23,8 +23,8 @@ class SocialScreen extends StatelessWidget {
               children: [
                 TabBar(
                   tabs: const [
-                    Tab(text: '친구 목록'),
-                    Tab(text: '그룹'),
+                    Tab(text: '연구자'),
+                    Tab(text: '연구 그룹'),
                   ],
                   labelColor: primaryColor,
                   unselectedLabelColor: secondaryTextColor,
@@ -32,7 +32,7 @@ class SocialScreen extends StatelessWidget {
                 Expanded(
                   child: TabBarView(
                     children: [
-                      _buildFriendsList(),
+                      _buildResearchersList(),
                       _buildGroupsList(),
                     ],
                   ),
@@ -45,7 +45,7 @@ class SocialScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFriendsList() {
+  Widget _buildResearchersList() {
     return ListView.builder(
       controller: scrollController,
       itemCount: 10,
@@ -56,8 +56,8 @@ class SocialScreen extends StatelessWidget {
             leading: const CircleAvatar(
               child: Icon(Icons.person),
             ),
-            title: Text('친구 ${index + 1}'),
-            subtitle: const Text('상태 메시지'),
+            title: Text('연구자 ${index + 1}'),
+            subtitle: const Text('소속 기관 · 연구 분야'),
             trailing: TextButton(
               child: const Text('팔로우'),
               onPressed: () {},

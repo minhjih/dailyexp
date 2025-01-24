@@ -36,13 +36,13 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     _hideController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 200),
-      value: 1.5,
+      value: 0.0,
     );
 
     // 슬라이드 애니메이션을 위한 Tween 설정
     _slideAnimation = Tween<Offset>(
       begin: Offset.zero,
-      end: const Offset(0, 3.0), // y축으로 300% 이동
+      end: const Offset(0, 4.0), // y축으로 400% 이동 (더 아래로)
     ).animate(_hideController!);
 
     _scrollController.addListener(() {
@@ -74,13 +74,15 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true, // 콘텐츠가 하단바 영역까지 확장되도록 설정
+      extendBodyBehindAppBar: true, // 콘텐츠가 앱바 뒤로 확장되도록 설정
       appBar: _tabController?.index == 0
           ? PreferredSize(
               preferredSize: const Size.fromHeight(kToolbarHeight),
               child: SlideTransition(
                 position: Tween<Offset>(
                   begin: Offset.zero,
-                  end: const Offset(0, -1.5), // 위로 슬라이드
+                  end: const Offset(0, -1.5),
                 ).animate(_hideController!),
                 child: CustomAppBar(
                   title: 'DailyExp',
@@ -99,16 +101,32 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               ),
             )
           : null,
-      body: TabBarView(
-        physics: const NeverScrollableScrollPhysics(),
-        controller: _tabController,
-        children: [
-          FeedScreen(scrollController: _scrollController),
-          WorkspaceScreen(scrollController: _scrollController),
-          DiscoverScreen(scrollController: _scrollController),
-          SocialScreen(scrollController: _scrollController),
-          ProfileScreen(scrollController: _scrollController),
-        ],
+      body: AnimatedBuilder(
+        animation: _hideController!,
+        builder: (context, child) {
+          return Container(
+            padding: EdgeInsets.only(
+              top: _tabController?.index == 0 ? kToolbarHeight + 20 : 0,
+              bottom: 65,
+            ).copyWith(
+              top: _tabController?.index == 0
+                  ? ((kToolbarHeight + 20) * (1 - _hideController!.value))
+                  : 0,
+              bottom: 65 * (1 - _hideController!.value),
+            ),
+            child: TabBarView(
+              physics: const NeverScrollableScrollPhysics(),
+              controller: _tabController,
+              children: [
+                FeedScreen(scrollController: _scrollController),
+                WorkspaceScreen(scrollController: _scrollController),
+                DiscoverScreen(scrollController: _scrollController),
+                SocialScreen(scrollController: _scrollController),
+                ProfileScreen(scrollController: _scrollController),
+              ],
+            ),
+          );
+        },
       ),
       bottomNavigationBar: SlideTransition(
         position: _slideAnimation!,
@@ -127,7 +145,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           child: MotionTabBar(
             controller: _tabController,
             initialSelectedTab: "피드",
-            labels: const ["피드", "워크스페이스", "발견", "친구", "프로필"],
+            labels: const ["피드", "워크스페이스", "발견", "네트워크", "프로필"],
             icons: const [
               Icons.home_rounded,
               Icons.work_rounded,

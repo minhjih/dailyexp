@@ -15,7 +15,7 @@ class FeedScreen extends StatelessWidget {
     return ListView.builder(
       controller: scrollController,
       itemCount: 10,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       itemBuilder: (context, index) {
         return _FeedCard(index: index);
       },
@@ -31,7 +31,7 @@ class _FeedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.only(bottom: 16),
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
@@ -40,18 +40,20 @@ class _FeedCard extends StatelessWidget {
           width: 1,
         ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(context),
-            const SizedBox(height: 12),
-            _buildContent(context),
-            const SizedBox(height: 16),
-            _buildFooter(context),
-          ],
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: _buildHeader(context),
+          ),
+          _buildContent(context),
+          _buildImageGrid(context),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: _buildFooter(context),
+          ),
+        ],
       ),
     );
   }
@@ -101,26 +103,86 @@ class _FeedCard extends StatelessWidget {
     );
   }
 
+  Widget _buildImageGrid(BuildContext context) {
+    final List<String> images = [
+      'https://picsum.photos/500/300?random=${index * 3}',
+      'https://picsum.photos/500/300?random=${index * 3 + 1}',
+      'https://picsum.photos/500/300?random=${index * 3 + 2}',
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: AspectRatio(
+          aspectRatio: 16 / 9,
+          child: images.length == 1
+              ? _buildSingleImage(images.first)
+              : GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: images.length >= 3 ? 3 : 2,
+                  mainAxisSpacing: 4,
+                  crossAxisSpacing: 4,
+                  children: images.map((url) => _buildGridImage(url)).toList(),
+                ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSingleImage(String url) {
+    return Image.network(
+      url,
+      fit: BoxFit.cover,
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return Container(
+          color: Colors.grey[200],
+          child: const Center(child: CircularProgressIndicator()),
+        );
+      },
+    );
+  }
+
+  Widget _buildGridImage(String url) {
+    return Image.network(
+      url,
+      fit: BoxFit.cover,
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return Container(
+          color: Colors.grey[200],
+          child: const Center(child: CircularProgressIndicator()),
+        );
+      },
+    );
+  }
+
   Widget _buildContent(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '논문 제목 ${index + 1}',
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '논문 제목 ${index + 1}',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          '이 논문은 매우 흥미로운 연구 결과를 보여줍니다. 주요 발견점과 시사점을 공유합니다.',
-          style: TextStyle(
-            color: Colors.grey[800],
-            height: 1.5,
+          const SizedBox(height: 8),
+          Text(
+            '이 논문은 매우 흥미로운 연구 결과를 보여줍니다. 주요 발견점과 시사점을 공유합니다. '
+            '연구 방법론과 결과 분석에 대한 자세한 내용을 확인해보세요.',
+            style: TextStyle(
+              color: Colors.grey[800],
+              height: 1.5,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
