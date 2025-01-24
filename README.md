@@ -44,24 +44,29 @@ DailyExp is an innovative research tracking and knowledge sharing platform desig
 - Basic UI/UX design applied
 - Secure login mechanism integrated
 
-### Ongoing Development
-🔨 Main Page Framework
+✅ Main Page Framework
 - Preliminary layout and navigation structure established
 - Initial component drafts created
 - Basic routing between screens
 
-### Next Development Stages
-1. Paper Recommendation Section
+### Ongoing Development
+🔨 User information maintain
+- Maintain much more user information (such as organization, ages, sex etc..)
+- ⭐️ Link to profile
+
+🔨 Paper Recommendation Section
 - Integrate OpenAI API for intelligent recommendations
 - Develop user interest-based recommendation algorithm
 - Design personalized research feed
 
-2. Scraping and Sharing Functionality
+### Next Development Stages
+
+1. Scraping and Sharing Functionality
 - Implement paper scraping mechanism
 - Design group sharing interface
 - Create annotation and highlight features
 
-3. Review Posting System
+2. Review Posting System
 - Develop paper review writing/editing page
 - Implement public/private review settings
 - Add tagging and categorization options
