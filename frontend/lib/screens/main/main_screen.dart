@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:motion_tab_bar_v2/motion-tab-bar.dart';
+import 'package:motion_tab_bar_v2/motion-tab-controller.dart';
 import '../../theme/colors.dart';
+import '../../widgets/custom_app_bar.dart';
 import '../feed/feed_screen.dart';
 import '../workspace/workspace_screen.dart';
 import '../discover/discover_screen.dart';
@@ -13,131 +17,143 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0;
+class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
+  MotionTabBarController? _tabController;
+  final ScrollController _scrollController = ScrollController();
+  AnimationController? _hideController;
+  bool _isVisible = true;
+  Animation<Offset>? _slideAnimation;
 
-  final List<Widget> _screens = [
-    const FeedScreen(), // SNS 피드
-    const WorkspaceScreen(), // 워크스페이스
-    const DiscoverScreen(), // 논문 추천
-    const SocialScreen(), // 친구
-    const ProfileScreen(), // 프로필
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _tabController = MotionTabBarController(
+      initialIndex: 0,
+      length: 5,
+      vsync: this,
+    );
+
+    _hideController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+      value: 1.5,
+    );
+
+    // 슬라이드 애니메이션을 위한 Tween 설정
+    _slideAnimation = Tween<Offset>(
+      begin: Offset.zero,
+      end: const Offset(0, 3.0), // y축으로 300% 이동
+    ).animate(_hideController!);
+
+    _scrollController.addListener(() {
+      if (_scrollController.position.userScrollDirection ==
+          ScrollDirection.reverse) {
+        if (_isVisible) {
+          _isVisible = false;
+          _hideController?.forward(); // 아래로 스크롤 시 숨김
+        }
+      }
+      if (_scrollController.position.userScrollDirection ==
+          ScrollDirection.forward) {
+        if (!_isVisible) {
+          _isVisible = true;
+          _hideController?.reverse(); // 위로 스크롤 시 보임
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController?.dispose();
+    _scrollController.dispose();
+    _hideController?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_selectedIndex],
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, -5),
-            ),
-          ],
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _NavBarItem(
-                  icon: Icons.home_outlined,
-                  selectedIcon: Icons.home_rounded,
-                  label: '피드',
-                  isSelected: _selectedIndex == 0,
-                  onTap: () => setState(() => _selectedIndex = 0),
+      appBar: _tabController?.index == 0
+          ? PreferredSize(
+              preferredSize: const Size.fromHeight(kToolbarHeight),
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: Offset.zero,
+                  end: const Offset(0, -1.5), // 위로 슬라이드
+                ).animate(_hideController!),
+                child: CustomAppBar(
+                  title: 'DailyExp',
+                  actions: [
+                    IconButton(
+                      icon: Icon(Icons.search, color: secondaryTextColor),
+                      onPressed: () {},
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.notifications_outlined,
+                          color: secondaryTextColor),
+                      onPressed: () {},
+                    ),
+                  ],
                 ),
-                _NavBarItem(
-                  icon: Icons.work_outline_rounded,
-                  selectedIcon: Icons.work_rounded,
-                  label: '워크스페이스',
-                  isSelected: _selectedIndex == 1,
-                  onTap: () => setState(() => _selectedIndex = 1),
-                ),
-                _NavBarItem(
-                  icon: Icons.explore_outlined,
-                  selectedIcon: Icons.explore,
-                  label: '발견',
-                  isSelected: _selectedIndex == 2,
-                  onTap: () => setState(() => _selectedIndex = 2),
-                ),
-                _NavBarItem(
-                  icon: Icons.people_outline_rounded,
-                  selectedIcon: Icons.people_rounded,
-                  label: '친구',
-                  isSelected: _selectedIndex == 3,
-                  onTap: () => setState(() => _selectedIndex = 3),
-                ),
-                _NavBarItem(
-                  icon: Icons.person_outline_rounded,
-                  selectedIcon: Icons.person_rounded,
-                  label: '프로필',
-                  isSelected: _selectedIndex == 4,
-                  onTap: () => setState(() => _selectedIndex = 4),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _NavBarItem extends StatelessWidget {
-  final IconData icon;
-  final IconData selectedIcon;
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _NavBarItem({
-    required this.icon,
-    required this.selectedIcon,
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              isSelected ? selectedIcon : icon,
-              color: isSelected
-                  ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.onSurface.withOpacity(0.64),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color: isSelected
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.onSurface.withOpacity(0.64),
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
+            )
+          : null,
+      body: TabBarView(
+        physics: const NeverScrollableScrollPhysics(),
+        controller: _tabController,
+        children: [
+          FeedScreen(scrollController: _scrollController),
+          WorkspaceScreen(scrollController: _scrollController),
+          DiscoverScreen(scrollController: _scrollController),
+          SocialScreen(scrollController: _scrollController),
+          ProfileScreen(scrollController: _scrollController),
+        ],
+      ),
+      bottomNavigationBar: SlideTransition(
+        position: _slideAnimation!,
+        child: Container(
+          height: 65,
+          decoration: BoxDecoration(
+            color: surfaceColor,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 20,
+                offset: const Offset(0, -20),
+              ),
+            ],
+          ),
+          child: MotionTabBar(
+            controller: _tabController,
+            initialSelectedTab: "피드",
+            labels: const ["피드", "워크스페이스", "발견", "친구", "프로필"],
+            icons: const [
+              Icons.home_rounded,
+              Icons.work_rounded,
+              Icons.explore_rounded,
+              Icons.people_rounded,
+              Icons.person_rounded,
+            ],
+            tabSize: 50,
+            tabBarHeight: 55,
+            textStyle: TextStyle(
+              fontSize: 11,
+              color: primaryTextColor,
+              fontWeight: FontWeight.w500,
             ),
-          ],
+            tabIconColor: secondaryTextColor,
+            tabIconSize: 24.0,
+            tabIconSelectedSize: 22.0,
+            tabSelectedColor: primaryColor,
+            tabIconSelectedColor: surfaceColor,
+            tabBarColor: surfaceColor,
+            onTabItemSelected: (int value) {
+              setState(() {
+                _tabController?.index = value;
+              });
+            },
+          ),
         ),
       ),
     );

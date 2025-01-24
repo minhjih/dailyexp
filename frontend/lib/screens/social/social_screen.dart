@@ -1,34 +1,53 @@
 import 'package:flutter/material.dart';
+import '../../widgets/custom_app_bar.dart';
+import '../../theme/colors.dart';
+import '../../widgets/screen_header.dart';
 
 class SocialScreen extends StatelessWidget {
-  const SocialScreen({super.key});
+  final ScrollController scrollController;
+
+  const SocialScreen({
+    super.key,
+    required this.scrollController,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('친구'),
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: '친구 목록'),
-              Tab(text: '그룹'),
-            ],
+    return Column(
+      children: [
+        const ScreenHeader(title: '친구'),
+        Expanded(
+          child: DefaultTabController(
+            length: 2,
+            child: Column(
+              children: [
+                TabBar(
+                  tabs: const [
+                    Tab(text: '친구 목록'),
+                    Tab(text: '그룹'),
+                  ],
+                  labelColor: primaryColor,
+                  unselectedLabelColor: secondaryTextColor,
+                ),
+                Expanded(
+                  child: TabBarView(
+                    children: [
+                      _buildFriendsList(),
+                      _buildGroupsList(),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-        body: TabBarView(
-          children: [
-            _buildFriendsList(),
-            _buildGroupsList(),
-          ],
-        ),
-      ),
+      ],
     );
   }
 
   Widget _buildFriendsList() {
     return ListView.builder(
+      controller: scrollController,
       itemCount: 10,
       padding: const EdgeInsets.all(16),
       itemBuilder: (context, index) {
@@ -67,4 +86,22 @@ class SocialScreen extends StatelessWidget {
       },
     );
   }
+}
+
+class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
+  final TabBar tabBar;
+
+  _SliverAppBarDelegate(this.tabBar);
+
+  @override
+  Widget build(context, shrinkOffset, overlapsContent) => tabBar;
+
+  @override
+  double get maxExtent => tabBar.preferredSize.height;
+
+  @override
+  double get minExtent => tabBar.preferredSize.height;
+
+  @override
+  bool shouldRebuild(covariant _SliverAppBarDelegate oldDelegate) => false;
 }

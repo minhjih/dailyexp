@@ -1,49 +1,60 @@
 import 'package:flutter/material.dart';
+import '../../widgets/custom_app_bar.dart';
+import '../../theme/colors.dart';
+import '../../widgets/screen_header.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+  final ScrollController scrollController;
+
+  const ProfileScreen({
+    super.key,
+    required this.scrollController,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('프로필'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              // 설정 페이지로 이동
-            },
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            const CircleAvatar(
-              radius: 50,
-              child: Icon(Icons.person, size: 50),
+    return Column(
+      children: [
+        ScreenHeader(
+          title: '프로필',
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () {},
             ),
-            const SizedBox(height: 16),
-            Text(
-              '사용자 이름',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '소속 기관',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-            const SizedBox(height: 24),
-            _buildStatRow(),
-            const Divider(height: 32),
-            _buildActionButtons(),
-            const SizedBox(height: 24),
-            _buildRecentActivity(),
           ],
         ),
-      ),
+        Expanded(
+          child: ListView(
+            controller: scrollController,
+            padding: const EdgeInsets.all(16),
+            children: [
+              const CircleAvatar(
+                radius: 50,
+                child: Icon(Icons.person, size: 50),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '사용자 이름',
+                style: Theme.of(context).textTheme.headlineSmall,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '소속 기관',
+                style: Theme.of(context).textTheme.bodyLarge,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              _buildStatRow(),
+              const Divider(height: 32),
+              _buildActionButtons(),
+              const SizedBox(height: 24),
+              _buildRecentActivity(),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -80,8 +91,10 @@ class ProfileScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('최근 활동',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          '최근 활동',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 8),
         ListView.builder(
           shrinkWrap: true,

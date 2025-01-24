@@ -51,6 +51,8 @@ dependencies:
   form_field_validator: ^1.1.0
   http: ^1.1.0
   qs: ^0.0.2
+  motion_tab_bar_v2: ^0.3.0
+  hidable: ^1.0.6
 
 dev_dependencies:
   flutter_test:

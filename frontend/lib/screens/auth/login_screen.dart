@@ -31,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
           _passwordController.text,
         );
         if (mounted) {
-          Navigator.of(context).pushReplacementNamed('/papers');
+          _onLoginSuccess(context);
         }
       } catch (e) {
         if (mounted) {
@@ -44,6 +44,10 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       }
     }
+  }
+
+  void _onLoginSuccess(BuildContext context) {
+    Navigator.of(context).pushReplacementNamed('/main');
   }
 
   @override
