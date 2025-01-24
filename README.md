@@ -1,4 +1,4 @@
-[KOR](#하루-논문(가제))
+[KOR](#겉핥기)
 [ENG](#dailyexp)
 # DailyExp
 
@@ -99,9 +99,9 @@ Project Maintainer - [@minji](https://www.linkedin.com/in/minhjih?utm_source=sha
 
 Project Link: [https://github.com/minhjih/dailyexp](https://github.com/minhjih/dailyexp)
 
-# 하루 논문(가제)
+# 겉핥기
 
-하루 논문는 대학원생을 위해 설계된 혁신적인 연구 추적 및 지식 공유 플랫폼입니다. 관심 분야의 최신 논문에 대한 추천을 받고, 핵심 통찰력을 포착하며, 연구 그룹과 공유하고, 논문 리뷰를 공개적으로 게시하여 지식을 전파할 수 있는 종합적인 솔루션을 제공합니다.
+겉핥기(가제)는 대학원생을 위해 설계된 혁신적인 연구 추적 및 지식 공유 플랫폼입니다. 관심 분야의 최신 논문에 대한 추천을 받고, 핵심 통찰력을 포착하며, 연구 그룹과 공유하고, 논문 리뷰를 공개적으로 게시하여 지식을 전파할 수 있는 종합적인 솔루션을 제공합니다.
 
 ## 주요 기능
 
