@@ -201,35 +201,35 @@ Project Link: [https://github.com/minhjih/dailyexp](https://github.com/minhjih/d
 # Prototype
 
 ## Login
-<img src="screenshots/login_screen.png" width="300" alt="로그인 화면"/>
+<img src="screenshots/login_screen.png" width="100" alt="로그인 화면"/>
 
 ## Main Feed
 <div style="display: flex; gap: 20px;">
-    <img src="screenshots/feed_screen.png" width="300" alt="피드 화면"/>
+    <img src="screenshots/feed_screen.png" width="100" alt="피드 화면"/>
 </div>
 
 ## Workspace
 <div style="display: flex; gap: 20px;">
-    <img src="screenshots/workspace_list.png" width="300" alt="워크스페이스 목록"/>
-    <img src="screenshots/workspace_detail1.png" width="300" alt="워크스페이스 상세"/>
-    <img src="screenshots/workspace_detail2.png" width="300" alt="워크스페이스 상세"/>
+    <img src="screenshots/workspace_list.png" width="100" alt="워크스페이스 목록"/>
+    <img src="screenshots/workspace_detail1.png" width="100" alt="워크스페이스 상세"/>
+    <img src="screenshots/workspace_detail2.png" width="100" alt="워크스페이스 상세2"/>
 </div>
 
 ## Paper Search and Share
 <div style="display: flex; gap: 20px;">
-    <img src="screenshots/paper_feed.png" width="300" alt="논문 피드"/>
+    <img src="screenshots/paper_feed.png" width="100" alt="논문 피드"/>
 </div>
 
 
 ## Researcher Network
 <div style="display: flex; gap: 20px;">
-    <img src="screenshots/network_researcher.png" width="300" alt="연구자 목록"/>
-    <img src="screenshots/network_workspace.png" width="300" alt="연구자 프로필"/>
+    <img src="screenshots/network_researchers.png" width="100" alt="연구자 목록"/>
+    <img src="screenshots/network_workspace.png" width="100" alt="연구자 프로필"/>
 </div>
 
 ## Profile
 <div style="display: flex; gap: 20px;">
-    <img src="screenshots/profile.png" width="300" alt="연구자 목록"/>
+    <img src="screenshots/profile.png" width="100" alt="연구자 목록"/>
 </div>
 
 
