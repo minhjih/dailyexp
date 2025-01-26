@@ -54,6 +54,12 @@ dependencies:
   motion_tab_bar_v2: ^0.3.0
   hidable: ^1.0.6
 
+  # 소셜 로그인
+  sign_in_with_apple: ^6.1.4
+  flutter_svg: ^2.0.10  # SVG 파일을 위한 패키지
+  flutter_signin_button: ^2.0.0
+  google_fonts: ^6.1.0
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -106,3 +112,5 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+  

@@ -57,23 +57,24 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<void> signup({
-    required String email,
-    required String password,
-    required String fullName,
-  }) async {
-    _isLoading = true;
-    notifyListeners();
-
+  Future<void> signup(Map<String, dynamic> signupData) async {
     try {
-      await AuthAPI.signup(
-        email: email,
-        password: password,
-        fullName: fullName,
-      );
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+      final response = await AuthAPI.signup(signupData);
+
+      if (response == null || !response.containsKey('email')) {
+        throw Exception('Invalid response from server');
+      }
+
+      // 회원가입 성공 메시지만 반환
+      return;
+    } catch (e) {
+      print('Signup error: $e');
+      rethrow;
     }
+  }
+
+  Future<void> _saveAuthData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('token', _token!);
   }
 }

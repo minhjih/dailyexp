@@ -4,8 +4,9 @@ import 'dart:convert'; // jsonEncode를 위해 추가
 
 class AuthAPI {
   static final Dio _dio = Dio(BaseOptions(
-    baseUrl: 'http://10.0.2.2:8000', // localhost 대신 10.0.2.2 사용
+    baseUrl: 'http://10.0.2.2:8000',
     contentType: 'application/json',
+    validateStatus: (status) => status! < 500, // 4xx 에러도 처리
   ));
 
   static Future<Map<String, dynamic>> login(
@@ -34,10 +35,10 @@ class AuthAPI {
 
       return response.data;
     } catch (e) {
-      if (e is DioException) {
-        print('Status code: ${e.response?.statusCode}');
-        print('Error response: ${e.response?.data}');
-      }
+      //if (e is DioException) {
+      //  print('Status code: ${e.response?.statusCode}');
+      //  print('Error response: ${e.response?.data}');
+      //}
       throw Exception('로그인 실패: $e');
     }
   }
@@ -56,20 +57,45 @@ class AuthAPI {
     }
   }
 
-  static Future<Map<String, dynamic>> signup({
-    required String email,
-    required String password,
-    required String fullName,
-  }) async {
+  static Future<Map<String, dynamic>> signup(
+      Map<String, dynamic> signupData) async {
     try {
-      final response = await _dio.post('/auth/signup', data: {
-        'email': email,
-        'password': password,
-        'full_name': fullName,
-      });
+      print('Sending signup data: $signupData');
+
+      final response = await _dio.post(
+        '/auth/signup',
+        data: signupData,
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response data: ${response.data}');
+
+      if (response.statusCode == 400) {
+        final error = response.data['detail'] ?? '회원가입 실패';
+        throw Exception(error);
+      }
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception('회원가입 실패: 상태 코드 ${response.statusCode}');
+      }
+
+      if (response.data == null) {
+        throw Exception('서버 응답이 비어있습니다');
+      }
+
       return response.data;
+    } on DioException catch (e) {
+      print('DioError: ${e.message}');
+      print('DioError type: ${e.type}');
+      print('DioError response: ${e.response?.data}');
+
+      if (e.response?.statusCode == 400) {
+        throw Exception(e.response?.data['detail'] ?? '회원가입 실패');
+      }
+      throw Exception('네트워크 오류: ${e.message}');
     } catch (e) {
-      throw Exception('회원가입 실패: ${e.toString()}');
+      print('General error: $e');
+      throw Exception('회원가입 실패: $e');
     }
   }
 }

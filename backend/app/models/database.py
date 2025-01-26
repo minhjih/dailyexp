@@ -18,4 +18,11 @@ def get_db():
     try:
         yield db
     finally:
-        db.close() 
+        db.close()
+
+# 데이터베이스 초기화 함수 추가
+def init_db():
+    # import all models here
+    from . import models
+    Base.metadata.drop_all(bind=engine)  # 기존 테이블 모두 삭제
+    Base.metadata.create_all(bind=engine)  # 새로운 테이블 생성 

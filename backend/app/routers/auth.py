@@ -13,36 +13,68 @@ from ..utils.auth import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     get_current_user
 )
+import logging
 
 router = APIRouter(
     prefix="/auth",
     tags=["authentication"]
 )
 
+logger = logging.getLogger(__name__)
+
 @router.post("/signup", response_model=user_schemas.User)
-def signup(
-    user_in: user_schemas.UserCreate,
+async def signup(
+    user: user_schemas.UserCreate,
     db: Session = Depends(get_db)
-) -> Any:
-    """새로운 사용자를 등록합니다."""
-    # 이메일 중복 확인
-    user = db.query(models.User).filter(models.User.email == user_in.email).first()
-    if user:
-        raise HTTPException(
-            status_code=400,
-            detail="이미 등록된 이메일입니다."
+):
+    try:
+        logger.info(f"Signup attempt for email: {user.email}")
+        
+        # 이메일 중복 체크
+        db_user = db.query(models.User).filter(
+            models.User.email == user.email
+        ).first()
+        
+        if db_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="이미 등록된 이메일입니다"
+            )
+        
+        # 새 사용자 생성
+        hashed_password = get_password_hash(user.password)
+        
+        db_user = models.User(
+            email=user.email,
+            hashed_password=hashed_password,
+            full_name=user.full_name,
+            institution=user.institution,
+            department=user.department,
+            research_field=user.research_field,
+            research_interests=user.research_interests,
+            bio=user.bio,
+            external_links=user.external_links or {}
         )
-    
-    # 새 사용자 생성
-    db_user = models.User(
-        email=user_in.email,
-        full_name=user_in.full_name,
-        hashed_password=get_password_hash(user_in.password)
-    )
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return db_user
+        
+        logger.info(f"Creating new user: {db_user.email}")
+        
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+        
+        logger.info(f"Successfully created user: {db_user.email}")
+        return db_user
+        
+    except HTTPException as he:
+        logger.error(f"HTTP Exception during signup: {str(he)}")
+        raise he
+    except Exception as e:
+        logger.error(f"Error during signup: {str(e)}")
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"회원가입 처리 중 오류가 발생했습니다: {str(e)}"
+        )
 
 @router.post("/login", response_model=user_schemas.Token)
 def login(

@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .routers import papers, auth, scraps, groups, comments
+from .models.database import init_db
+import uvicorn
 
 app = FastAPI(title="DailyExp API")
 
@@ -12,6 +14,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 앱 시작 시 데이터베이스 초기화
+@app.on_event("startup")
+async def startup_event():
+    init_db()
 
 app.include_router(auth.router)
 app.include_router(papers.router)

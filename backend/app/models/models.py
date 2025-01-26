@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, JSON, Boolean
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, JSON, Boolean, ARRAY
 from sqlalchemy.orm import relationship, backref
 from .database import Base
 import datetime
@@ -11,6 +11,15 @@ class User(Base):
     hashed_password = Column(String)
     full_name = Column(String)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    
+    # 추가되는 필드들
+    institution = Column(String, nullable=True)  # 소속 기관/학교
+    department = Column(String, nullable=True)  # 학과/부서
+    research_field = Column(String, nullable=True)  # 주 연구 분야
+    research_interests = Column(ARRAY(String), nullable=True)  # 관심 연구 주제들
+    bio = Column(String, nullable=True)  # 한줄 소개
+    external_links = Column(JSON, nullable=True)  # 외부 링크들 (GitHub, LinkedIn 등)
+    profile_image_url = Column(String, nullable=True)  # 프로필 이미지
     
     papers = relationship("Paper", back_populates="user")
     scraps = relationship("Scrap", back_populates="user")
