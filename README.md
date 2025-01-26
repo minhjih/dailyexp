@@ -4,7 +4,7 @@
 
 # DailyExp
 <div style="display: flex; gap: 20px;">
-    <img src="screenshots/Mobil1.png" height="480"/>
+    <img src="screenshots/Mobile1.png" height="480"/>
 </div>
 DailyExp is an innovative research tracking and knowledge sharing platform designed for graduate students. It offers a comprehensive solution for receiving recommendations on the latest papers in your field of interest, capturing key insights, sharing them with your research group, and publicly posting your paper reviews to spread knowledge in a short-form.
 
@@ -105,7 +105,7 @@ Project Link: [https://github.com/minhjih/dailyexp](https://github.com/minhjih/d
 
 # 겉핥기
 <div style="display: flex; gap: 20px;">
-    <img src="screenshots/Mobil1.png" height="480"/>
+    <img src="screenshots/Mobile1.png" height="480"/>
 </div>
 겉핥기(가제)는 대학원생을 위해 설계된 혁신적인 연구 추적 및 지식 공유 플랫폼입니다. 관심 분야의 최신 논문에 대한 추천을 받고, 핵심 통찰력을 포착하며, 연구 그룹과 공유하고, 논문 리뷰를 공개적으로 게시하여 빠른 연구 변화에 숏폼 형태로 지식을 전파, 수용 할 수 있는 종합적인 솔루션을 제공합니다.
 
