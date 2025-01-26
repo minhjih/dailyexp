@@ -1,12 +1,12 @@
 # Language
 - [KOR](#겉핥기)
-- [ENG](#dailyexp)
+- [ENG](#Glimpse)
 
-# DailyExp
+# Glimpse
 <div style="display: flex; gap: 20px;">
     <img src="screenshots/Mobile1.png" height="480"/>
 </div>
-DailyExp is an innovative research tracking and knowledge sharing platform designed for graduate students. It offers a comprehensive solution for receiving recommendations on the latest papers in your field of interest, capturing key insights, sharing them with your research group, and publicly posting your paper reviews to spread knowledge in a short-form.
+Glimpse is an innovative research tracking and knowledge sharing platform designed for graduate students. It offers a comprehensive solution for receiving recommendations on the latest papers in your field of interest, capturing key insights, sharing them with your research group, and publicly posting your paper reviews to spread knowledge in a short-form.
 
 ## Key Features
 
@@ -42,7 +42,7 @@ DailyExp is an innovative research tracking and knowledge sharing platform desig
 5. Write and publicly post your personal reviews of papers.
 6. Follow other researchers and gain insights from their work.
 
-## Current Project Progress (DailyExp)
+## Current Project Progress (Glimpse)
 
 ### Completed Features
 ✅ Login Page Implementation
@@ -142,7 +142,7 @@ Project Link: [https://github.com/minhjih/dailyexp](https://github.com/minhjih/d
 5. 개인적인 논문 리뷰를 작성하고 공개적으로 게시합니다.
 6. 다른 연구자들을 팔로우하고 그들의 작업에서 통찰력을 얻습니다.
 
-## 현재 프로젝트 진행 상황 (DailyExp)
+## 현재 프로젝트 진행 상황 (Glimpse)
 
 ### 완료된 기능
 ✅ 로그인 페이지 구현
