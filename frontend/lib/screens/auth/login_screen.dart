@@ -64,7 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   'glimpse',
                   style: GoogleFonts.pacifico(
                     fontSize: 36,
-                    color: const Color(0xFF43A047),
+                    color: AppColors.primary,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -145,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ElevatedButton(
                   onPressed: _login,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green[400],
+                    backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -185,7 +185,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         Navigator.pushNamed(context, '/signup');
                       },
                       style: TextButton.styleFrom(
-                        foregroundColor: Colors.green[400],
+                        foregroundColor: AppColors.primary,
                       ),
                       child: const Text('Sign up'),
                     ),

@@ -28,3 +28,7 @@ const inactiveColor = Color(0xFFE2E8F0); // 비활성 상태
 // 그라데이션 컬러
 const gradientStart = Color(0xFF4F46E5); // 인디고
 const gradientEnd = Color(0xFF818CF8); // 연한 인디고
+
+class AppColors {
+  static const Color primary = Color(0xFF16BC88);
+}
