@@ -9,6 +9,7 @@ import '../workspace/workspace_screen.dart';
 import '../discover/discover_screen.dart';
 import '../social/social_screen.dart';
 import '../profile/profile_screen.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -84,19 +85,43 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   begin: Offset.zero,
                   end: const Offset(0, -1.5),
                 ).animate(_hideController!),
-                child: CustomAppBar(
-                  title: 'DailyExp',
-                  actions: [
-                    IconButton(
-                      icon: Icon(Icons.search, color: secondaryTextColor),
-                      onPressed: () {},
+                child: Container(
+                  color: Colors.white,
+                  child: SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'glimpse',
+                            style: GoogleFonts.pacifico(
+                              fontSize: 24,
+                              color: const Color(0xFF43A047),
+                            ),
+                          ),
+                          const Row(
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.notifications_outlined),
+                                onPressed: null,
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.mail_outline),
+                                onPressed: null,
+                              ),
+                              CircleAvatar(
+                                radius: 16,
+                                backgroundColor: Colors.grey,
+                                // TODO: 실제 프로필 이미지로 교체
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                    IconButton(
-                      icon: Icon(Icons.notifications_outlined,
-                          color: secondaryTextColor),
-                      onPressed: () {},
-                    ),
-                  ],
+                  ),
                 ),
               ),
             )
@@ -107,12 +132,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           return Container(
             padding: EdgeInsets.only(
               top: _tabController?.index == 0 ? kToolbarHeight + 20 : 0,
-              bottom: 65,
             ).copyWith(
               top: _tabController?.index == 0
                   ? ((kToolbarHeight + 20) * (1 - _hideController!.value))
                   : 0,
-              bottom: 65 * (1 - _hideController!.value),
+              bottom: 44 * (1 - _hideController!.value),
             ),
             child: TabBarView(
               physics: const NeverScrollableScrollPhysics(),
@@ -129,49 +153,39 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         },
       ),
       bottomNavigationBar: SlideTransition(
-        position: _slideAnimation!,
-        child: Container(
-          height: 65,
-          decoration: BoxDecoration(
-            color: surfaceColor,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 20,
-                offset: const Offset(0, -20),
-              ),
-            ],
+        position: Tween<Offset>(
+          begin: Offset(0, 0.1),
+          end: const Offset(0, 1.5),
+        ).animate(_hideController!),
+        child: MotionTabBar(
+          controller: _tabController,
+          initialSelectedTab: "Feed",
+          labels: const ["Feed", "Workspace", "Explore", "Network", "Profile"],
+          icons: const [
+            Icons.home_outlined,
+            Icons.work_outline,
+            Icons.explore_outlined,
+            Icons.people_outline,
+            Icons.person_outline
+          ],
+          tabSize: 30,
+          tabBarHeight: 40,
+          textStyle: const TextStyle(
+            fontSize: 12,
+            color: Color(0xFF43A047),
+            fontWeight: FontWeight.w500,
           ),
-          child: MotionTabBar(
-            controller: _tabController,
-            initialSelectedTab: "피드",
-            labels: const ["피드", "워크스페이스", "발견", "네트워크", "프로필"],
-            icons: const [
-              Icons.home_rounded,
-              Icons.work_rounded,
-              Icons.explore_rounded,
-              Icons.people_rounded,
-              Icons.person_rounded,
-            ],
-            tabSize: 50,
-            tabBarHeight: 55,
-            textStyle: TextStyle(
-              fontSize: 11,
-              color: primaryTextColor,
-              fontWeight: FontWeight.w500,
-            ),
-            tabIconColor: secondaryTextColor,
-            tabIconSize: 24.0,
-            tabIconSelectedSize: 22.0,
-            tabSelectedColor: primaryColor,
-            tabIconSelectedColor: surfaceColor,
-            tabBarColor: surfaceColor,
-            onTabItemSelected: (int value) {
-              setState(() {
-                _tabController?.index = value;
-              });
-            },
-          ),
+          tabIconColor: Colors.grey[600],
+          tabIconSize: 24.0,
+          tabIconSelectedSize: 22.0,
+          tabSelectedColor: const Color(0xFF43A047),
+          tabIconSelectedColor: Colors.white,
+          tabBarColor: Colors.white,
+          onTabItemSelected: (int value) {
+            setState(() {
+              _tabController?.index = value;
+            });
+          },
         ),
       ),
     );

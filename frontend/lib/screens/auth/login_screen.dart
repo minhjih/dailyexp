@@ -61,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 const SizedBox(height: 80),
                 Text(
-                  'Skim',
+                  'glimpse',
                   style: GoogleFonts.pacifico(
                     fontSize: 36,
                     color: const Color(0xFF43A047),

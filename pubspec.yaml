@@ -1,6 +1,2 @@
 dependencies:
   google_fonts: ^6.1.0
-
-flutter:
-  assets:
-    - assets/logo.png

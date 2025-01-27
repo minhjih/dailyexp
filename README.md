@@ -1,12 +1,10 @@
 # Language
 - [KOR](#겉핥기)
-- [ENG](#Glimpse)
+- [ENG](#dailyexp)
 
-# Glimpse
-<div style="display: flex; gap: 20px;">
-    <img src="screenshots/Mobile1.png" height="400"/>
-</div>
-Glimpse is an innovative research tracking and knowledge sharing platform designed for graduate students. It offers a comprehensive solution for receiving recommendations on the latest papers in your field of interest, capturing key insights, sharing them with your research group, and publicly posting your paper reviews to spread knowledge in a short-form.
+# DailyExp
+
+DailyExp is an innovative research tracking and knowledge sharing platform designed for graduate students. It offers a comprehensive solution for receiving recommendations on the latest papers in your field of interest, capturing key insights, sharing them with your research group, and publicly posting your paper reviews to spread knowledge in a short-form.
 
 ## Key Features
 
@@ -42,7 +40,7 @@ Glimpse is an innovative research tracking and knowledge sharing platform design
 5. Write and publicly post your personal reviews of papers.
 6. Follow other researchers and gain insights from their work.
 
-## Current Project Progress (Glimpse)
+## Current Project Progress (DailyExp)
 
 ### Completed Features
 ✅ Login Page Implementation
@@ -104,9 +102,7 @@ Project Maintainer - [@minji](https://www.linkedin.com/in/minhjih?utm_source=sha
 Project Link: [https://github.com/minhjih/dailyexp](https://github.com/minhjih/dailyexp)
 
 # 겉핥기
-<div style="display: flex; gap: 20px;">
-    <img src="screenshots/Mobile1.png" height="400"/>
-</div>
+
 겉핥기(가제)는 대학원생을 위해 설계된 혁신적인 연구 추적 및 지식 공유 플랫폼입니다. 관심 분야의 최신 논문에 대한 추천을 받고, 핵심 통찰력을 포착하며, 연구 그룹과 공유하고, 논문 리뷰를 공개적으로 게시하여 빠른 연구 변화에 숏폼 형태로 지식을 전파, 수용 할 수 있는 종합적인 솔루션을 제공합니다.
 
 ## 주요 기능
@@ -142,7 +138,7 @@ Project Link: [https://github.com/minhjih/dailyexp](https://github.com/minhjih/d
 5. 개인적인 논문 리뷰를 작성하고 공개적으로 게시합니다.
 6. 다른 연구자들을 팔로우하고 그들의 작업에서 통찰력을 얻습니다.
 
-## 현재 프로젝트 진행 상황 (Glimpse)
+## 현재 프로젝트 진행 상황 (DailyExp)
 
 ### 완료된 기능
 ✅ 로그인 페이지 구현
