@@ -57,9 +57,14 @@ Glimpse is an innovative research tracking and knowledge sharing platform design
 - Basic routing between screens
 
 ### Ongoing Development
+🔨 Main page sync to frontend design
+- ✅ login & signup screens
+- ✅ feed screen
+- 🔨 Workspaces, paper, social, profile screens
+
 🔨 User information maintain
-- Maintain much more user information (such as organization, ages, sex etc..)
-- ⭐️ Link to profile
+- ✅ Maintain much more user information (such as organization, ages, sex etc..)
+- 🔨 Link to profile
 
 🔨 Paper Recommendation Section
 - Integrate OpenAI API for intelligent recommendations
