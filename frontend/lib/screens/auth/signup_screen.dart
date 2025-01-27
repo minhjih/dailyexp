@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../theme/colors.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -396,8 +395,9 @@ class _SignupScreenState extends State<SignupScreen> {
               validator: _validateEmail,
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
+              cursorColor: const Color(0xFF43A047),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
             TextFormField(
               controller: _passwordController,
               decoration: _buildInputDecoration('비밀번호', Icons.lock).copyWith(
@@ -419,14 +419,16 @@ class _SignupScreenState extends State<SignupScreen> {
               validator: _validatePassword,
               obscureText: _obscurePassword, // 상태 변수 사용
               textInputAction: TextInputAction.next,
+              cursorColor: const Color(0xFF43A047),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 14),
             TextFormField(
               controller: _fullNameController,
               decoration: _buildInputDecoration('이름', Icons.person),
               validator: _validateName,
               textInputAction: TextInputAction.done,
               keyboardType: TextInputType.name,
+              cursorColor: const Color(0xFF43A047),
             ),
             const SizedBox(height: 40),
             _buildNavigationButton(
@@ -458,6 +460,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 decoration: _buildInputDecoration('소속 기관', Icons.business),
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.text,
+                cursorColor: const Color(0xFF43A047),
               ),
               const SizedBox(height: 24),
               TextFormField(
@@ -465,6 +468,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 decoration: _buildInputDecoration('학과/부서', Icons.school),
                 textInputAction: TextInputAction.done,
                 keyboardType: TextInputType.text,
+                cursorColor: const Color(0xFF43A047),
               ),
               const SizedBox(height: 40),
               _buildNavigationButton(
@@ -480,72 +484,113 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Widget _buildResearchInfoPage() {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 400),
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          child: Stack(
             children: [
-              TextFormField(
-                controller: _researchFieldController,
-                decoration: _buildInputDecoration('연구 분야', Icons.science),
-                textInputAction: TextInputAction.next,
-                keyboardType: TextInputType.text,
+              SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      TextFormField(
+                        controller: _researchFieldController,
+                        decoration: _buildInputDecoration('연구 분야', Icons.science),
+                        textInputAction: TextInputAction.next,
+                        keyboardType: TextInputType.text,
+                        cursorColor: const Color(0xFF43A047),
+                      ),
+                      const SizedBox(height: 15),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
+                        alignment: WrapAlignment.start,
+                        children: _availableInterests.map((interest) {
+                          final isSelected = _selectedInterests.contains(interest);
+                          return FilterChip(
+                            label: Text(
+                              interest,
+                              style: TextStyle(
+                                color: isSelected ? Colors.white : Colors.black38,
+                                fontSize: 15,
+                                fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+                              ),
+                            ),
+                            selected: isSelected,
+                            onSelected: (selected) {
+                              setState(() {
+                                if (selected) {
+                                  _selectedInterests.add(interest);
+                                } else {
+                                  _selectedInterests.remove(interest);
+                                }
+                              });
+                            },
+                            selectedColor: const Color(0xFF43A047),
+                            backgroundColor: Colors.white,
+                            checkmarkColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                            labelPadding: const EdgeInsets.symmetric(horizontal: 5),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                              side: BorderSide(color: isSelected ? const Color(0xFF43A047) : Colors.black12, width: 1),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 40),
+                    ],
+                  ),
+                ),
               ),
-              const SizedBox(height: 24),
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                alignment: WrapAlignment.center,
-                children: _availableInterests.map((interest) {
-                  final isSelected = _selectedInterests.contains(interest);
-                  return SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.4,
-                    child: FilterChip(
-                      label: Text(
-                        interest,
-                        style: TextStyle(
-                          color: isSelected ? Colors.white : Colors.black87,
-                          fontSize: 15,
-                          fontWeight:
-                              isSelected ? FontWeight.w500 : FontWeight.normal,
-                        ),
-                      ),
-                      selected: isSelected,
-                      onSelected: (selected) {
-                        setState(() {
-                          if (selected) {
-                            _selectedInterests.add(interest);
-                          } else {
-                            _selectedInterests.remove(interest);
-                          }
-                        });
-                      },
-                      selectedColor: const Color(0xFF43A047),
-                      backgroundColor: Colors.white,
-                      checkmarkColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 12),
-                      labelPadding: const EdgeInsets.symmetric(horizontal: 8),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  height: 20,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [const Color(0xFFE6F2E5), const Color(0xFFE6F2E5).withOpacity(0.0)],
+                      stops: [0.0, 1.0],
                     ),
-                  );
-                }).toList(),
+                  ),
+                ),
               ),
-              const SizedBox(height: 40),
-              _buildNavigationButton(
-                text: '다음',
-                onPressed: _nextPage,
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  height: 48,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [const Color(0xFFE6F2E5).withOpacity(0.0), const Color(0xFFE6F2E5)],
+                      stops: [0.0, 1.0],
+                    ),
+                  ),
+                ),
               ),
-              const SizedBox(height: 16),
             ],
           ),
         ),
-      ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Center(
+            child: _buildNavigationButton(
+              text: '다음',
+              onPressed: _nextPage,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -567,6 +612,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 maxLines: 3,
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.multiline,
+                cursorColor: const Color(0xFF43A047),
               ),
               const SizedBox(height: 24),
               TextFormField(
@@ -574,6 +620,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 decoration: _buildInputDecoration('GitHub 프로필', Icons.link),
                 textInputAction: TextInputAction.next,
                 onChanged: (value) => _externalLinks['github'] = value,
+                cursorColor: const Color(0xFF43A047),
               ),
               const SizedBox(height: 24),
               TextFormField(
@@ -581,6 +628,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 decoration: _buildInputDecoration('LinkedIn 프로필', Icons.link),
                 textInputAction: TextInputAction.done,
                 onChanged: (value) => _externalLinks['linkedin'] = value,
+                cursorColor: const Color(0xFF43A047),
               ),
               const SizedBox(height: 40),
               _buildNavigationButton(
