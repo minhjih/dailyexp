@@ -109,7 +109,7 @@ Project Maintainer - [@minji](https://www.linkedin.com/in/minhjih?utm_source=sha
 
 Project Link: [https://github.com/minhjih/dailyexp](https://github.com/minhjih/dailyexp)
 
-# 겉핥기(가제)
+# 겉핥기
 <div style="display: flex; gap: 20px;">
     <img src="screenshots/Mobile1.png" width="100%" height="50%"/>
 </div>
