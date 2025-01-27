@@ -1,4 +1,3 @@
-# Language
 - [KOR](#겉핥기)
 - [ENG](#Glimpse)
 
