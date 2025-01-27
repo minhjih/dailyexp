@@ -1,0 +1,3 @@
+일단 대강 프론트 만들긴했는데 현재 feed_screen, login_screen, main screen제외 제대로 건드린거 없음. 
+대충 figma로 디자인해놓은건 screenshots에 있으니까 profile_screen, social_screen은 너 맘대로 만들고 flow같은거 더 추가해봐도 됨.
+에러 안나는거 항상 확인하고 Push 할것! 에러 나는 것 확인시 이전 것으로 돌려놔서 다시 push하기!
