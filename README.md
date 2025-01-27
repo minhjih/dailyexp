@@ -200,40 +200,6 @@ Project Link: [https://github.com/minhjih/dailyexp](https://github.com/minhjih/d
 
 프로젝트 관리자 - [@minji](https://www.linkedin.com/in/minhjih?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app) - jhchoi0226@snu.ac.kr
 
+프론트엔드 협업 - [@jadestarmin](https://www.linkedin.com/in/minkyu-park-591b912b5?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app) - jadestar@postech.ac.kr 
+
 프로젝트 링크: [https://github.com/minhjih/dailyexp](https://github.com/minhjih/dailyexp)
-
-# Prototype
-
-## Login
-<img src="screenshots/login_screen.png" width="150" alt="로그인 화면"/>
-
-## Main Feed
-<div style="display: flex; gap: 20px;">
-    <img src="screenshots/feed_screen.png" width="150" alt="피드 화면"/>
-</div>
-
-## Workspace
-<div style="display: flex; gap: 20px;">
-    <img src="screenshots/workspace_list.png" width="150" alt="워크스페이스 목록"/>
-    <img src="screenshots/workspace_detail1.png" width="150" alt="워크스페이스 상세"/>
-    <img src="screenshots/workspace_detail2.png" width="150" alt="워크스페이스 상세2"/>
-</div>
-
-## Paper Search and Share
-<div style="display: flex; gap: 20px;">
-    <img src="screenshots/paper_feed.png" width="150" alt="논문 피드"/>
-</div>
-
-
-## Researcher Network
-<div style="display: flex; gap: 20px;">
-    <img src="screenshots/network_researchers.png" width="150" alt="연구자 목록"/>
-    <img src="screenshots/network_workspace.png" width="150" alt="연구자 프로필"/>
-</div>
-
-## Profile
-<div style="display: flex; gap: 20px;">
-    <img src="screenshots/profile.png" width="150" alt="연구자 목록"/>
-</div>
-
-
