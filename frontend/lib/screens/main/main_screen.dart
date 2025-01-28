@@ -9,6 +9,7 @@ import '../workspace/workspace_screen.dart';
 import '../discover/discover_screen.dart';
 import '../social/social_screen.dart';
 import '../profile/profile_screen.dart';
+import '../workspace/workspace_detail_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class MainScreen extends StatefulWidget {
@@ -24,6 +25,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   AnimationController? _hideController;
   bool _isVisible = true;
   Animation<Offset>? _slideAnimation;
+  Map<String, dynamic>? _selectedWorkspace;
 
   @override
   void initState() {
@@ -70,6 +72,12 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     _scrollController.dispose();
     _hideController?.dispose();
     super.dispose();
+  }
+
+  void _goBackToWorkspaceList() {
+    setState(() {
+      _selectedWorkspace = null;
+    });
   }
 
   @override
@@ -139,7 +147,20 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               controller: _tabController,
               children: [
                 FeedScreen(scrollController: _scrollController),
-                WorkspaceScreen(scrollController: _scrollController),
+                _selectedWorkspace == null
+                    ? WorkspaceScreen(
+                        scrollController: _scrollController,
+                        tabController: _tabController,
+                        onWorkspaceSelected: (workspace) {
+                          setState(() {
+                            _selectedWorkspace = workspace;
+                          });
+                        },
+                      )
+                    : WorkspaceDetailScreen(
+                        workspace: _selectedWorkspace!,
+                        onBack: _goBackToWorkspaceList,
+                      ),
                 DiscoverScreen(scrollController: _scrollController),
                 SocialScreen(scrollController: _scrollController),
                 ProfileScreen(scrollController: _scrollController),

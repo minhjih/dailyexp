@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:motion_tab_bar_v2/motion-tab-controller.dart';
 import '../../theme/colors.dart';
+import './workspace_detail_screen.dart';
 
 class WorkspaceScreen extends StatelessWidget {
   final ScrollController scrollController;
+  final MotionTabBarController? tabController;
+  final Function(Map<String, dynamic>)? onWorkspaceSelected;
 
   const WorkspaceScreen({
     super.key,
     required this.scrollController,
+    this.tabController,
+    this.onWorkspaceSelected,
   });
 
   @override
@@ -139,7 +145,13 @@ class WorkspaceScreen extends StatelessWidget {
                 ),
                 child: InkWell(
                   onTap: () {
-                    // TODO: Workspace 상세 페이지로 이동
+                    // Navigator.push 대신 TabController를 통해 화면 전환
+                    if (tabController != null) {
+                      // 현재 워크스페이스 정보를 저장
+                      onWorkspaceSelected?.call(workspace);
+                      // 워크스페이스 상세 화면으로 전환
+                      tabController!.animateTo(tabController!.index);
+                    }
                   },
                   borderRadius: BorderRadius.circular(12),
                   child: Padding(
