@@ -2,13 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../theme/colors.dart';
 
-class FeedScreen extends StatelessWidget {
+class FeedScreen extends StatefulWidget {
   final ScrollController scrollController;
 
   const FeedScreen({
-    super.key,
+    Key? key,
     required this.scrollController,
-  });
+  }) : super(key: key);
+
+  @override
+  _FeedScreenState createState() => _FeedScreenState();
+}
+
+class _FeedScreenState extends State<FeedScreen> {
+  bool _isSaved = false; // 저장 상태 추가
+  bool _isLiked = false; // 좋아요 상태 추가
+  int _likeCount = 245; // 좋아요 개수 추가
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +70,7 @@ class FeedScreen extends StatelessWidget {
         // 피드 목록
         Expanded(
           child: ListView.builder(
-            controller: scrollController,
+            controller: widget.scrollController,
             itemCount: 10,
             padding: const EdgeInsets.only(
               left: 16,
@@ -138,18 +147,11 @@ class FeedScreen extends StatelessWidget {
                       padding: const EdgeInsets.all(16),
                       child: Row(
                         children: [
-                          _buildInteractionButton(Icons.favorite_border, '245'),
+                          _buildInteractionButton(Icons.favorite, Icons.favorite_border, _likeCount.toString(), _toggleLike, Colors.red, _isLiked),
                           const SizedBox(width: 24),
-                          _buildInteractionButton(Icons.comment_outlined, '18'),
+                          _buildInteractionButton(Icons.comment, Icons.comment_outlined, '18',() {}, Colors.grey),
                           const Spacer(),
-                          TextButton.icon(
-                            onPressed: () {},
-                            icon: const Icon(Icons.bookmark_border),
-                            label: const Text('Save'),
-                            style: TextButton.styleFrom(
-                              foregroundColor: Colors.grey[700],
-                            ),
-                          ),
+                          _buildInteractionButton(Icons.bookmark, Icons.bookmark_border, _isSaved ? 'Saved' : 'Save', _toggleSave, const Color(0xFF43A047), _isSaved),
                         ],
                       ),
                     ),
@@ -183,19 +185,34 @@ class FeedScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInteractionButton(IconData icon, String count) {
-    return Row(
-      children: [
-        Icon(icon, size: 20, color: Colors.grey[700]),
-        const SizedBox(width: 4),
-        Text(
-          count,
-          style: TextStyle(
-            color: Colors.grey[700],
-            fontSize: 14,
+  Widget _buildInteractionButton(IconData activeIcon, IconData inactiveIcon, String text, VoidCallback onPressed, Color IconColor, [bool isActive = false]) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Row(
+        children: [
+          Icon(isActive ? activeIcon : inactiveIcon, size: 20, color: isActive ? IconColor : Colors.grey[700]),
+          const SizedBox(width: 4),
+          Text(
+            text,
+            style: TextStyle(
+              color: isActive ? IconColor : Colors.grey[700],
+              fontSize: 14,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
+  }
+  void _toggleLike() {
+    setState(() {
+      _isLiked = !_isLiked;
+      _likeCount += _isLiked ? 1 : -1;  // 좋아요 상태에 따라 카운트 증감
+    });
+  }
+
+  void _toggleSave() {
+    setState(() {
+      _isSaved = !_isSaved;
+    });
   }
 }
