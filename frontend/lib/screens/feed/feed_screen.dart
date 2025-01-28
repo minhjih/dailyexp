@@ -65,6 +65,7 @@ class _FeedScreenState extends State<FeedScreen> {
                 borderSide: BorderSide.none,
               ),
             ),
+            cursorColor: const Color(0xFF43A047),  // 커서 색상 설정
           ),
         ),
         // 피드 목록
