@@ -58,8 +58,8 @@ Glimpse is an innovative research tracking and knowledge sharing platform design
 ### Ongoing Development
 🔨 Main page sync to frontend design
 - ✅ login & signup screens
-- ✅ feed screen
-- 🔨 Workspaces, paper, social, profile screens
+- ✅ feed screen, Workspaces_main, Workspace_detail_screen1
+- 🔨 Workspace_detail_screen2, paper, social, profile screens
 
 🔨 User information maintain
 - ✅ Maintain much more user information (such as organization, ages, sex etc..)
@@ -158,8 +158,8 @@ Project Link: [https://github.com/minhjih/dailyexp](https://github.com/minhjih/d
 ### 진행 중인 개발
 🔨 프론트엔드 디자인과 동기화 작업
 - ✅ login & signup screens
-- ✅ feed screen
-- 🔨 Workspaces, paper, social, profile screens
+- ✅ feed screen, Workspaces_main, Workspace_detail_screen1
+- 🔨 Workspace_detail_screen2, paper, social, profile screens
 
 🔨 사용자 정보 관리
 - ✅ 더 많은 사용자 정보 유지 (조직, 나이, 성별 등)
