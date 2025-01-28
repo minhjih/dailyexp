@@ -94,12 +94,7 @@ Glimpse is an innovative research tracking and knowledge sharing platform design
 - Scalable recommendation engine
 - Cross-platform UI consistency
 - Data privacy and user permissions
-
-### Actions
-- Finalize main page component structure
-- Set up backend API endpoints
-- Design comprehensive state management approach
-- Create detailed wireframes for upcoming features
+- Chrome extension
 
 
 ## Contact
@@ -199,15 +194,9 @@ Project Link: [https://github.com/minhjih/dailyexp](https://github.com/minhjih/d
 - 확장 가능한 추천 엔진
 - 크로스 플랫폼 UI 일관성
 - 데이터 프라이버시 및 사용자 권한
-
-### 조치사항
-- 메인 페이지 컴포넌트 구조 완성
-- 백엔드 API 엔드포인트 설정
-- 종합적인 상태 관리 접근 방식 설계
-- 향후 기능에 대한 상세 와이어프레임 생성
+- 구글 확장 프로그램으로 논문 검색시 관련 포스트 모아보기
 
 ## 연락처
-
 프로젝트 관리자 - [@minji](https://www.linkedin.com/in/minhjih?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app) - jhchoi0226@snu.ac.kr
 
 프론트엔드 협업 - [@jadestarmin](https://www.linkedin.com/in/minkyu-park-591b912b5?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app) - jadestar@postech.ac.kr 
