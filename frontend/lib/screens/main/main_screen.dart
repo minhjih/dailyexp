@@ -11,6 +11,7 @@ import '../social/social_screen.dart';
 import '../profile/profile_screen.dart';
 import '../workspace/workspace_detail_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../papers/paper_list_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -161,7 +162,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                         workspace: _selectedWorkspace!,
                         onBack: _goBackToWorkspaceList,
                       ),
-                DiscoverScreen(scrollController: _scrollController),
+                PaperListScreen(scrollController: _scrollController),
                 SocialScreen(scrollController: _scrollController),
                 ProfileScreen(scrollController: _scrollController),
               ],
