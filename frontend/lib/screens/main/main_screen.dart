@@ -75,67 +75,63 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBody: true, // 콘텐츠가 하단바 영역까지 확장되도록 설정
-      extendBodyBehindAppBar: true, // 콘텐츠가 앱바 뒤로 확장되도록 설정
-      appBar: _tabController?.index == 0
-          ? PreferredSize(
-              preferredSize: const Size.fromHeight(kToolbarHeight),
-              child: SlideTransition(
-                position: Tween<Offset>(
-                  begin: Offset.zero,
-                  end: const Offset(0, -1.5),
-                ).animate(_hideController!),
-                child: Container(
-                  color: Colors.white,
-                  child: SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'glimpse',
-                            style: GoogleFonts.pacifico(
-                              fontSize: 24,
-                              color: const Color(0xFF43A047),
-                            ),
-                          ),
-                          const Row(
-                            children: [
-                              IconButton(
-                                icon: Icon(Icons.notifications_outlined),
-                                onPressed: null,
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.mail_outline),
-                                onPressed: null,
-                              ),
-                              CircleAvatar(
-                                radius: 16,
-                                backgroundColor: Colors.grey,
-                                // TODO: 실제 프로필 이미지로 교체
-                              ),
-                            ],
-                          ),
-                        ],
+      extendBody: true,
+      extendBodyBehindAppBar: true,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: Offset.zero,
+            end: const Offset(0, -1.5),
+          ).animate(_hideController!),
+          child: Container(
+            color: Colors.white,
+            child: SafeArea(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'glimpse',
+                      style: GoogleFonts.pacifico(
+                        fontSize: 24,
+                        color: const Color(0xFF43A047),
                       ),
                     ),
-                  ),
+                    const Row(
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.notifications_outlined),
+                          onPressed: null,
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.mail_outline),
+                          onPressed: null,
+                        ),
+                        CircleAvatar(
+                          radius: 16,
+                          backgroundColor: Colors.grey,
+                          // TODO: 실제 프로필 이미지로 교체
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-            )
-          : null,
+            ),
+          ),
+        ),
+      ),
       body: AnimatedBuilder(
         animation: _hideController!,
         builder: (context, child) {
           return Container(
             padding: EdgeInsets.only(
-              top: _tabController?.index == 0 ? kToolbarHeight + 20 : 0,
+              top: kToolbarHeight + 20,
             ).copyWith(
-              top: _tabController?.index == 0
-                  ? ((kToolbarHeight + 20) * (1 - _hideController!.value))
-                  : 0,
+              top: ((kToolbarHeight + 20) * (1 - _hideController!.value)),
               bottom: 44 * (1 - _hideController!.value),
             ),
             child: TabBarView(
