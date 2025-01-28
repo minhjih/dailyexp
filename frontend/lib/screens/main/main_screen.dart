@@ -102,11 +102,14 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'glimpse',
-                      style: GoogleFonts.pacifico(
-                        fontSize: 24,
-                        color: const Color(0xFF43A047),
+                    Transform.translate(
+                      offset: Offset(0, -3), // y축으로 -10 픽셀 만큼 이동
+                      child: Text(
+                        'glimpse',
+                        style: GoogleFonts.pacifico(
+                          fontSize: 24,
+                          color: const Color(0xFF43A047),
+                        ),
                       ),
                     ),
                     Row(
@@ -119,6 +122,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                           icon: Icon(Icons.mail_outline),
                           onPressed: null,
                         ),
+                        const SizedBox(width: 10),
                         GestureDetector(
                           onTap: () {
                             _tabController?.index = 4;
