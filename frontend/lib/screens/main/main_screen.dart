@@ -109,7 +109,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                         color: const Color(0xFF43A047),
                       ),
                     ),
-                    const Row(
+                    Row(
                       children: [
                         IconButton(
                           icon: Icon(Icons.notifications_outlined),
@@ -119,10 +119,16 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                           icon: Icon(Icons.mail_outline),
                           onPressed: null,
                         ),
-                        CircleAvatar(
-                          radius: 16,
-                          backgroundColor: Colors.grey,
-                          // TODO: 실제 프로필 이미지로 교체
+                        GestureDetector(
+                          onTap: () {
+                            _tabController?.index = 4;
+                          },
+                          child: CircleAvatar(
+                            radius: 16,
+                            backgroundColor: Colors.grey[200],
+                            backgroundImage: const NetworkImage(
+                                'https://via.placeholder.com/150'),
+                          ),
                         ),
                       ],
                     ),

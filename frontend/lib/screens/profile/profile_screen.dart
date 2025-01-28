@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../widgets/custom_app_bar.dart';
-import '../../theme/colors.dart';
-import '../../widgets/screen_header.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ProfileScreen extends StatelessWidget {
   final ScrollController scrollController;
@@ -13,44 +11,156 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return ListView(
+      controller: scrollController,
+      padding: const EdgeInsets.only(bottom: 100),
       children: [
-        ScreenHeader(
-          title: '프로필',
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.settings),
-              onPressed: () {},
-            ),
-          ],
-        ),
-        Expanded(
-          child: ListView(
-            controller: scrollController,
-            padding: const EdgeInsets.all(16),
+        // 프로필 헤더
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const CircleAvatar(
-                radius: 50,
-                child: Icon(Icons.person, size: 50),
+              Row(
+                children: [
+                  const CircleAvatar(
+                    radius: 40,
+                    backgroundImage:
+                        NetworkImage('https://via.placeholder.com/150'),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Dr. Jaehyun Choi',
+                          style: GoogleFonts.poppins(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          'Master student at SNU',
+                          style: GoogleFonts.poppins(
+                            color: Colors.grey[600],
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
-              Text(
-                '사용자 이름',
-                style: Theme.of(context).textTheme.headlineSmall,
-                textAlign: TextAlign.center,
+              // 팔로워 정보
+              Row(
+                children: [
+                  Text(
+                    '245 Following',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: Colors.grey[800],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Text(
+                    '1.2k Followers',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: Colors.grey[800],
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 16),
+              // 소개
               Text(
-                '소속 기관',
-                style: Theme.of(context).textTheme.bodyLarge,
-                textAlign: TextAlign.center,
+                'Specializing in AI Healthcare and Quantum Computing. Leading research teams at MIT\'s Advanced Technology Lab.',
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: Colors.grey[700],
+                ),
               ),
-              const SizedBox(height: 24),
-              _buildStatRow(),
-              const Divider(height: 32),
-              _buildActionButtons(),
-              const SizedBox(height: 24),
-              _buildRecentActivity(),
+              const SizedBox(height: 16),
+              // 관심 분야 태그
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _buildInterestTag('AI Healthcare'),
+                  _buildInterestTag('Quantum Computing'),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const Divider(height: 1),
+        // My Posts 섹션
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'My Posts',
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 16),
+              // 검색창 추가
+              TextField(
+                decoration: InputDecoration(
+                  hintText: 'Search my posts...',
+                  hintStyle: GoogleFonts.poppins(
+                    color: Colors.grey[400],
+                    fontSize: 14,
+                  ),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: Colors.grey[400],
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              _buildPostCard(
+                'Advancing AI in Healthcare: A Comprehensive Study',
+                'Published in Nature Medicine · 2023',
+                '234',
+                '45',
+              ),
+              _buildPostCard(
+                'Quantum Computing Applications in Medical Imaging',
+                'Published in Science · 2023',
+                '189',
+                '32',
+              ),
+              _buildPostCard(
+                '5G Security in Healthcare Systems',
+                'Published in IEEE · 2022',
+                '156',
+                '28',
+              ),
             ],
           ),
         ),
@@ -58,83 +168,74 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatRow() {
-    return const Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _StatItem(label: '논문', value: '15'),
-        _StatItem(label: '팔로워', value: '128'),
-        _StatItem(label: '팔로잉', value: '91'),
-      ],
+  Widget _buildInterestTag(String tag) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.green.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        tag,
+        style: GoogleFonts.poppins(
+          color: Colors.green,
+          fontSize: 14,
+        ),
+      ),
     );
   }
 
-  Widget _buildActionButtons() {
-    return Wrap(
-      spacing: 8,
-      children: [
-        ActionChip(
-          avatar: const Icon(Icons.edit),
-          label: const Text('프로필 수정'),
-          onPressed: () {},
-        ),
-        ActionChip(
-          avatar: const Icon(Icons.share),
-          label: const Text('프로필 공유'),
-          onPressed: () {},
-        ),
-      ],
-    );
-  }
-
-  Widget _buildRecentActivity() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          '최근 활동',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: 5,
-          itemBuilder: (context, index) {
-            return ListTile(
-              leading: const Icon(Icons.article),
-              title: Text('활동 ${index + 1}'),
-              subtitle: const Text('2시간 전'),
-            );
-          },
-        ),
-      ],
-    );
-  }
-}
-
-class _StatItem extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _StatItem({
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+  Widget _buildPostCard(
+      String title, String publishInfo, String likes, String comments) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
           ),
-        ),
-        Text(label),
-      ],
+          const SizedBox(height: 4),
+          Text(
+            publishInfo,
+            style: GoogleFonts.poppins(
+              color: Colors.grey[600],
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Icon(Icons.favorite_border, size: 20, color: Colors.grey[600]),
+              const SizedBox(width: 4),
+              Text(
+                likes,
+                style: GoogleFonts.poppins(
+                  color: Colors.grey[600],
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Icon(Icons.chat_bubble_outline,
+                  size: 20, color: Colors.grey[600]),
+              const SizedBox(width: 4),
+              Text(
+                comments,
+                style: GoogleFonts.poppins(
+                  color: Colors.grey[600],
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          const Divider(height: 1),
+        ],
+      ),
     );
   }
 }
