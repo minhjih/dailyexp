@@ -18,6 +18,7 @@ class _FeedScreenState extends State<FeedScreen> {
   bool _isSaved = false; // 저장 상태 추가
   bool _isLiked = false; // 좋아요 상태 추가
   int _likeCount = 245; // 좋아요 개수 추가
+  bool _isCommentsVisible = false; // 댓글 섹션의 확장 상태 추가
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +66,7 @@ class _FeedScreenState extends State<FeedScreen> {
                 borderSide: BorderSide.none,
               ),
             ),
-            cursorColor: const Color(0xFF43A047),  // 커서 색상 설정
+            cursorColor: const Color(0xFF43A047),
           ),
         ),
         // 피드 목록
@@ -73,96 +74,95 @@ class _FeedScreenState extends State<FeedScreen> {
           child: ListView.builder(
             controller: widget.scrollController,
             itemCount: 10,
-            padding: const EdgeInsets.only(
-              left: 16,
-              right: 16,
-              top: 0,
-              bottom: 100, // 네비게이션 바 높이(40) + offset 고려(0.1) + 여유 공간
-            ),
             itemBuilder: (context, index) {
-              return Card(
-                elevation: 0,
-                margin: const EdgeInsets.only(bottom: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ListTile(
-                      leading: const CircleAvatar(
-                        backgroundImage: NetworkImage(
-                          'https://via.placeholder.com/150',
-                        ),
-                      ),
-                      title: Text(
-                        'Dr. Sarah Chen',
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      subtitle: Text(
-                        'Stanford University',
-                        style: GoogleFonts.poppins(
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Novel Approaches in Quantum Computing: A Review',
-                            style: GoogleFonts.poppins(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'A comprehensive analysis of recent developments in quantum computing architectures and their implications for scalable quantum systems.',
-                            style: GoogleFonts.poppins(
-                              color: Colors.grey[700],
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Key Insights:',
-                            style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          _buildKeyInsight(
-                              'New error correction methods show 50% improvement'),
-                          _buildKeyInsight(
-                              'Hybrid quantum-classical systems emerge as promising'),
-                          _buildKeyInsight(
-                              'Scalability challenges require novel approaches'),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        children: [
-                          _buildInteractionButton(Icons.favorite, Icons.favorite_border, _likeCount.toString(), _toggleLike, Colors.red, _isLiked),
-                          const SizedBox(width: 24),
-                          _buildInteractionButton(Icons.comment, Icons.comment_outlined, '18',() {}, Colors.grey),
-                          const Spacer(),
-                          _buildInteractionButton(Icons.bookmark, Icons.bookmark_border, _isSaved ? 'Saved' : 'Save', _toggleSave, const Color(0xFF43A047), _isSaved),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              );
+              return buildPostCard();
             },
           ),
         ),
       ],
+    );
+  }
+
+  Widget buildPostCard() {
+    return Card(
+      elevation: 0,
+      margin: const EdgeInsets.only(bottom: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ListTile(
+            leading: const CircleAvatar(
+              backgroundImage: NetworkImage(
+                'https://via.placeholder.com/150',
+              ),
+            ),
+            title: Text(
+              'Dr. Sarah Chen',
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            subtitle: Text(
+              'Stanford University',
+              style: GoogleFonts.poppins(
+                color: Colors.grey[600],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Novel Approaches in Quantum Computing: A Review',
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'A comprehensive analysis of recent developments in quantum computing architectures and their implications for scalable quantum systems.',
+                  style: GoogleFonts.poppins(
+                    color: Colors.grey[700],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Key Insights:',
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                _buildKeyInsight(
+                    'New error correction methods show 50% improvement'),
+                _buildKeyInsight(
+                    'Hybrid quantum-classical systems emerge as promising'),
+                _buildKeyInsight(
+                    'Scalability challenges require novel approaches'),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                _buildInteractionButton(Icons.favorite, Icons.favorite_border, _likeCount.toString(), _toggleLike, Colors.red, _isLiked),
+                const SizedBox(width: 24),
+                _buildInteractionButton(Icons.comment, Icons.comment_outlined, '18', _toggleComments, Colors.grey, _isCommentsVisible),
+                const Spacer(),
+                _buildInteractionButton(Icons.bookmark, Icons.bookmark_border, _isSaved ? 'Saved' : 'Save', _toggleSave, const Color(0xFF43A047), _isSaved),
+              ],
+            ),
+          ),
+          _isCommentsVisible ? buildCommentsSection() : SizedBox.shrink(),
+        ],
+      ),
     );
   }
 
@@ -210,10 +210,115 @@ class _FeedScreenState extends State<FeedScreen> {
       _likeCount += _isLiked ? 1 : -1;  // 좋아요 상태에 따라 카운트 증감
     });
   }
-
   void _toggleSave() {
     setState(() {
       _isSaved = !_isSaved;
     });
+  }
+  void _toggleComments() {
+    setState(() {
+      _isCommentsVisible = !_isCommentsVisible;
+    });
+  }
+  Widget buildCommentsSection() {
+    // 예제 댓글 데이터
+    List<Map<String, dynamic>> comments = [
+      {
+        "name": "Minkyu Park",
+        "time": "5분 전",
+        "profileImage": "https://via.placeholder.com/150",
+        "comment": "As someone deeply fascinated by both theoretical and applied physics, I find the potential of quantum computing truly revolutionary.",
+      },
+      {
+        "name": "Jadestar Min",
+        "time": "39분 전",
+        "profileImage": "https://via.placeholder.com/150",
+        "comment": "The notion that quantum computers could one day solve complex problems, which are currently beyond the reach of classical computers, in mere seconds is mind-blowing.",
+      },
+      // 추가 댓글 데이터...
+    ];
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: TextField(
+            decoration: InputDecoration(
+              hintText: "Write a comment...",
+              suffixIcon: Icon(Icons.send),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20), // 테두리의 둥근 모서리
+                borderSide: BorderSide(color: Colors.grey, width: 1), // 테두리 색상과 두께
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+                borderSide: BorderSide(color: Colors.grey, width: 1), // 활성화 상태에서의 테두리 색상과 두께
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+                borderSide: BorderSide(color: Color(0xFF43A047), width: 2), // 포커스를 받았을 때의 테두리 색상과 두께
+              ),
+              filled: false,
+              fillColor: Colors.grey[200],
+            ),
+            cursorColor: const Color(0xFF43A047),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: comments.map((comment) => buildCommentItem(comment)).toList(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget buildCommentItem(Map<String, dynamic> comment) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CircleAvatar(
+            backgroundImage: NetworkImage(comment['profileImage']),
+            radius: 20,
+          ),
+          SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      comment['name'],
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(width: 8), // 이름과 시간 사이 간격 조정
+                    Text(
+                      comment['time'],
+                      style: GoogleFonts.poppins(
+                        color: Colors.grey[600], // 시간 표시 색상 조정
+                        fontSize: 12, // 시간 표시 크기 조정
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  comment['comment'],
+                  style: GoogleFonts.poppins(
+                    color: Colors.black54,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
