@@ -166,7 +166,8 @@ Project Link: [https://github.com/minhjih/dailyexp](https://github.com/minhjih/d
 
 🔨 사용자 정보 관리
 - ✅ 더 많은 사용자 정보 유지 (조직, 나이, 성별 등)
-- ⭐️ 프로필 연결
+- ✅ 프로필 연결
+- 🔨 Posting 기능
 
 🔨 논문 추천 섹션
 - 지능형 추천을 위한 OpenAI API 통합
@@ -198,6 +199,7 @@ Project Link: [https://github.com/minhjih/dailyexp](https://github.com/minhjih/d
 - 크로스 플랫폼 UI 일관성
 - 데이터 프라이버시 및 사용자 권한
 - 구글 확장 프로그램으로 논문 검색시 관련 포스트 모아보기
+
 
 ## 연락처
 프로젝트 관리자 - [@minji](https://www.linkedin.com/in/minhjih?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app) - jhchoi0226@snu.ac.kr
