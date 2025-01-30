@@ -84,7 +84,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Row(
                     children: [
                       Text(
-                        '245 Following',
+                        '${userProvider.followingCount} Following',
                         style: GoogleFonts.poppins(
                           fontSize: 14,
                           color: Colors.grey[800],
@@ -92,7 +92,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       const SizedBox(width: 16),
                       Text(
-                        '1.2k Followers',
+                        '${userProvider.followersCount} Followers',
                         style: GoogleFonts.poppins(
                           fontSize: 14,
                           color: Colors.grey[800],
