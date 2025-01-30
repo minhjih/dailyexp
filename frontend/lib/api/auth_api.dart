@@ -157,4 +157,72 @@ class AuthAPI {
       throw Exception('Failed to fetch profile stats: $e');
     }
   }
+
+  Future<Map<String, dynamic>> getUserProfileById(int userId) async {
+    try {
+      final response = await _dio.get(
+        '/profile/$userId',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer ${await _getToken()}',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception('Failed to fetch user profile: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Failed to fetch user profile: $e');
+    }
+  }
+
+  Future<void> followUser(int userId) async {
+    try {
+      final token = await _getToken();
+      if (token == null) {
+        throw Exception('No token found');
+      }
+
+      await _dio.post(
+        '/profile/$userId/follow',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+    } catch (e) {
+      throw Exception('Failed to follow user: $e');
+    }
+  }
+
+  Future<List<int>> getFollowingIds() async {
+    try {
+      final token = await _getToken();
+      if (token == null) {
+        throw Exception('No token found');
+      }
+
+      final response = await _dio.get(
+        '/profile/me/following',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        List<dynamic> followingList = response.data;
+        return followingList.map((user) => user['id'] as int).toList();
+      } else {
+        throw Exception('Failed to fetch following list');
+      }
+    } catch (e) {
+      throw Exception('Failed to fetch following list: $e');
+    }
+  }
 }

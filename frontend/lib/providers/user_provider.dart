@@ -42,4 +42,26 @@ class UserProvider with ChangeNotifier {
       print('Failed to fetch profile stats: $e');
     }
   }
+
+  Future<User> loadUserProfile(int userId) async {
+    try {
+      final response = await AuthAPI().getUserProfileById(userId);
+      return User.fromJson(response);
+    } catch (e) {
+      print('Failed to load user profile: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> loadProfileStats() async {
+    try {
+      final stats = await AuthAPI().getProfileStats();
+      _followersCount = stats['followers_count'];
+      _followingCount = stats['following_count'];
+      notifyListeners();
+    } catch (e) {
+      print('Failed to load profile stats: $e');
+      rethrow;
+    }
+  }
 }
