@@ -175,4 +175,16 @@ class Comment(Base):
     
     # 대댓글을 위한 필드
     parent_id = Column(Integer, ForeignKey("comments.id"), nullable=True)
-    replies = relationship("Comment", backref=backref("parent", remote_side=[id])) 
+    replies = relationship("Comment", backref=backref("parent", remote_side=[id]))
+
+class Follow(Base):
+    __tablename__ = "follows"
+
+    id = Column(Integer, primary_key=True, index=True)
+    follower_id = Column(Integer, ForeignKey("users.id"))
+    following_id = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+    # 관계 설정
+    follower = relationship("User", foreign_keys=[follower_id], backref="following")
+    following = relationship("User", foreign_keys=[following_id], backref="followers") 
