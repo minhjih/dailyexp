@@ -6,9 +6,18 @@ import 'screens/auth/signup_screen.dart';
 import 'screens/papers/paper_list_screen.dart';
 import 'screens/main/main_screen.dart'; // 추가
 import 'theme/colors.dart';
+import 'providers/user_provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

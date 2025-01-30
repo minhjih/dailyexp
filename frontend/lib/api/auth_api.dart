@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../models/user.dart';
 import 'dart:convert'; // jsonEncode를 위해 추가
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthAPI {
   static final Dio _dio = Dio(BaseOptions(
@@ -96,6 +97,37 @@ class AuthAPI {
     } catch (e) {
       print('General error: $e');
       throw Exception('회원가입 실패: $e');
+    }
+  }
+
+  Future<String?> _getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('token');
+  }
+
+  Future<Map<String, dynamic>> getUserProfile() async {
+    try {
+      final token = await _getToken();
+      if (token == null) {
+        throw Exception('No token found');
+      }
+
+      final response = await _dio.get(
+        '/profile/me',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception('Failed to fetch user profile: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Failed to fetch user profile: $e');
     }
   }
 }
