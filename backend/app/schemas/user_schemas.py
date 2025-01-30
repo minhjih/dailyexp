@@ -38,4 +38,13 @@ class Token(BaseModel):
     token_type: str
 
 class TokenData(BaseModel):
-    email: Optional[str] = None 
+    email: Optional[str] = None
+
+class UserUpdate(BaseModel):
+    full_name: Optional[str] = None
+    institution: Optional[str] = None
+    department: Optional[str] = None
+    research_field: Optional[str] = None
+    research_interests: Optional[List[str]] = None
+    bio: Optional[str] = None
+    external_links: Optional[Dict[str, str]] = None 
