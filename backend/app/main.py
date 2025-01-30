@@ -19,7 +19,7 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_event():
     try:
-        from .models.init_db import init_db
+        from .models.database import init_db
         init_db()
     except Exception as e:
         print(f"Database initialization error: {e}")

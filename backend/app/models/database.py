@@ -3,8 +3,13 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 import os
+import datetime
+from passlib.context import CryptContext
 
 load_dotenv()
+
+# 비밀번호 해싱을 위한 설정
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@db/dailyexp")
 
@@ -21,10 +26,8 @@ def get_db():
         db.close()
 
 def init_db():
-    # 여기서 models를 import
-    from . import models
-    from ..utils.auth import get_password_hash
-    import datetime
+    # 여기서 모든 모델을 import
+    from .models import User, Follow, Paper, Comment, Group
     
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
@@ -127,9 +130,9 @@ def init_db():
 
     try:
         for user_data in test_users:
-            user = models.User(
+            user = User(
                 email=user_data["email"],
-                hashed_password=get_password_hash("admin"),
+                hashed_password=pwd_context.hash("admin"),  # 직접 비밀번호 해싱
                 full_name=user_data["full_name"],
                 institution=user_data["institution"],
                 department=user_data["department"],
