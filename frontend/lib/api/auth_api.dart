@@ -130,4 +130,31 @@ class AuthAPI {
       throw Exception('Failed to fetch user profile: $e');
     }
   }
+
+  Future<Map<String, dynamic>> getProfileStats() async {
+    try {
+      final token = await _getToken();
+      if (token == null) {
+        throw Exception('No token found');
+      }
+
+      final response = await _dio.get(
+        '/profile/me/stats',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception(
+            'Failed to fetch profile stats: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Failed to fetch profile stats: $e');
+    }
+  }
 }
