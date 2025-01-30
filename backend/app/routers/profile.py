@@ -94,4 +94,19 @@ async def unfollow_user(
     if follow:
         db.delete(follow)
         db.commit()
-    return {"message": "Successfully unfollowed"} 
+    return {"message": "Successfully unfollowed"}
+
+@router.get("/me/following")
+async def get_following(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """현재 사용자가 팔로우하는 사용자 목록을 반환합니다."""
+    following = db.query(models.User).join(
+        models.Follow,
+        models.Follow.following_id == models.User.id
+    ).filter(
+        models.Follow.follower_id == current_user.id
+    ).all()
+    
+    return following or []  # 팔로잉이 없으면 빈 리스트 반환 
