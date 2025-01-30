@@ -18,7 +18,11 @@ app.add_middleware(
 # 앱 시작 시 데이터베이스 초기화
 @app.on_event("startup")
 async def startup_event():
-    init_db()
+    try:
+        from .models.init_db import init_db
+        init_db()
+    except Exception as e:
+        print(f"Database initialization error: {e}")
 
 app.include_router(auth.router)
 app.include_router(papers.router)
