@@ -21,7 +21,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     // 프로필 데이터 로드
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<UserProvider>().fetchUserProfile();
+      final userProvider = context.read<UserProvider>();
+      userProvider.fetchUserProfile();
+      userProvider.fetchProfileStats(); // 프로필 통계도 함께 로드
     });
   }
 

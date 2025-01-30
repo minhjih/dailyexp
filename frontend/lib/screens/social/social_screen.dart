@@ -1,297 +1,298 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../providers/user_provider.dart';
+import '../../models/user.dart';
+import '../../theme/colors.dart';
+import '../../api/auth_api.dart';
 
 class SocialScreen extends StatefulWidget {
   final ScrollController scrollController;
 
   const SocialScreen({
-    super.key,
+    Key? key,
     required this.scrollController,
-  });
+  }) : super(key: key);
 
   @override
-  State<SocialScreen> createState() => _SocialScreenState();
+  _SocialScreenState createState() => _SocialScreenState();
 }
 
-class _SocialScreenState extends State<SocialScreen> {
-  bool isResearcherMode = true;
+class _SocialScreenState extends State<SocialScreen>
+    with AutomaticKeepAliveClientMixin {
+  bool isResearcherMode = true; // true: Researchers, false: Workspaces
+  List<User> recommendedUsers = [];
+  bool isLoading = true; // 다시 true로 변경
+
+  @override
+  bool get wantKeepAlive => true; // 화면 유지
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRecommendedUsers();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // 상단 탭 버튼
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      isResearcherMode = true;
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        isResearcherMode ? Colors.green : Colors.grey[200],
-                    foregroundColor:
-                        isResearcherMode ? Colors.white : Colors.grey[600],
-                    elevation: isResearcherMode ? 1 : 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                  child: Text(
-                    'Researchers',
-                    style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      isResearcherMode = false;
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        !isResearcherMode ? Colors.green : Colors.grey[200],
-                    foregroundColor:
-                        !isResearcherMode ? Colors.white : Colors.grey[600],
-                    elevation: !isResearcherMode ? 1 : 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                  child: Text(
-                    'Workspaces',
-                    style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        // 검색창
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: TextField(
-            decoration: InputDecoration(
-              hintText: isResearcherMode
-                  ? 'Search researchers...'
-                  : 'Search workspaces...',
-              hintStyle: GoogleFonts.poppins(
-                color: Colors.grey[400],
-                fontSize: 14,
-              ),
-              prefixIcon: Icon(
-                Icons.search,
-                color: Colors.grey[400],
-              ),
-              filled: true,
-              fillColor: Colors.grey[100],
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide.none,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide.none,
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide.none,
-              ),
-            ),
-          ),
-        ),
-        // 콘텐츠 섹션
-        Expanded(
-          child: ListView(
-            controller: widget.scrollController,
-            padding: const EdgeInsets.only(bottom: 100),
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                child: Text(
-                  isResearcherMode
-                      ? 'Recommended Researchers'
-                      : 'Recommended Workspaces',
-                  style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              if (isResearcherMode) ...[
-                _buildResearcherCard(
-                  'Dr. Sarah Chen',
-                  'AI Research Lead at Stanford',
-                  '12 papers in AI & Healthcare',
-                ),
-                _buildResearcherCard(
-                  'Prof. James Wilson',
-                  'Quantum Computing - MIT',
-                  '8 papers in Quantum Computing',
-                ),
-                _buildResearcherCard(
-                  'Dr. Michael Park',
-                  '5G Network Specialist - IBM',
-                  '15 papers in Network Security',
-                ),
-              ] else ...[
-                _buildWorkspaceCard(
-                  'AI Research Group',
-                  'Stanford University',
-                  '15 members',
-                ),
-                _buildWorkspaceCard(
-                  'Quantum Computing Lab',
-                  'MIT',
-                  '8 members',
-                ),
-                _buildWorkspaceCard(
-                  'Network Security Team',
-                  'IBM Research',
-                  '12 members',
-                ),
-              ],
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildResearcherCard(String name, String position, String papers) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: [
-          const CircleAvatar(
-            radius: 24,
-            backgroundImage: NetworkImage('https://via.placeholder.com/150'),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Text(
-                  position,
-                  style: GoogleFonts.poppins(
-                    color: Colors.grey[600],
-                    fontSize: 14,
-                  ),
-                ),
-                Text(
-                  papers,
-                  style: GoogleFonts.poppins(
-                    color: Colors.green,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.person_add_outlined),
-            onPressed: () {},
-            color: Colors.grey[600],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildWorkspaceCard(String name, String institution, String members) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
+    super.build(context); // AutomaticKeepAliveClientMixin 사용시 필수
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Column(
         children: [
           Container(
-            width: 48,
-            height: 48,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.1),
+                  blurRadius: 4,
+                ),
+              ],
             ),
-            child: Icon(Icons.groups_outlined, color: Colors.green[700]),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                Text(
-                  name,
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => setState(() => isResearcherMode = true),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isResearcherMode
+                          ? const Color(0xFF00BFA5)
+                          : Colors.grey[200],
+                      foregroundColor:
+                          isResearcherMode ? Colors.white : Colors.grey[600],
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text('Researchers'),
                   ),
                 ),
-                Text(
-                  institution,
-                  style: GoogleFonts.poppins(
-                    color: Colors.grey[600],
-                    fontSize: 14,
-                  ),
-                ),
-                Text(
-                  members,
-                  style: GoogleFonts.poppins(
-                    color: Colors.green,
-                    fontSize: 12,
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => setState(() => isResearcherMode = false),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: !isResearcherMode
+                          ? const Color(0xFF00BFA5)
+                          : Colors.grey[200],
+                      foregroundColor:
+                          !isResearcherMode ? Colors.white : Colors.grey[600],
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text('Workspaces'),
                   ),
                 ),
               ],
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.add_outlined),
-            onPressed: () {},
-            color: Colors.grey[600],
+          Expanded(
+            child: isResearcherMode
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                        child: Row(
+                          children: [
+                            Text(
+                              'Recommended Researchers',
+                              style: GoogleFonts.poppins(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey[800],
+                              ),
+                            ),
+                            const Spacer(),
+                            IconButton(
+                              icon: const Icon(Icons.refresh),
+                              onPressed:
+                                  isLoading ? null : _loadRecommendedUsers,
+                              color: const Color(0xFF00BFA5),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (isLoading)
+                        const Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Center(child: CircularProgressIndicator()),
+                        )
+                      else
+                        Expanded(
+                          child: ListView.builder(
+                            controller: widget.scrollController,
+                            padding: EdgeInsets.zero,
+                            itemCount: recommendedUsers.length,
+                            itemBuilder: (context, index) {
+                              final user = recommendedUsers[index];
+                              return ResearcherListTile(user: user);
+                            },
+                          ),
+                        ),
+                    ],
+                  )
+                : const Center(child: Text('Workspaces')),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _loadRecommendedUsers() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final currentUser = userProvider.user;
+
+      // 팔로잉 목록 가져오기
+      final followingIds = await AuthAPI().getFollowingIds();
+
+      List<User> users = [];
+      List<MapEntry<User, int>> userScores = [];
+
+      for (int i = 1; i <= 10; i++) {
+        if (currentUser?.id != i && !followingIds.contains(i)) {
+          // 팔로우하지 않은 사용자만 포함
+          try {
+            User user = await userProvider.loadUserProfile(i);
+
+            // 매칭 점수 계산
+            int score = 0;
+
+            if (user.researchField == currentUser?.researchField) {
+              score += 3;
+            }
+
+            if (user.institution == currentUser?.institution) {
+              score += 2;
+            }
+
+            final commonInterests = user.researchInterests
+                .where((interest) =>
+                    currentUser?.researchInterests.contains(interest) ?? false)
+                .length;
+            score += commonInterests;
+
+            userScores.add(MapEntry(user, score));
+          } catch (e) {
+            print('Failed to load user $i: $e');
+          }
+        }
+      }
+
+      userScores.sort((a, b) => b.value.compareTo(a.value));
+      users = userScores.take(5).map((entry) => entry.key).toList();
+
+      if (mounted) {
+        setState(() {
+          recommendedUsers = users;
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading recommended users: $e');
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
   }
 }
 
-class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-  final TabBar tabBar;
+class ResearcherListTile extends StatefulWidget {
+  final User user;
 
-  _SliverAppBarDelegate(this.tabBar);
-
-  @override
-  Widget build(context, shrinkOffset, overlapsContent) => tabBar;
+  const ResearcherListTile({Key? key, required this.user}) : super(key: key);
 
   @override
-  double get maxExtent => tabBar.preferredSize.height;
+  State<ResearcherListTile> createState() => _ResearcherListTileState();
+}
+
+class _ResearcherListTileState extends State<ResearcherListTile> {
+  bool isFollowing = false;
+
+  Future<void> _followUser() async {
+    try {
+      await AuthAPI().followUser(widget.user.id!);
+
+      // 프로필 통계 업데이트
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      await userProvider.loadProfileStats();
+
+      setState(() {
+        isFollowing = true;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to follow user: $e')),
+      );
+    }
+  }
 
   @override
-  double get minExtent => tabBar.preferredSize.height;
-
-  @override
-  bool shouldRebuild(covariant _SliverAppBarDelegate oldDelegate) => false;
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 24,
+            backgroundImage: widget.user.profileImageUrl != null
+                ? NetworkImage(widget.user.profileImageUrl!)
+                : null,
+            child: widget.user.profileImageUrl == null
+                ? Text(widget.user.fullName[0],
+                    style: const TextStyle(fontSize: 20))
+                : null,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Dr. ${widget.user.fullName}',
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  '${widget.user.researchField} - ${widget.user.institution}',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                Text(
+                  '12 papers in ${widget.user.researchField}',
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    color: const Color(0xFF00BFA5),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: Icon(
+              isFollowing ? Icons.check_circle : Icons.person_add_outlined,
+              color: isFollowing ? const Color(0xFF00BFA5) : Colors.grey[600],
+            ),
+            onPressed: isFollowing ? null : _followUser,
+          ),
+        ],
+      ),
+    );
+  }
 }
