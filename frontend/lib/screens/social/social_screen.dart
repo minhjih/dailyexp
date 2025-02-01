@@ -36,111 +36,85 @@ class _SocialScreenState extends State<SocialScreen>
   @override
   Widget build(BuildContext context) {
     super.build(context); // AutomaticKeepAliveClientMixin 사용시 필수
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
-                  blurRadius: 4,
-                ),
-              ],
-            ),
-            child: Row(
+    return CustomScrollView(
+      controller: widget.scrollController,
+      slivers: [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => setState(() => isResearcherMode = true),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isResearcherMode
-                          ? const Color(0xFF00BFA5)
-                          : Colors.grey[200],
-                      foregroundColor:
-                          isResearcherMode ? Colors.white : Colors.grey[600],
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.1),
+                        blurRadius: 4,
                       ),
-                    ),
-                    child: const Text('Researchers'),
+                    ],
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => setState(() => isResearcherMode = false),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: !isResearcherMode
-                          ? const Color(0xFF00BFA5)
-                          : Colors.grey[200],
-                      foregroundColor:
-                          !isResearcherMode ? Colors.white : Colors.grey[600],
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () =>
+                              setState(() => isResearcherMode = true),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: isResearcherMode
+                                ? const Color(0xFF00BFA5)
+                                : Colors.grey[200],
+                            foregroundColor: isResearcherMode
+                                ? Colors.white
+                                : Colors.grey[600],
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text('Researchers'),
+                        ),
                       ),
-                    ),
-                    child: const Text('Workspaces'),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () =>
+                              setState(() => isResearcherMode = false),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: !isResearcherMode
+                                ? const Color(0xFF00BFA5)
+                                : Colors.grey[200],
+                            foregroundColor: !isResearcherMode
+                                ? Colors.white
+                                : Colors.grey[600],
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text('Workspaces'),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
-          Expanded(
-            child: isResearcherMode
-                ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                        child: Row(
-                          children: [
-                            Text(
-                              'Recommended Researchers',
-                              style: GoogleFonts.poppins(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.grey[800],
-                              ),
-                            ),
-                            const Spacer(),
-                            IconButton(
-                              icon: const Icon(Icons.refresh),
-                              onPressed:
-                                  isLoading ? null : _loadRecommendedUsers,
-                              color: const Color(0xFF00BFA5),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (isLoading)
-                        const Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Center(child: CircularProgressIndicator()),
-                        )
-                      else
-                        Expanded(
-                          child: ListView.builder(
-                            controller: widget.scrollController,
-                            padding: EdgeInsets.zero,
-                            itemCount: recommendedUsers.length,
-                            itemBuilder: (context, index) {
-                              final user = recommendedUsers[index];
-                              return ResearcherListTile(user: user);
-                            },
-                          ),
-                        ),
-                    ],
-                  )
-                : const Center(child: Text('Workspaces')),
+        ),
+        SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
+              final user = recommendedUsers[index];
+              return ResearcherListTile(user: user);
+            },
+            childCount: recommendedUsers.length,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
