@@ -6,7 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AuthAPI {
   final Dio _dio = Dio(BaseOptions(
-    baseUrl: dotenv.env['API_URL'] ?? 'http://localhost:8000',
+    baseUrl: dotenv.env['API_URL'] ?? 'http://10.0.2.2:8000',
     contentType: 'application/json',
     validateStatus: (status) => status! < 500,
   ));
