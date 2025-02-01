@@ -14,15 +14,15 @@ import 'package:google_fonts/google_fonts.dart';
 import '../papers/paper_list_screen.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  const MainScreen({Key? key}) : super(key: key);
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  _MainScreenState createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   MotionTabBarController? _tabController;
-  final ScrollController _scrollController = ScrollController();
+  late TrackingScrollController _scrollController;
   AnimationController? _hideController;
   bool _isVisible = true;
   Animation<Offset>? _slideAnimation;
@@ -48,6 +48,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       begin: Offset.zero,
       end: const Offset(0, 4.0), // y축으로 400% 이동 (더 아래로)
     ).animate(_hideController!);
+
+    _scrollController = TrackingScrollController();
 
     _scrollController.addListener(() {
       if (_scrollController.position.userScrollDirection ==

@@ -2,16 +2,16 @@ import 'package:dio/dio.dart';
 import '../models/user.dart';
 import 'dart:convert'; // jsonEncode를 위해 추가
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AuthAPI {
-  static final Dio _dio = Dio(BaseOptions(
-    baseUrl: 'http://10.0.2.2:8000',
+  final Dio _dio = Dio(BaseOptions(
+    baseUrl: dotenv.env['API_URL'] ?? 'http://localhost:8000',
     contentType: 'application/json',
-    validateStatus: (status) => status! < 500, // 4xx 에러도 처리
+    validateStatus: (status) => status! < 500,
   ));
 
-  static Future<Map<String, dynamic>> login(
-      String email, String password) async {
+  Future<Map<String, dynamic>> login(String email, String password) async {
     try {
       // URL-encoded form data 형식으로 변경
       final data = {
@@ -44,7 +44,7 @@ class AuthAPI {
     }
   }
 
-  static Future<User> getCurrentUser(String token) async {
+  Future<User> getCurrentUser(String token) async {
     try {
       final response = await _dio.get(
         '/auth/me',
@@ -58,8 +58,7 @@ class AuthAPI {
     }
   }
 
-  static Future<Map<String, dynamic>> signup(
-      Map<String, dynamic> signupData) async {
+  Future<Map<String, dynamic>> signup(Map<String, dynamic> signupData) async {
     try {
       print('Sending signup data: $signupData');
 

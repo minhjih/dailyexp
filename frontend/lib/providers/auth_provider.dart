@@ -5,7 +5,7 @@ import '../api/auth_api.dart';
 import '../screens/main/main_screen.dart';
 
 class AuthProvider with ChangeNotifier {
-  final String baseUrl = 'http://10.0.2.2:8000'; // Android 에뮬레이터용 URL로 수정
+  final AuthAPI _authAPI = AuthAPI();
   User? _user;
   String? _token;
   bool _isLoading = false;
@@ -20,14 +20,14 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await AuthAPI.login(email, password);
+      final response = await _authAPI.login(email, password);
       _token = response['access_token'];
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', _token!);
 
-      _user = await AuthAPI.getCurrentUser(_token!);
-      notifyListeners(); // 인증 상태 변경 알림
+      _user = await _authAPI.getCurrentUser(_token!);
+      notifyListeners();
     } catch (e) {
       rethrow;
     } finally {
@@ -49,7 +49,7 @@ class AuthProvider with ChangeNotifier {
     _token = prefs.getString('token');
     if (_token != null) {
       try {
-        _user = await AuthAPI.getCurrentUser(_token!);
+        _user = await _authAPI.getCurrentUser(_token!);
         notifyListeners();
       } catch (e) {
         logout();
@@ -59,7 +59,7 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> signup(Map<String, dynamic> signupData) async {
     try {
-      final response = await AuthAPI.signup(signupData);
+      final response = await _authAPI.signup(signupData);
 
       if (response == null || !response.containsKey('email')) {
         throw Exception('Invalid response from server');

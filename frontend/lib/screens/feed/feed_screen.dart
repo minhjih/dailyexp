@@ -152,11 +152,19 @@ class _FeedScreenState extends State<FeedScreen> {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                _buildInteractionButton(Icons.favorite, Icons.favorite_border, _likeCount.toString(), _toggleLike, Colors.red, _isLiked),
+                _buildInteractionButton(Icons.favorite, Icons.favorite_border,
+                    _likeCount.toString(), _toggleLike, Colors.red, _isLiked),
                 const SizedBox(width: 24),
-                _buildInteractionButton(Icons.comment, Icons.comment_outlined, '18', _toggleComments, Colors.grey, _isCommentsVisible),
+                _buildInteractionButton(Icons.comment, Icons.comment_outlined,
+                    '18', _toggleComments, Colors.grey, _isCommentsVisible),
                 const Spacer(),
-                _buildInteractionButton(Icons.bookmark, Icons.bookmark_border, _isSaved ? 'Saved' : 'Save', _toggleSave, const Color(0xFF43A047), _isSaved),
+                _buildInteractionButton(
+                    Icons.bookmark,
+                    Icons.bookmark_border,
+                    _isSaved ? 'Saved' : 'Save',
+                    _toggleSave,
+                    const Color(0xFF43A047),
+                    _isSaved),
               ],
             ),
           ),
@@ -186,12 +194,15 @@ class _FeedScreenState extends State<FeedScreen> {
     );
   }
 
-  Widget _buildInteractionButton(IconData activeIcon, IconData inactiveIcon, String text, VoidCallback onPressed, Color IconColor, [bool isActive = false]) {
+  Widget _buildInteractionButton(IconData activeIcon, IconData inactiveIcon,
+      String text, VoidCallback onPressed, Color IconColor,
+      [bool isActive = false]) {
     return GestureDetector(
       onTap: onPressed,
       child: Row(
         children: [
-          Icon(isActive ? activeIcon : inactiveIcon, size: 20, color: isActive ? IconColor : Colors.grey[700]),
+          Icon(isActive ? activeIcon : inactiveIcon,
+              size: 20, color: isActive ? IconColor : Colors.grey[700]),
           const SizedBox(width: 4),
           Text(
             text,
@@ -204,22 +215,26 @@ class _FeedScreenState extends State<FeedScreen> {
       ),
     );
   }
+
   void _toggleLike() {
     setState(() {
       _isLiked = !_isLiked;
-      _likeCount += _isLiked ? 1 : -1;  // 좋아요 상태에 따라 카운트 증감
+      _likeCount += _isLiked ? 1 : -1; // 좋아요 상태에 따라 카운트 증감
     });
   }
+
   void _toggleSave() {
     setState(() {
       _isSaved = !_isSaved;
     });
   }
+
   void _toggleComments() {
     setState(() {
       _isCommentsVisible = !_isCommentsVisible;
     });
   }
+
   Widget buildCommentsSection() {
     // 예제 댓글 데이터
     List<Map<String, dynamic>> comments = [
@@ -227,13 +242,15 @@ class _FeedScreenState extends State<FeedScreen> {
         "name": "Minkyu Park",
         "time": "5분 전",
         "profileImage": "https://via.placeholder.com/150",
-        "comment": "As someone deeply fascinated by both theoretical and applied physics, I find the potential of quantum computing truly revolutionary.",
+        "comment":
+            "As someone deeply fascinated by both theoretical and applied physics, I find the potential of quantum computing truly revolutionary.",
       },
       {
         "name": "Jadestar Min",
         "time": "39분 전",
         "profileImage": "https://via.placeholder.com/150",
-        "comment": "The notion that quantum computers could one day solve complex problems, which are currently beyond the reach of classical computers, in mere seconds is mind-blowing.",
+        "comment":
+            "The notion that quantum computers could one day solve complex problems, which are currently beyond the reach of classical computers, in mere seconds is mind-blowing.",
       },
       // 추가 댓글 데이터...
     ];
@@ -248,15 +265,19 @@ class _FeedScreenState extends State<FeedScreen> {
               suffixIcon: Icon(Icons.send),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(20), // 테두리의 둥근 모서리
-                borderSide: BorderSide(color: Colors.grey, width: 1), // 테두리 색상과 두께
+                borderSide:
+                    BorderSide(color: Colors.grey, width: 1), // 테두리 색상과 두께
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(20),
-                borderSide: BorderSide(color: Colors.grey, width: 1), // 활성화 상태에서의 테두리 색상과 두께
+                borderSide: BorderSide(
+                    color: Colors.grey, width: 1), // 활성화 상태에서의 테두리 색상과 두께
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(20),
-                borderSide: BorderSide(color: Color(0xFF43A047), width: 2), // 포커스를 받았을 때의 테두리 색상과 두께
+                borderSide: BorderSide(
+                    color: Color(0xFF43A047),
+                    width: 2), // 포커스를 받았을 때의 테두리 색상과 두께
               ),
               filled: false,
               fillColor: Colors.grey[200],
@@ -268,7 +289,8 @@ class _FeedScreenState extends State<FeedScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: comments.map((comment) => buildCommentItem(comment)).toList(),
+            children:
+                comments.map((comment) => buildCommentItem(comment)).toList(),
           ),
         ),
       ],

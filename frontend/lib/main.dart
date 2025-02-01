@@ -7,8 +7,12 @@ import 'screens/papers/paper_list_screen.dart';
 import 'screens/main/main_screen.dart'; // 추가
 import 'theme/colors.dart';
 import 'providers/user_provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+void main() async {
+  // dotenv 초기화를 먼저 수행
+  await dotenv.load(fileName: ".env");
+
   runApp(
     MultiProvider(
       providers: [
