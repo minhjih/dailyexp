@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/rendering.dart' show ScrollDirection;
 import '../../providers/user_provider.dart';
+import 'profile_edit.dart';
 
 class ProfileScreen extends StatefulWidget {
   final ScrollController scrollController;
@@ -101,6 +102,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         style: GoogleFonts.poppins(
                           fontSize: 14,
                           color: Colors.grey[800],
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (context) => ProfileEditPage()), // 프로필 수정 페이지로 이동
+                          );
+                        },
+                        child: Text(
+                          '프로필 수정',
+                          style: GoogleFonts.poppins(
+                            color: Colors.green,
+                            fontSize: 14,
+                          ),
                         ),
                       ),
                     ],
