@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/rendering.dart' show ScrollDirection;
 import '../../providers/user_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   final ScrollController scrollController;
+  final Function(ScrollDirection)? onScroll;
 
   const ProfileScreen({
-    super.key,
+    Key? key,
     required this.scrollController,
-  });
+    this.onScroll,
+  }) : super(key: key);
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();

@@ -14,19 +14,20 @@ import 'package:google_fonts/google_fonts.dart';
 import '../papers/paper_list_screen.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({Key? key}) : super(key: key);
+  const MainScreen({super.key});
 
   @override
-  _MainScreenState createState() => _MainScreenState();
+  State<MainScreen> createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   MotionTabBarController? _tabController;
-  late TrackingScrollController _scrollController;
+  final ScrollController _scrollController = ScrollController();
   AnimationController? _hideController;
   bool _isVisible = true;
   Animation<Offset>? _slideAnimation;
   Map<String, dynamic>? _selectedWorkspace;
+  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -48,8 +49,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       begin: Offset.zero,
       end: const Offset(0, 4.0), // y축으로 400% 이동 (더 아래로)
     ).animate(_hideController!);
-
-    _scrollController = TrackingScrollController();
 
     _scrollController.addListener(() {
       if (_scrollController.position.userScrollDirection ==
@@ -83,8 +82,39 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     });
   }
 
+  void _handleScroll(ScrollDirection direction) {
+    if (direction == ScrollDirection.reverse) {
+      // 네비게이션 바 숨기기
+    } else {
+      // 네비게이션 바 보이기
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final List<Widget> screens = [
+      FeedScreen(scrollController: _scrollController, onScroll: _handleScroll),
+      _selectedWorkspace == null
+          ? WorkspaceScreen(
+              scrollController: _scrollController,
+              tabController: _tabController,
+              onWorkspaceSelected: (workspace) {
+                setState(() {
+                  _selectedWorkspace = workspace;
+                });
+              },
+            )
+          : WorkspaceDetailScreen(
+              workspace: _selectedWorkspace!,
+              onBack: _goBackToWorkspaceList,
+            ),
+      PaperListScreen(scrollController: _scrollController),
+      SocialScreen(
+          scrollController: _scrollController, onScroll: _handleScroll),
+      ProfileScreen(
+          scrollController: _scrollController, onScroll: _handleScroll),
+    ];
+
     return Scaffold(
       extendBody: true,
       extendBodyBehindAppBar: true,
@@ -158,26 +188,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             child: TabBarView(
               physics: const NeverScrollableScrollPhysics(),
               controller: _tabController,
-              children: [
-                FeedScreen(scrollController: _scrollController),
-                _selectedWorkspace == null
-                    ? WorkspaceScreen(
-                        scrollController: _scrollController,
-                        tabController: _tabController,
-                        onWorkspaceSelected: (workspace) {
-                          setState(() {
-                            _selectedWorkspace = workspace;
-                          });
-                        },
-                      )
-                    : WorkspaceDetailScreen(
-                        workspace: _selectedWorkspace!,
-                        onBack: _goBackToWorkspaceList,
-                      ),
-                PaperListScreen(scrollController: _scrollController),
-                SocialScreen(scrollController: _scrollController),
-                ProfileScreen(scrollController: _scrollController),
-              ],
+              children: screens,
             ),
           );
         },

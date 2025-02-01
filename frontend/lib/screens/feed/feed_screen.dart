@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../theme/colors.dart';
+import 'package:flutter/rendering.dart' show ScrollDirection;
 
 class FeedScreen extends StatefulWidget {
   final ScrollController scrollController;
+  final Function(ScrollDirection)? onScroll;
 
   const FeedScreen({
     Key? key,
     required this.scrollController,
+    this.onScroll,
   }) : super(key: key);
 
   @override
