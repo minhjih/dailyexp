@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart'; // 이미지 선택을 위해 image_picker 패키지 사용
+import 'dart:io'; // File 클래스 사용을 위해 필요
 
 class ProfileEditPage extends StatefulWidget {
-  const ProfileEditPage({Key? key}) : super(key: key); // null-safety를 위한 key 수정
+  const ProfileEditPage({Key? key}) : super(key: key);
 
   @override
   _ProfileEditPageState createState() => _ProfileEditPageState();
@@ -10,9 +12,21 @@ class ProfileEditPage extends StatefulWidget {
 
 class _ProfileEditPageState extends State<ProfileEditPage> {
   final _formKey = GlobalKey<FormState>();
-  String? name = ''; // null-safety에 맞게 수정
-  String? email = ''; // null-safety에 맞게 수정
-  String? password = ''; // null-safety에 맞게 수정
+  String? name = '';
+  String? email = '';
+  String? password = '';
+  XFile? _image; // 선택된 이미지 파일
+
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickImage() async {
+    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _image = pickedFile;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,8 +40,18 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         child: Form(
           key: _formKey,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
+              GestureDetector(
+                onTap: _pickImage, // 이미지 변경을 위해 탭 핸들러 추가
+                child: CircleAvatar(
+                  radius: 60,
+                  backgroundColor: Colors.grey.shade300,
+                  backgroundImage: _image != null ? FileImage(File(_image!.path)) : null,
+                  child: _image == null ? Icon(Icons.camera_alt, size: 60, color: Colors.grey.shade800) : null,
+                ),
+              ),
+              SizedBox(height: 20),
               TextFormField(
                 decoration: InputDecoration(
                   labelText: '이름',
@@ -41,7 +65,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                 },
                 onSaved: (value) => name = value,
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 20),
               TextFormField(
                 decoration: InputDecoration(
                   labelText: '이메일',
@@ -55,7 +79,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                 },
                 onSaved: (value) => email = value,
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 20),
               TextFormField(
                 decoration: InputDecoration(
                   labelText: '새 비밀번호',
@@ -70,7 +94,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                 },
                 onSaved: (value) => password = value,
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 40),
               ElevatedButton(
                 onPressed: _submit,
                 child: Text('저장하기', style: GoogleFonts.poppins()),
@@ -81,7 +105,6 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
       ),
     );
   }
-
   void _submit() {
     final form = _formKey.currentState;
     if (form != null && form.validate()) {
@@ -91,21 +114,21 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
       // 데이터 업데이트 후 다이얼로그 표시
       showDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          title: Text('저장 완료'),
-          content: Text('변경사항이 저장되었습니다.'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // 다이얼로그 닫기
-                Navigator.of(context).pop(); // 프로필 수정 페이지 닫고 이전 화면으로 돌아가기
-              },
-              child: Text('확인'),
+        builder: (context) =>
+            AlertDialog(
+              title: Text('저장 완료'),
+              content: Text('변경사항이 저장되었습니다.'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // 다이얼로그 닫기
+                    Navigator.of(context).pop(); // 프로필 수정 페이지 닫고 이전 화면으로 돌아가기
+                  },
+                  child: Text('확인'),
+                ),
+              ],
             ),
-          ],
-        ),
       );
     }
   }
-
 }
