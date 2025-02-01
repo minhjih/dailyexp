@@ -3,6 +3,7 @@ import '../models/user.dart';
 import 'dart:convert'; // jsonEncode를 위해 추가
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../models/workspace.dart';
 
 class AuthAPI {
   final Dio _dio = Dio(BaseOptions(
@@ -222,6 +223,31 @@ class AuthAPI {
       }
     } catch (e) {
       throw Exception('Failed to fetch following list: $e');
+    }
+  }
+
+  Future<List<Workspace>> getRecommendedWorkspaces({
+    String? researchField,
+    List<String>? interests,
+  }) async {
+    try {
+      final token = await _getToken();
+      final response = await _dio.get(
+        '/workspaces/recommended',
+        options: Options(
+          headers: {'Authorization': 'Bearer $token'},
+        ),
+        queryParameters: {
+          'research_field': researchField,
+          'interests': interests,
+        },
+      );
+
+      return (response.data as List)
+          .map((json) => Workspace.fromJson(json))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to get recommended workspaces: $e');
     }
   }
 }

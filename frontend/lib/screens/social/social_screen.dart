@@ -6,6 +6,7 @@ import '../../models/user.dart';
 import '../../theme/colors.dart';
 import '../../api/auth_api.dart';
 import 'package:flutter/rendering.dart' show ScrollDirection;
+import '../../models/workspace.dart';
 
 class SocialScreen extends StatefulWidget {
   final ScrollController scrollController;
@@ -23,10 +24,13 @@ class SocialScreen extends StatefulWidget {
 
 class _SocialScreenState extends State<SocialScreen>
     with AutomaticKeepAliveClientMixin {
-  bool isResearcherMode = true; // true: Researchers, false: Workspaces
+  bool isResearcherMode = true;
   List<User> recommendedUsers = [];
-  bool isLoading = true; // 다시 true로 변경
-  final ScrollController _scrollController = ScrollController();
+  List<Workspace> recommendedWorkspaces = [];
+  bool isLoading = true;
+  // 각 탭별로 별도의 스크롤 컨트롤러 사용
+  final ScrollController _researcherScrollController = ScrollController();
+  final ScrollController _workspaceScrollController = ScrollController();
 
   @override
   bool get wantKeepAlive => true; // 화면 유지
@@ -35,15 +39,18 @@ class _SocialScreenState extends State<SocialScreen>
   void initState() {
     super.initState();
     _loadRecommendedUsers();
-    _scrollController.addListener(_scrollListener);
+    _researcherScrollController.addListener(_scrollListener);
+    _workspaceScrollController.addListener(_scrollListener);
   }
 
   void _scrollListener() {
     if (widget.onScroll != null) {
-      if (_scrollController.position.userScrollDirection ==
-          ScrollDirection.reverse) {
+      final controller = isResearcherMode
+          ? _researcherScrollController
+          : _workspaceScrollController;
+      if (controller.position.userScrollDirection == ScrollDirection.reverse) {
         widget.onScroll!(ScrollDirection.reverse);
-      } else if (_scrollController.position.userScrollDirection ==
+      } else if (controller.position.userScrollDirection ==
           ScrollDirection.forward) {
         widget.onScroll!(ScrollDirection.forward);
       }
@@ -52,8 +59,10 @@ class _SocialScreenState extends State<SocialScreen>
 
   @override
   void dispose() {
-    _scrollController.removeListener(_scrollListener);
-    _scrollController.dispose();
+    _researcherScrollController.removeListener(_scrollListener);
+    _researcherScrollController.dispose();
+    _workspaceScrollController.removeListener(_scrollListener);
+    _workspaceScrollController.dispose();
     super.dispose();
   }
 
@@ -79,7 +88,7 @@ class _SocialScreenState extends State<SocialScreen>
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () => setState(() => isResearcherMode = true),
+                    onPressed: () => _onTabChanged(true),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: isResearcherMode
                           ? const Color(0xFF00BFA5)
@@ -97,7 +106,7 @@ class _SocialScreenState extends State<SocialScreen>
                 const SizedBox(width: 8),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () => setState(() => isResearcherMode = false),
+                    onPressed: () => _onTabChanged(false),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: !isResearcherMode
                           ? const Color(0xFF00BFA5)
@@ -150,7 +159,7 @@ class _SocialScreenState extends State<SocialScreen>
                       else
                         Expanded(
                           child: ListView.builder(
-                            controller: _scrollController,
+                            controller: _researcherScrollController,
                             padding: EdgeInsets.zero,
                             itemCount: recommendedUsers.length,
                             itemBuilder: (context, index) {
@@ -161,7 +170,42 @@ class _SocialScreenState extends State<SocialScreen>
                         ),
                     ],
                   )
-                : const Center(child: Text('Workspaces')),
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                        child: Row(
+                          children: [
+                            Text(
+                              'Recommended Workspaces',
+                              style: GoogleFonts.poppins(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey[800],
+                              ),
+                            ),
+                            const Spacer(),
+                            IconButton(
+                              icon: const Icon(Icons.refresh),
+                              onPressed:
+                                  isLoading ? null : _loadRecommendedWorkspaces,
+                              color: const Color(0xFF00BFA5),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (isLoading)
+                        const Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Center(child: CircularProgressIndicator()),
+                        )
+                      else
+                        Expanded(
+                          child: buildWorkspaceList(),
+                        ),
+                    ],
+                  ),
           ),
         ],
       ),
@@ -231,6 +275,64 @@ class _SocialScreenState extends State<SocialScreen>
       }
     }
   }
+
+  Widget buildWorkspaceList() {
+    if (isLoading) {
+      return const Padding(
+        padding: EdgeInsets.all(16),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    return ListView.builder(
+      controller: _workspaceScrollController,
+      padding: EdgeInsets.zero,
+      itemCount: recommendedWorkspaces.length,
+      itemBuilder: (context, index) {
+        final workspace = recommendedWorkspaces[index];
+        return WorkspaceListTile(workspace: workspace);
+      },
+    );
+  }
+
+  Future<void> _loadRecommendedWorkspaces() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final currentUser = userProvider.user;
+
+      // API 호출하여 추천 워크스페이스 가져오기
+      final workspaces = await AuthAPI().getRecommendedWorkspaces(
+        researchField: currentUser?.researchField,
+        interests: currentUser?.researchInterests,
+      );
+
+      setState(() {
+        recommendedWorkspaces = workspaces;
+        isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading recommended workspaces: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  // 탭 전환 시 데이터 로드
+  void _onTabChanged(bool isResearcher) {
+    setState(() {
+      isResearcherMode = isResearcher;
+      if (isResearcher) {
+        _loadRecommendedUsers();
+      } else {
+        _loadRecommendedWorkspaces();
+      }
+    });
+  }
 }
 
 class ResearcherListTile extends StatefulWidget {
@@ -243,28 +345,11 @@ class ResearcherListTile extends StatefulWidget {
 }
 
 class _ResearcherListTileState extends State<ResearcherListTile> {
-  bool isFollowing = false;
-
-  Future<void> _followUser() async {
-    try {
-      await AuthAPI().followUser(widget.user.id!);
-
-      // 프로필 통계 업데이트
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      await userProvider.loadProfileStats();
-
-      setState(() {
-        isFollowing = true;
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to follow user: $e')),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final isFollowing = userProvider.followingIds.contains(widget.user.id);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
@@ -313,10 +398,147 @@ class _ResearcherListTileState extends State<ResearcherListTile> {
               isFollowing ? Icons.check_circle : Icons.person_add_outlined,
               color: isFollowing ? const Color(0xFF00BFA5) : Colors.grey[600],
             ),
-            onPressed: isFollowing ? null : _followUser,
+            onPressed: isFollowing ? null : () => _followUser(userProvider),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _followUser(UserProvider userProvider) async {
+    try {
+      await userProvider.followUser(widget.user.id!);
+      await userProvider.loadProfileStats();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to follow user: $e')),
+      );
+    }
+  }
+}
+
+class WorkspaceListTile extends StatelessWidget {
+  final Workspace workspace;
+
+  const WorkspaceListTile({Key? key, required this.workspace})
+      : super(key: key);
+
+  String _getFollowingMembersText(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final currentUser = userProvider.user;
+    if (currentUser == null) return '';
+
+    // 팔로우하는 멤버들 찾기
+    final followingIds = userProvider.followingIds;
+    final followingMembers = workspace.members
+        .where((member) => followingIds.contains(member.userId))
+        .map((member) => member.user.fullName)
+        .toList();
+
+    if (followingMembers.isEmpty) return '';
+    if (followingMembers.length == 1) {
+      return '${followingMembers[0]} is a member';
+    }
+    if (followingMembers.length == 2) {
+      return '${followingMembers[0]} and ${followingMembers[1]} are members';
+    }
+    return '${followingMembers[0]} and ${followingMembers.length - 1} others are members';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final followingMembersText = _getFollowingMembersText(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          // 워크스페이스 아이콘
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: Colors.green[50],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              Icons.group_work_outlined,
+              color: Colors.green[400],
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 12),
+          // 워크스페이스 정보
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  workspace.name,
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Row(
+                  children: [
+                    Text(
+                      '${workspace.memberCount} members',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const Text(' · '),
+                    Text(
+                      '${workspace.papers.length} papers',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+                if (followingMembersText.isNotEmpty)
+                  Text(
+                    followingMembersText,
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      color: const Color(0xFF00BFA5),
+                    ),
+                  ),
+                Text(
+                  'Last updated ${_getTimeAgo()}',
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // 더보기 버튼
+          IconButton(
+            icon: Icon(Icons.more_vert, color: Colors.grey[400]),
+            onPressed: () {
+              // 더보기 메뉴 처리
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getTimeAgo() {
+    final now = DateTime.now();
+    final difference = now.difference(workspace.updatedAt);
+
+    if (difference.inDays > 0) {
+      return '${difference.inDays} days ago';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours} hours ago';
+    } else {
+      return '${difference.inMinutes} minutes ago';
+    }
   }
 }
