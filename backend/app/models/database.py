@@ -27,7 +27,7 @@ def get_db():
 
 def init_db():
     # 여기서 모든 모델을 import
-    from .models import User, Follow, Paper, Comment, Group
+    from .models import User, Follow, Paper, Comment, Group, Workspace, WorkspaceMember
     
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
@@ -146,6 +146,218 @@ def init_db():
         db.commit()
     except Exception as e:
         print(f"Error creating test users: {e}")
+        db.rollback()
+
+    # 워크스페이스 샘플 데이터
+    workspaces = [
+        {
+            "name": "AI Healthcare Research Group",
+            "description": "AI 기술을 활용한 의료 진단 및 치료 방법 연구",
+            "research_field": "AI Healthcare",
+            "research_topics": ["Medical Imaging", "Disease Prediction", "Healthcare AI"],
+            "owner_id": 1
+        },
+        {
+            "name": "Quantum Computing Lab",
+            "description": "양자 컴퓨팅 알고리즘 및 응용 연구",
+            "research_field": "Quantum Computing",
+            "research_topics": ["Quantum Algorithms", "Quantum Error Correction"],
+            "owner_id": 2
+        },
+        {
+            "name": "Brain Mapping Initiative",
+            "description": "뇌 구조와 기능의 매핑 연구",
+            "research_field": "Brain Mapping",
+            "research_topics": ["Neuroscience", "Brain", "Cognitive Science"],
+            "owner_id": 7
+        },
+        {
+            "name": "Climate Change Research Network",
+            "description": "기후 변화 영향 및 대응 전략 연구",
+            "research_field": "Climate Change",
+            "research_topics": ["Climate", "Environment", "Sustainability"],
+            "owner_id": 8
+        },
+        {
+            "name": "Behavioral Economics Group",
+            "description": "행동 경제학 이론 및 실험 연구",
+            "research_field": "Behavioral Science",
+            "research_topics": ["Psychology", "Economics", "Decision Making"],
+            "owner_id": 9
+        },
+        {
+            "name": "Genetics Data Analysis Group",
+            "description": "유전체 데이터 분석 및 질병 연관성 연구",
+            "research_field": "Genetics",
+            "research_topics": ["Genomics", "Bioinformatics", "Disease Genetics"],
+            "owner_id": 3
+        },
+        {
+            "name": "Advanced Materials Lab",
+            "description": "신소재 개발 및 특성 분석 연구",
+            "research_field": "Materials Science",
+            "research_topics": ["Nanomaterials", "Material Characterization"],
+            "owner_id": 4
+        },
+        {
+            "name": "Robotics Innovation Center",
+            "description": "로봇 시스템 설계 및 제어 연구",
+            "research_field": "Robotics",
+            "research_topics": ["Robot Control", "AI", "Automation"],
+            "owner_id": 5
+        },
+        {
+            "name": "Data Mining Research Group",
+            "description": "대규모 데이터 분석 및 패턴 발견",
+            "research_field": "Data Science",
+            "research_topics": ["Data Mining", "Machine Learning", "Big Data"],
+            "owner_id": 6
+        },
+        {
+            "name": "FinTech Innovation Lab",
+            "description": "금융 기술 혁신 및 응용 연구",
+            "research_field": "Financial Technology",
+            "research_topics": ["Blockchain", "Digital Finance", "Risk Analysis"],
+            "owner_id": 10
+        },
+        {
+            "name": "AI Drug Discovery",
+            "description": "AI 기반 신약 개발 연구",
+            "research_field": "AI Healthcare",
+            "research_topics": ["Drug Discovery", "Molecular Modeling", "AI"],
+            "owner_id": 1
+        },
+        {
+            "name": "Quantum Information Lab",
+            "description": "양자 정보 이론 및 암호화 연구",
+            "research_field": "Quantum Computing",
+            "research_topics": ["Quantum Information", "Cryptography"],
+            "owner_id": 2
+        },
+        {
+            "name": "Molecular Genetics Lab",
+            "description": "분자 유전학 메커니즘 연구",
+            "research_field": "Genetics",
+            "research_topics": ["Molecular Biology", "Gene Expression"],
+            "owner_id": 3
+        },
+        {
+            "name": "Smart Materials Group",
+            "description": "지능형 소재 개발 연구",
+            "research_field": "Materials Science",
+            "research_topics": ["Smart Materials", "Sensors", "IoT"],
+            "owner_id": 4
+        },
+        {
+            "name": "Cognitive Robotics Team",
+            "description": "인지 로봇 시스템 연구",
+            "research_field": "Robotics",
+            "research_topics": ["Cognitive Systems", "Human-Robot Interaction"],
+            "owner_id": 5
+        },
+        {
+            "name": "ML Systems Lab",
+            "description": "기계학습 시스템 최적화 연구",
+            "research_field": "AI Healthcare",
+            "research_topics": ["Machine Learning", "Systems", "Optimization"],
+            "owner_id": 1
+        },
+        {
+            "name": "Medical AI Applications",
+            "description": "의료 진단을 위한 AI 응용",
+            "research_field": "AI Healthcare",
+            "research_topics": ["Medical AI", "Diagnostics", "Healthcare"],
+            "owner_id": 1
+        },
+        {
+            "name": "Neurodegenerative Disease Research",
+            "description": "신경퇴행성 질환의 메커니즘 및 치료법 연구",
+            "research_field": "Brain Mapping",
+            "research_topics": ["Alzheimer's", "Parkinson's", "Neural Degeneration"],
+            "owner_id": 7
+        },
+        {
+            "name": "Sustainable Energy Systems",
+            "description": "지속가능한 에너지 시스템 개발 연구",
+            "research_field": "Climate Change",
+            "research_topics": ["Renewable Energy", "Smart Grid", "Energy Storage"],
+            "owner_id": 8
+        },
+        {
+            "name": "Consumer Psychology Lab",
+            "description": "소비자 행동 및 의사결정 연구",
+            "research_field": "Behavioral Science",
+            "research_topics": ["Consumer Behavior", "Decision Making", "Marketing"],
+            "owner_id": 9
+        },
+        {
+            "name": "Quantum Machine Learning",
+            "description": "양자 컴퓨팅을 활용한 기계학습 연구",
+            "research_field": "Quantum Computing",
+            "research_topics": ["Quantum ML", "Quantum Neural Networks"],
+            "owner_id": 2
+        },
+        {
+            "name": "Biomedical Data Science",
+            "description": "생물의학 데이터 분석 및 모델링",
+            "research_field": "Data Science",
+            "research_topics": ["Biomedical Data", "Health Analytics", "ML in Medicine"],
+            "owner_id": 6
+        },
+        {
+            "name": "Digital Health Innovations",
+            "description": "디지털 헬스케어 솔루션 연구",
+            "research_field": "AI Healthcare",
+            "research_topics": ["Digital Health", "Telemedicine", "Health Tech"],
+            "owner_id": 1
+        },
+        {
+            "name": "Evolutionary Genetics",
+            "description": "진화 유전학 및 적응 메커니즘 연구",
+            "research_field": "Genetics",
+            "research_topics": ["Evolution", "Adaptation", "Population Genetics"],
+            "owner_id": 3
+        },
+        {
+            "name": "Human-AI Collaboration",
+            "description": "인간-AI 협력 시스템 연구",
+            "research_field": "Robotics",
+            "research_topics": ["Human-AI Interaction", "Collaborative AI", "UX"],
+            "owner_id": 5
+        },
+        {
+            "name": "Blockchain Economics",
+            "description": "블록체인 기술의 경제적 영향 연구",
+            "research_field": "Financial Technology",
+            "research_topics": ["Crypto Economics", "DeFi", "Digital Currency"],
+            "owner_id": 10
+        },
+        {
+            "name": "Neural Engineering Lab",
+            "description": "신경공학 및 뇌-기계 인터페이스 연구",
+            "research_field": "Brain Mapping",
+            "research_topics": ["Neural Interfaces", "Brain-Computer Interface", "Neurotech"],
+            "owner_id": 7
+        }
+    ]
+
+    try:
+        for workspace_data in workspaces:
+            workspace = Workspace(**workspace_data)
+            db.add(workspace)
+            db.flush()  # workspace.id 얻기 위해
+
+            # owner를 멤버로 추가
+            owner_member = WorkspaceMember(
+                workspace_id=workspace.id,
+                user_id=workspace_data["owner_id"],
+                role="admin",  # owner는 admin 권한
+            )
+            db.add(owner_member)
+            
+        db.commit()
+    except Exception as e:
+        print(f"Error creating test workspaces: {e}")
         db.rollback()
     finally:
         db.close()

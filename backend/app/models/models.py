@@ -27,6 +27,8 @@ class User(Base):
     owned_groups = relationship("Group", back_populates="owner")
     group_memberships = relationship("GroupMember", back_populates="user")
     comments = relationship("Comment", back_populates="user")
+    owned_workspaces = relationship("Workspace", back_populates="owner")
+    workspace_memberships = relationship("WorkspaceMember", back_populates="user")
 
 class Paper(Base):
     __tablename__ = "papers"
@@ -187,4 +189,46 @@ class Follow(Base):
 
     # 관계 설정
     follower = relationship("User", foreign_keys=[follower_id], backref="following")
-    following = relationship("User", foreign_keys=[following_id], backref="followers") 
+    following = relationship("User", foreign_keys=[following_id], backref="followers")
+
+class Workspace(Base):
+    __tablename__ = "workspaces"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String)
+    description = Column(Text)
+    research_field = Column(String)
+    research_topics = Column(ARRAY(String))
+    owner_id = Column(Integer, ForeignKey("users.id"))
+    is_public = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    member_count = Column(Integer, default=1)
+    
+    owner = relationship("User", back_populates="owned_workspaces")
+    members = relationship("WorkspaceMember", back_populates="workspace")
+    papers = relationship("WorkspacePaper", back_populates="workspace")
+
+class WorkspaceMember(Base):
+    __tablename__ = "workspace_members"
+
+    id = Column(Integer, primary_key=True, index=True)
+    workspace_id = Column(Integer, ForeignKey("workspaces.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
+    role = Column(String, default="member")  # admin or member
+    joined_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+    workspace = relationship("Workspace", back_populates="members")
+    user = relationship("User", back_populates="workspace_memberships")
+
+class WorkspacePaper(Base):
+    __tablename__ = "workspace_papers"
+
+    id = Column(Integer, primary_key=True, index=True)
+    workspace_id = Column(Integer, ForeignKey("workspaces.id"))
+    paper_id = Column(Integer, ForeignKey("papers.id"))
+    added_at = Column(DateTime, default=datetime.datetime.utcnow)
+    status = Column(String, default="in_progress")  # in_progress, completed, archived
+
+    workspace = relationship("Workspace", back_populates="papers")
+    paper = relationship("Paper") 

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import papers, auth, scraps, groups, comments, profile
+from .routers import papers, auth, scraps, groups, comments, profile, workspaces
 from .models.database import init_db
 import uvicorn
 
@@ -30,6 +30,7 @@ app.include_router(scraps.router)
 app.include_router(groups.router)
 app.include_router(comments.router)
 app.include_router(profile.router)
+app.include_router(workspaces.router)
 
 @app.get("/")
 async def root():
