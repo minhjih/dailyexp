@@ -3,10 +3,11 @@ from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 from ..models.database import get_db
 from ..models import models
-from ..schemas import workspace_schemas
+from ..schemas import workspace_schemas, user_schemas
 from ..utils.auth import get_current_user
 import random
 from datetime import datetime
+from sqlalchemy import or_
 
 router = APIRouter(
     prefix="/workspaces",
@@ -150,4 +151,47 @@ async def get_my_workspaces(
         .filter(models.WorkspaceMember.user_id == current_user.id)\
         .all()
     
-    return workspaces 
+    return workspaces
+
+@router.get("/search", response_model=List[workspace_schemas.Workspace])
+async def search_workspaces(
+    query: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    # ilike를 사용하여 대소문자 구분 없이 검색
+    workspaces = db.query(models.Workspace)\
+        .options(
+            joinedload(models.Workspace.members).joinedload(models.WorkspaceMember.user),
+            joinedload(models.Workspace.papers).joinedload(models.WorkspacePaper.paper)
+        )\
+        .filter(
+            models.Workspace.is_public == True,
+            or_(
+                models.Workspace.name.ilike(f"%{query}%"),
+                models.Workspace.description.ilike(f"%{query}%"),
+                models.Workspace.research_field.ilike(f"%{query}%")
+            )
+        )\
+        .all()
+    
+    return workspaces
+
+@router.get("/users/search", response_model=List[user_schemas.User])
+async def search_users(
+    query: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    users = db.query(models.User)\
+        .filter(
+            or_(
+                models.User.full_name.ilike(f"%{query}%"),
+                models.User.institution.ilike(f"%{query}%"),
+                models.User.department.ilike(f"%{query}%"),
+                models.User.research_field.ilike(f"%{query}%")
+            )
+        )\
+        .all()
+    
+    return users 
