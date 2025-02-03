@@ -234,22 +234,40 @@ class _SocialScreenState extends State<SocialScreen>
           Expanded(
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    controller: isResearcherMode
-                        ? _researcherScrollController
-                        : _workspaceScrollController,
-                    padding: EdgeInsets.zero, // 패딩 제거
-                    itemCount: isResearcherMode
-                        ? filteredUsers.length
-                        : filteredWorkspaces.length,
-                    itemBuilder: (context, index) {
-                      return isResearcherMode
-                          ? ResearcherListTile(user: filteredUsers[index])
-                          : WorkspaceListTile(
-                              workspace: filteredWorkspaces[index],
-                              onWorkspaceUpdated: _loadRecommendedWorkspaces,
-                            );
+                : RefreshIndicator(
+                    onRefresh: () async {
+                      if (isResearcherMode) {
+                        await _loadRecommendedUsers();
+                      } else {
+                        await _loadRecommendedWorkspaces();
+                      }
                     },
+                    child: ListView.builder(
+                      controller: isResearcherMode
+                          ? _researcherScrollController
+                          : _workspaceScrollController,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: EdgeInsets.zero,
+                      itemCount: isResearcherMode
+                          ? filteredUsers.length
+                          : filteredWorkspaces.length,
+                      itemBuilder: (context, index) {
+                        if (filteredUsers.isEmpty && isResearcherMode) {
+                          return const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Text('No researchers found'),
+                            ),
+                          );
+                        }
+                        return isResearcherMode
+                            ? ResearcherListTile(user: filteredUsers[index])
+                            : WorkspaceListTile(
+                                workspace: filteredWorkspaces[index],
+                                onWorkspaceUpdated: _loadRecommendedWorkspaces,
+                              );
+                      },
+                    ),
                   ),
           ),
         ],
@@ -266,7 +284,8 @@ class _SocialScreenState extends State<SocialScreen>
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       final currentUser = userProvider.user;
 
-      // 팔로잉 목록 가져오기
+      // 팔로잉 목록 새로 가져오기
+      await userProvider.loadProfileStats(); // 팔로잉 상태 업데이트
       final followingIds = await AuthAPI().getFollowingIds();
 
       List<User> users = [];
@@ -274,7 +293,6 @@ class _SocialScreenState extends State<SocialScreen>
 
       for (int i = 1; i <= 10; i++) {
         if (currentUser?.id != i && !followingIds.contains(i)) {
-          // 팔로우하지 않은 사용자만 포함
           try {
             User user = await userProvider.loadUserProfile(i);
 
