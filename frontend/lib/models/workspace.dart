@@ -50,6 +50,23 @@ class Workspace {
           .toList(),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'research_field': researchField,
+      'research_topics': researchTopics,
+      'owner_id': ownerId,
+      'is_public': isPublic,
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt.toIso8601String(),
+      'member_count': memberCount,
+      'members': members.map((m) => m.toJson()).toList(),
+      'papers': papers.map((p) => p.toJson()).toList(),
+    };
+  }
 }
 
 class WorkspaceMember {
@@ -76,6 +93,16 @@ class WorkspaceMember {
       user: User.fromJson(json['user']),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'user_id': userId,
+      'role': role,
+      'joined_at': joinedAt.toIso8601String(),
+      'user': user.toJson(),
+    };
+  }
 }
 
 class WorkspacePaper {
@@ -101,5 +128,15 @@ class WorkspacePaper {
       status: json['status'],
       paper: Paper.fromJson(json['paper']),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'paper_id': paperId,
+      'added_at': addedAt.toIso8601String(),
+      'status': status,
+      'paper': paper.toJson(),
+    };
   }
 }

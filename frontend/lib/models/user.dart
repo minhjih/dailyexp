@@ -46,4 +46,20 @@ class User {
           : null,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'email': email,
+      'full_name': fullName,
+      'created_at': createdAt?.toIso8601String(),
+      'institution': institution,
+      'department': department,
+      'research_field': researchField,
+      'research_interests': researchInterests,
+      'bio': bio,
+      'external_links': externalLinks,
+      'profile_image_url': profileImageUrl,
+    };
+  }
 }

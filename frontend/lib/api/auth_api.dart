@@ -250,4 +250,42 @@ class AuthAPI {
       throw Exception('Failed to get recommended workspaces: $e');
     }
   }
+
+  Future<Workspace> joinWorkspace(int workspaceId) async {
+    final token = await _getToken();
+    final response = await _dio.post(
+      '/workspaces/$workspaceId/join',
+      options: Options(
+        headers: {'Authorization': 'Bearer $token'},
+      ),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to join workspace');
+    }
+    return Workspace.fromJson(response.data);
+  }
+
+  Future<Workspace> getWorkspace(int workspaceId) async {
+    final token = await _getToken();
+    final response = await _dio.get(
+      '/workspaces/$workspaceId',
+      options: Options(
+        headers: {'Authorization': 'Bearer $token'},
+      ),
+    );
+    return Workspace.fromJson(response.data);
+  }
+
+  Future<List<Workspace>> getMyWorkspaces() async {
+    final token = await _getToken();
+    final response = await _dio.get(
+      '/workspaces/my',
+      options: Options(
+        headers: {'Authorization': 'Bearer $token'},
+      ),
+    );
+    return (response.data as List)
+        .map((json) => Workspace.fromJson(json))
+        .toList();
+  }
 }

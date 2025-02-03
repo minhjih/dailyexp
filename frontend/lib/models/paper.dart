@@ -46,4 +46,22 @@ class Paper {
       userId: json['user_id'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'ieee_id': ieeeId,
+      'title': title,
+      'abstract': abstract,
+      'authors': authors,
+      'published_date': publishedDate.toIso8601String(),
+      'ai_summary': aiSummary,
+      'core_claims': coreClaims,
+      'methodology': methodology,
+      'key_findings': keyFindings,
+      'visual_elements': visualElements,
+      'future_research': futureResearch,
+      'user_id': userId,
+    };
+  }
 }
