@@ -64,7 +64,7 @@ Glimpse is an innovative research tracking and knowledge sharing platform design
 
 🔨 User information maintain
 - ✅ POST much more user information (such as organization, ages, sex etc..)
-- 🔨 Link to user information to profile
+- ✅ Link to user information to profile
 - 🔨 Database expansion
 
 🔨 Paper Recommendation Section
