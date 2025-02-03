@@ -103,6 +103,8 @@ Glimpse is an innovative research tracking and knowledge sharing platform design
 
 Project Maintainer - [@minji](https://www.linkedin.com/in/minhjih?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app) - jhchoi0226@snu.ac.kr
 
+Frontend Co-worker - [@jadestarmin](https://www.linkedin.com/in/minkyu-park-591b912b5?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app) - jadestar@postech.ac.kr 
+
 Project Link: [https://github.com/minhjih/dailyexp](https://github.com/minhjih/dailyexp)
 
 # 겉핥기
