@@ -1,8 +1,21 @@
 version: '3.8'
 
 services:
+  db:
+    image: postgres:17
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=researchdb
+    ports:
+      - "5432:5432"
+
   api:
     build: .
+    restart: always
     ports:
       - "8000:8000"
     volumes:
@@ -13,16 +26,6 @@ services:
       - db
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
-  db:
-    image: postgres:13
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=researchdb
-    ports:
-      - "5432:5432"
-
 volumes:
-  postgres_data: 
+  postgres_data:
+    driver: local 
