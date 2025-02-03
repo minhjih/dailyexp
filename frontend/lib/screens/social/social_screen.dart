@@ -7,6 +7,7 @@ import '../../theme/colors.dart';
 import '../../api/auth_api.dart';
 import 'package:flutter/rendering.dart' show ScrollDirection;
 import '../../models/workspace.dart';
+import '../../screens/social/workspace_detail_screen.dart';
 
 class SocialScreen extends StatefulWidget {
   final ScrollController scrollController;
@@ -41,6 +42,9 @@ class _SocialScreenState extends State<SocialScreen>
     _loadRecommendedUsers();
     _researcherScrollController.addListener(_scrollListener);
     _workspaceScrollController.addListener(_scrollListener);
+    if (!isResearcherMode) {
+      _loadRecommendedWorkspaces();
+    }
   }
 
   void _scrollListener() {
@@ -290,7 +294,10 @@ class _SocialScreenState extends State<SocialScreen>
       itemCount: recommendedWorkspaces.length,
       itemBuilder: (context, index) {
         final workspace = recommendedWorkspaces[index];
-        return WorkspaceListTile(workspace: workspace);
+        return WorkspaceListTile(
+          workspace: workspace,
+          onWorkspaceUpdated: _loadRecommendedWorkspaces,
+        );
       },
     );
   }
@@ -419,9 +426,13 @@ class _ResearcherListTileState extends State<ResearcherListTile> {
 
 class WorkspaceListTile extends StatelessWidget {
   final Workspace workspace;
+  final Function? onWorkspaceUpdated;
 
-  const WorkspaceListTile({Key? key, required this.workspace})
-      : super(key: key);
+  const WorkspaceListTile({
+    Key? key,
+    required this.workspace,
+    this.onWorkspaceUpdated,
+  }) : super(key: key);
 
   String _getFollowingMembersText(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -449,82 +460,95 @@ class WorkspaceListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final followingMembersText = _getFollowingMembersText(context);
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: [
-          // 워크스페이스 아이콘
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: Colors.green[50],
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              Icons.group_work_outlined,
-              color: Colors.green[400],
-              size: 24,
-            ),
+    return InkWell(
+      onTap: () async {
+        final result = await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => WorkspaceDetailScreen(workspace: workspace),
           ),
-          const SizedBox(width: 12),
-          // 워크스페이스 정보
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  workspace.name,
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Row(
-                  children: [
-                    Text(
-                      '${workspace.memberCount} members',
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    const Text(' · '),
-                    Text(
-                      '${workspace.papers.length} papers',
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
-                ),
-                if (followingMembersText.isNotEmpty)
+        );
+        if (result == true && onWorkspaceUpdated != null) {
+          onWorkspaceUpdated!();
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            // 워크스페이스 아이콘
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: Colors.green[50],
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                Icons.group_work_outlined,
+                color: Colors.green[400],
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            // 워크스페이스 정보
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    followingMembersText,
+                    workspace.name,
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        '${workspace.memberCount} members',
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      const Text(' · '),
+                      Text(
+                        '${workspace.papers.length} papers',
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (followingMembersText.isNotEmpty)
+                    Text(
+                      followingMembersText,
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        color: const Color(0xFF00BFA5),
+                      ),
+                    ),
+                  Text(
+                    'Last updated ${_getTimeAgo()}',
                     style: GoogleFonts.poppins(
                       fontSize: 13,
-                      color: const Color(0xFF00BFA5),
+                      color: Colors.grey[600],
                     ),
                   ),
-                Text(
-                  'Last updated ${_getTimeAgo()}',
-                  style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          // 더보기 버튼
-          IconButton(
-            icon: Icon(Icons.more_vert, color: Colors.grey[400]),
-            onPressed: () {
-              // 더보기 메뉴 처리
-            },
-          ),
-        ],
+            // 더보기 버튼
+            IconButton(
+              icon: Icon(Icons.more_vert, color: Colors.grey[400]),
+              onPressed: () {
+                // 더보기 메뉴 처리
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
