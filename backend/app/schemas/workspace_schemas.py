@@ -12,7 +12,7 @@ class WorkspaceMemberBase(BaseModel):
     user: User
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class WorkspacePaperBase(BaseModel):
     id: int
@@ -22,7 +22,7 @@ class WorkspacePaperBase(BaseModel):
     paper: Paper
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class WorkspaceBase(BaseModel):
     name: str
@@ -34,9 +34,14 @@ class WorkspaceBase(BaseModel):
 class WorkspaceCreate(WorkspaceBase):
     pass
 
-class Workspace(WorkspaceBase):
+class Workspace(BaseModel):
     id: int
+    name: str
+    description: str
+    research_field: str
+    research_topics: List[str]
     owner_id: int
+    is_public: bool = True
     created_at: datetime
     updated_at: datetime
     member_count: int = 1
@@ -44,4 +49,4 @@ class Workspace(WorkspaceBase):
     papers: List[WorkspacePaperBase]
 
     class Config:
-        orm_mode = True 
+        from_attributes = True 

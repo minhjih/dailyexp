@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 from ..models.database import get_db
 from ..models import models
 from ..schemas import workspace_schemas
 from ..utils.auth import get_current_user
 import random
+from datetime import datetime
 
 router = APIRouter(
     prefix="/workspaces",
@@ -22,7 +23,19 @@ async def get_recommended_workspaces(
     # 사용자가 팔로우하는 사람들의 ID 목록 가져오기
     following_ids = [f.following_id for f in current_user.following]
     
-    query = db.query(models.Workspace).filter(models.Workspace.is_public == True)
+    # 사용자가 이미 가입한 워크스페이스 ID 목록 가져오기
+    joined_workspace_ids = [
+        member.workspace_id 
+        for member in db.query(models.WorkspaceMember)
+        .filter(models.WorkspaceMember.user_id == current_user.id)
+        .all()
+    ]
+    
+    # 가입하지 않은 public 워크스페이스만 필터링
+    query = db.query(models.Workspace).filter(
+        models.Workspace.is_public == True,
+        ~models.Workspace.id.in_(joined_workspace_ids)  # 가입하지 않은 워크스페이스만
+    )
     workspaces = query.all()
     scored_workspaces = []
     
@@ -58,4 +71,83 @@ async def get_recommended_workspaces(
         selected_workspaces = random.sample(top_ten, 8)
         return [w[0] for w in selected_workspaces]
     
-    return [w[0] for w in top_ten] 
+    return [w[0] for w in top_ten]
+
+@router.post("/{workspace_id}/join")
+async def join_workspace(
+    workspace_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    try:
+        # 워크스페이스 조회 시 관련 데이터도 함께 로드
+        workspace = db.query(models.Workspace)\
+            .options(
+                joinedload(models.Workspace.members).joinedload(models.WorkspaceMember.user),
+                joinedload(models.Workspace.papers).joinedload(models.WorkspacePaper.paper)
+            )\
+            .filter(models.Workspace.id == workspace_id)\
+            .first()
+            
+        if not workspace:
+            raise HTTPException(status_code=404, detail="Workspace not found")
+            
+        # 이미 멤버인지 확인
+        existing_member = db.query(models.WorkspaceMember).filter(
+            models.WorkspaceMember.workspace_id == workspace_id,
+            models.WorkspaceMember.user_id == current_user.id
+        ).first()
+        
+        if existing_member:
+            raise HTTPException(status_code=400, detail="Already a member of this workspace")
+        
+        # 새 멤버 추가
+        new_member = models.WorkspaceMember(
+            workspace_id=workspace_id,
+            user_id=current_user.id,
+            role="member",
+            joined_at=datetime.utcnow()
+        )
+        
+        db.add(new_member)
+        
+        # 멤버 카운트 업데이트
+        workspace.member_count += 1
+        
+        db.commit()
+        
+        # 워크스페이스 다시 로드
+        workspace = db.query(models.Workspace)\
+            .options(
+                joinedload(models.Workspace.members).joinedload(models.WorkspaceMember.user),
+                joinedload(models.Workspace.papers).joinedload(models.WorkspacePaper.paper)
+            )\
+            .filter(models.Workspace.id == workspace_id)\
+            .first()
+        
+        # 업데이트된 워크스페이스 정보 반환
+        return workspace_schemas.Workspace.from_orm(workspace)
+        
+    except Exception as e:
+        db.rollback()
+        import traceback
+        print(f"Error in join_workspace: {str(e)}")
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=f"Failed to join workspace: {str(e)}")
+
+@router.get("/my", response_model=List[workspace_schemas.Workspace])
+async def get_my_workspaces(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    # 사용자가 가입한 워크스페이스 조회
+    workspaces = db.query(models.Workspace)\
+        .join(models.WorkspaceMember)\
+        .options(
+            joinedload(models.Workspace.members).joinedload(models.WorkspaceMember.user),
+            joinedload(models.Workspace.papers).joinedload(models.WorkspacePaper.paper)
+        )\
+        .filter(models.WorkspaceMember.user_id == current_user.id)\
+        .all()
+    
+    return workspaces 

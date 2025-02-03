@@ -21,17 +21,17 @@ class User(BaseModel):
     id: int
     email: EmailStr
     full_name: str
-    institution: str
-    department: str
-    research_field: str
-    research_interests: List[str]
-    bio: Optional[str]
-    external_links: Optional[Dict[str, str]]
-    profile_image_url: Optional[str]
     created_at: datetime
+    institution: Optional[str] = None
+    department: Optional[str] = None
+    research_field: Optional[str] = None
+    research_interests: List[str] = []
+    bio: Optional[str] = None
+    external_links: Optional[dict] = None
+    profile_image_url: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class Token(BaseModel):
     access_token: str
