@@ -166,9 +166,8 @@ class _WorkspaceDetailScreenState extends State<WorkspaceDetailScreen> {
                 top: 0,
                 bottom: 100,
               ),
-              itemCount: (widget.workspace['papers'] as List).length,
+              itemCount: 3,
               itemBuilder: (context, index) {
-                final paper = widget.workspace['papers'][index];
                 return Card(
                   elevation: 0,
                   margin: const EdgeInsets.only(bottom: 16),
@@ -192,7 +191,7 @@ class _WorkspaceDetailScreenState extends State<WorkspaceDetailScreen> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
-                                paper['status'] ?? '진행중',
+                                '진행중',
                                 style: GoogleFonts.poppins(
                                   fontSize: 12,
                                   color: Colors.blue,
@@ -204,7 +203,7 @@ class _WorkspaceDetailScreenState extends State<WorkspaceDetailScreen> {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          paper['paper']['title'],
+                          '양자 협업 연구성의 실험적 검증',
                           style: GoogleFonts.poppins(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -212,7 +211,7 @@ class _WorkspaceDetailScreenState extends State<WorkspaceDetailScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          (paper['paper']['authors'] as List).join(', '),
+                          '김도현, 이지원',
                           style: GoogleFonts.poppins(
                             color: Colors.grey[600],
                           ),
@@ -223,30 +222,23 @@ class _WorkspaceDetailScreenState extends State<WorkspaceDetailScreen> {
                             CircleAvatar(
                               radius: 14,
                               backgroundColor: Colors.grey[200],
-                              backgroundImage:
-                                  paper['user']['profile_image_url'] != null
-                                      ? NetworkImage(
-                                          paper['user']['profile_image_url'])
-                                      : null,
-                              child: paper['user']['profile_image_url'] == null
-                                  ? Text(
-                                      paper['user']['full_name'][0],
-                                      style: GoogleFonts.poppins(
-                                        color: Colors.grey[600],
-                                      ),
-                                    )
-                                  : null,
+                              child: Text(
+                                '박',
+                                style: GoogleFonts.poppins(
+                                  color: Colors.grey[600],
+                                ),
+                              ),
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              '담당: ${paper['user']['full_name']}',
+                              '담당: 박민준',
                               style: GoogleFonts.poppins(
                                 color: Colors.grey[600],
                               ),
                             ),
                             const Spacer(),
                             Text(
-                              '최근 업데이트: ${_formatDate(DateTime.parse(paper['added_at']))}',
+                              '최근 업데이트: 2024.02.15',
                               style: GoogleFonts.poppins(
                                 fontSize: 12,
                                 color: Colors.grey[600],
@@ -264,9 +256,5 @@ class _WorkspaceDetailScreenState extends State<WorkspaceDetailScreen> {
         ],
       ),
     );
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.year}.${date.month.toString().padLeft(2, '0')}.${date.day.toString().padLeft(2, '0')}';
   }
 }
