@@ -1,35 +1,28 @@
 version: '3.8'
 
 services:
-  db:
-    image: postgres:17
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: dailyexp
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d dailyexp"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   api:
     build: .
-    command: bash -c "uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
-    volumes:
-      - .:/app
     ports:
       - "8000:8000"
+    volumes:
+      - .:/app
     environment:
-      - DATABASE_URL=postgresql://user:password@db/dailyexp
+      - DATABASE_URL=postgresql://postgres:password@db:5432/researchdb
     depends_on:
-      db:
-        condition: service_healthy
+      - db
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  db:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=researchdb
+    ports:
+      - "5432:5432"
 
 volumes:
-  postgres_data:
-    name: dailyexp_postgres_data 
+  postgres_data: 
