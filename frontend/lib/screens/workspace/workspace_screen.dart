@@ -3,8 +3,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:motion_tab_bar_v2/motion-tab-controller.dart';
 import '../../theme/colors.dart';
 import './workspace_detail_screen.dart';
+import '../../api/auth_api.dart';
+import '../../models/workspace.dart';
+import 'dart:math' show min;
 
-class WorkspaceScreen extends StatelessWidget {
+class WorkspaceScreen extends StatefulWidget {
   final ScrollController scrollController;
   final MotionTabBarController? tabController;
   final Function(Map<String, dynamic>)? onWorkspaceSelected;
@@ -15,6 +18,39 @@ class WorkspaceScreen extends StatelessWidget {
     this.tabController,
     this.onWorkspaceSelected,
   });
+
+  @override
+  _WorkspaceScreenState createState() => _WorkspaceScreenState();
+}
+
+class _WorkspaceScreenState extends State<WorkspaceScreen> {
+  List<Workspace> workspaces = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadWorkspaces();
+  }
+
+  Future<void> _loadWorkspaces() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final loadedWorkspaces = await AuthAPI().getMyWorkspaces();
+      setState(() {
+        workspaces = loadedWorkspaces;
+        isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading workspaces: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,177 +134,154 @@ class WorkspaceScreen extends StatelessWidget {
         ),
         // Workspace 목록
         Expanded(
-          child: GridView.builder(
-            controller: scrollController,
-            padding: const EdgeInsets.all(16),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 0.95,
-            ),
-            itemCount: 4, // 임시 데이터
-            itemBuilder: (context, index) {
-              final workspaces = [
-                {
-                  'name': 'Quantum Research',
-                  'isPrivate': true,
-                  'members': 5,
-                  'papers': 12
-                },
-                {
-                  'name': 'ML Study Group',
-                  'isPrivate': false,
-                  'members': 8,
-                  'papers': 23
-                },
-                {
-                  'name': 'Climate Research',
-                  'isPrivate': true,
-                  'members': 4,
-                  'papers': 8
-                },
-                {
-                  'name': 'AI Ethics',
-                  'isPrivate': false,
-                  'members': 12,
-                  'papers': 31
-                },
-              ];
-
-              final workspace = workspaces[index];
-
-              return Card(
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: InkWell(
-                  onTap: () {
-                    // Navigator.push 대신 TabController를 통해 화면 전환
-                    if (tabController != null) {
-                      // 현재 워크스페이스 정보를 저장
-                      onWorkspaceSelected?.call(workspace);
-                      // 워크스페이스 상세 화면으로 전환
-                      tabController!.animateTo(tabController!.index);
-                    }
-                  },
-                  borderRadius: BorderRadius.circular(12),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                workspace['name'] as String,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: (workspace['isPrivate'] as bool)
-                                    ? Colors.blue.withOpacity(0.1)
-                                    : Colors.green.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                (workspace['isPrivate'] as bool)
-                                    ? 'Private'
-                                    : 'Public',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  color: (workspace['isPrivate'] as bool)
-                                      ? Colors.blue
-                                      : Colors.green,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const Spacer(),
-                        Text(
-                          '${workspace['members']} members · ${workspace['papers']} papers',
-                          style: GoogleFonts.poppins(
-                            fontSize: 13,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        SizedBox(
-                          height: 24,
-                          child: Stack(
+          child: isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : GridView.builder(
+                  controller: widget.scrollController,
+                  padding: const EdgeInsets.all(16),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 0.95,
+                  ),
+                  itemCount: workspaces.length,
+                  itemBuilder: (context, index) {
+                    final workspace = workspaces[index];
+                    return Card(
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: InkWell(
+                        onTap: () {
+                          if (widget.tabController != null) {
+                            widget.onWorkspaceSelected
+                                ?.call(workspace.toJson());
+                            widget.tabController!
+                                .animateTo(widget.tabController!.index);
+                          }
+                        },
+                        borderRadius: BorderRadius.circular(12),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              for (var i = 0; i < 3; i++)
-                                Positioned(
-                                  left: i * 16.0,
-                                  child: Container(
-                                    width: 24,
-                                    height: 24,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: Colors.white,
-                                        width: 2,
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      workspace.name,
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
                                       ),
-                                      image: const DecorationImage(
-                                        image: NetworkImage(
-                                          'https://via.placeholder.com/150',
-                                        ),
-                                        fit: BoxFit.cover,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: workspace.isPublic
+                                          ? Colors.green.withOpacity(0.1)
+                                          : Colors.blue.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      workspace.isPublic ? 'Public' : 'Private',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 12,
+                                        color: workspace.isPublic
+                                            ? Colors.green
+                                            : Colors.blue,
+                                        fontWeight: FontWeight.w500,
                                       ),
                                     ),
                                   ),
+                                ],
+                              ),
+                              const Spacer(),
+                              Text(
+                                '${workspace.memberCount} members · ${workspace.papers.length} papers',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 13,
+                                  color: Colors.grey[600],
                                 ),
-                              if ((workspace['members'] as int) > 3)
-                                Positioned(
-                                  left: 48,
-                                  child: Container(
-                                    width: 24,
-                                    height: 24,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.grey[200],
-                                      border: Border.all(
-                                        color: Colors.white,
-                                        width: 2,
-                                      ),
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        '+${(workspace['members'] as int) - 3}',
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 10,
-                                          color: Colors.grey[600],
-                                          fontWeight: FontWeight.w500,
+                              ),
+                              const SizedBox(height: 8),
+                              // Member avatars
+                              SizedBox(
+                                height: 24,
+                                child: Stack(
+                                  children: [
+                                    for (var i = 0;
+                                        i < min(3, workspace.members.length);
+                                        i++)
+                                      Positioned(
+                                        left: i * 16.0,
+                                        child: Container(
+                                          width: 24,
+                                          height: 24,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: Colors.white,
+                                              width: 2,
+                                            ),
+                                            image: DecorationImage(
+                                              image: NetworkImage(
+                                                workspace.members[i].user
+                                                        .profileImageUrl ??
+                                                    'https://via.placeholder.com/150',
+                                              ),
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ),
+                                    if (workspace.members.length > 3)
+                                      Positioned(
+                                        left: 48,
+                                        child: Container(
+                                          width: 24,
+                                          height: 24,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: Colors.grey[200],
+                                            border: Border.all(
+                                              color: Colors.white,
+                                              width: 2,
+                                            ),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              '+${workspace.members.length - 3}',
+                                              style: GoogleFonts.poppins(
+                                                fontSize: 10,
+                                                color: Colors.grey[600],
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
                                 ),
+                              ),
                             ],
                           ),
                         ),
-                      ],
-                    ),
-                  ),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
-          ),
         ),
       ],
     );
