@@ -288,4 +288,30 @@ class AuthAPI {
         .map((json) => Workspace.fromJson(json))
         .toList();
   }
+
+  Future<List<User>> searchUsers(String query) async {
+    final token = await _getToken();
+    final response = await _dio.get(
+      '/workspaces/users/search',
+      options: Options(
+        headers: {'Authorization': 'Bearer $token'},
+      ),
+      queryParameters: {'query': query},
+    );
+    return (response.data as List).map((json) => User.fromJson(json)).toList();
+  }
+
+  Future<List<Workspace>> searchWorkspaces(String query) async {
+    final token = await _getToken();
+    final response = await _dio.get(
+      '/workspaces/search',
+      options: Options(
+        headers: {'Authorization': 'Bearer $token'},
+      ),
+      queryParameters: {'query': query},
+    );
+    return (response.data as List)
+        .map((json) => Workspace.fromJson(json))
+        .toList();
+  }
 }

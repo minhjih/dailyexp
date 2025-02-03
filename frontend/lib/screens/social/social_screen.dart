@@ -27,8 +27,11 @@ class _SocialScreenState extends State<SocialScreen>
     with AutomaticKeepAliveClientMixin {
   bool isResearcherMode = true;
   List<User> recommendedUsers = [];
+  List<User> filteredUsers = [];
   List<Workspace> recommendedWorkspaces = [];
+  List<Workspace> filteredWorkspaces = [];
   bool isLoading = true;
+  final TextEditingController _searchController = TextEditingController();
   // 각 탭별로 별도의 스크롤 컨트롤러 사용
   final ScrollController _researcherScrollController = ScrollController();
   final ScrollController _workspaceScrollController = ScrollController();
@@ -42,9 +45,7 @@ class _SocialScreenState extends State<SocialScreen>
     _loadRecommendedUsers();
     _researcherScrollController.addListener(_scrollListener);
     _workspaceScrollController.addListener(_scrollListener);
-    if (!isResearcherMode) {
-      _loadRecommendedWorkspaces();
-    }
+    _searchController.addListener(_onSearchChanged);
   }
 
   void _scrollListener() {
@@ -67,148 +68,188 @@ class _SocialScreenState extends State<SocialScreen>
     _researcherScrollController.dispose();
     _workspaceScrollController.removeListener(_scrollListener);
     _workspaceScrollController.dispose();
+    _searchController.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged() async {
+    final query = _searchController.text;
+    if (query.isEmpty) {
+      setState(() {
+        filteredUsers = recommendedUsers;
+        filteredWorkspaces = recommendedWorkspaces;
+      });
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      if (isResearcherMode) {
+        final results = await AuthAPI().searchUsers(query);
+        if (mounted) {
+          setState(() {
+            filteredUsers = results;
+            isLoading = false;
+          });
+        }
+      } else {
+        final results = await AuthAPI().searchWorkspaces(query);
+        if (mounted) {
+          setState(() {
+            filteredWorkspaces = results;
+            isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      print('Error searching: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // AutomaticKeepAliveClientMixin 사용시 필수
+    super.build(context);
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
         children: [
+          // 고정된 상단 부분
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
-                  blurRadius: 4,
-                ),
-              ],
-            ),
-            child: Row(
+            color: Colors.white,
+            child: Column(
               children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => _onTabChanged(true),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isResearcherMode
-                          ? const Color(0xFF00BFA5)
-                          : Colors.grey[200],
-                      foregroundColor:
-                          isResearcherMode ? Colors.white : Colors.grey[600],
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                // 검색창
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border(
+                      bottom: BorderSide(
+                        color: Colors.grey.withOpacity(0.2),
+                        width: 1,
                       ),
                     ),
-                    child: const Text('Researchers'),
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: isResearcherMode
+                          ? 'Search researchers...'
+                          : 'Search workspaces...',
+                      hintStyle: GoogleFonts.poppins(
+                        color: Colors.grey[400],
+                        fontSize: 14,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: Colors.grey[400],
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[100],
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => _onTabChanged(false),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: !isResearcherMode
-                          ? const Color(0xFF00BFA5)
-                          : Colors.grey[200],
-                      foregroundColor:
-                          !isResearcherMode ? Colors.white : Colors.grey[600],
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                // 탭 버튼
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border(
+                      bottom: BorderSide(
+                        color: Colors.grey.withOpacity(0.2),
+                        width: 1,
                       ),
                     ),
-                    child: const Text('Workspaces'),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => _onTabChanged(true),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: isResearcherMode
+                                ? const Color(0xFF00BFA5)
+                                : Colors.grey[200],
+                            foregroundColor: isResearcherMode
+                                ? Colors.white
+                                : Colors.grey[600],
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text('Researchers'),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => _onTabChanged(false),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: !isResearcherMode
+                                ? const Color(0xFF00BFA5)
+                                : Colors.grey[200],
+                            foregroundColor: !isResearcherMode
+                                ? Colors.white
+                                : Colors.grey[600],
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text('Workspaces'),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
+          // 스크롤 가능한 리스트 부분
           Expanded(
-            child: isResearcherMode
-                ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                        child: Row(
-                          children: [
-                            Text(
-                              'Recommended Researchers',
-                              style: GoogleFonts.poppins(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.grey[800],
-                              ),
-                            ),
-                            const Spacer(),
-                            IconButton(
-                              icon: const Icon(Icons.refresh),
-                              onPressed:
-                                  isLoading ? null : _loadRecommendedUsers,
-                              color: const Color(0xFF00BFA5),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (isLoading)
-                        const Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Center(child: CircularProgressIndicator()),
-                        )
-                      else
-                        Expanded(
-                          child: ListView.builder(
-                            controller: _researcherScrollController,
-                            padding: EdgeInsets.zero,
-                            itemCount: recommendedUsers.length,
-                            itemBuilder: (context, index) {
-                              final user = recommendedUsers[index];
-                              return ResearcherListTile(user: user);
-                            },
-                          ),
-                        ),
-                    ],
-                  )
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                        child: Row(
-                          children: [
-                            Text(
-                              'Recommended Workspaces',
-                              style: GoogleFonts.poppins(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.grey[800],
-                              ),
-                            ),
-                            const Spacer(),
-                            IconButton(
-                              icon: const Icon(Icons.refresh),
-                              onPressed:
-                                  isLoading ? null : _loadRecommendedWorkspaces,
-                              color: const Color(0xFF00BFA5),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (isLoading)
-                        const Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Center(child: CircularProgressIndicator()),
-                        )
-                      else
-                        Expanded(
-                          child: buildWorkspaceList(),
-                        ),
-                    ],
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : ListView.builder(
+                    controller: isResearcherMode
+                        ? _researcherScrollController
+                        : _workspaceScrollController,
+                    padding: EdgeInsets.zero, // 패딩 제거
+                    itemCount: isResearcherMode
+                        ? filteredUsers.length
+                        : filteredWorkspaces.length,
+                    itemBuilder: (context, index) {
+                      return isResearcherMode
+                          ? ResearcherListTile(user: filteredUsers[index])
+                          : WorkspaceListTile(
+                              workspace: filteredWorkspaces[index],
+                              onWorkspaceUpdated: _loadRecommendedWorkspaces,
+                            );
+                    },
                   ),
           ),
         ],
@@ -267,6 +308,7 @@ class _SocialScreenState extends State<SocialScreen>
       if (mounted) {
         setState(() {
           recommendedUsers = users;
+          filteredUsers = users;
           isLoading = false;
         });
       }
@@ -319,6 +361,7 @@ class _SocialScreenState extends State<SocialScreen>
 
       setState(() {
         recommendedWorkspaces = workspaces;
+        filteredWorkspaces = workspaces;
         isLoading = false;
       });
     } catch (e) {
@@ -333,10 +376,14 @@ class _SocialScreenState extends State<SocialScreen>
   void _onTabChanged(bool isResearcher) {
     setState(() {
       isResearcherMode = isResearcher;
+      _searchController.clear();
       if (isResearcher) {
-        _loadRecommendedUsers();
+        filteredUsers = recommendedUsers;
       } else {
-        _loadRecommendedWorkspaces();
+        filteredWorkspaces = recommendedWorkspaces;
+        if (filteredWorkspaces.isEmpty) {
+          _loadRecommendedWorkspaces();
+        }
       }
     });
   }
