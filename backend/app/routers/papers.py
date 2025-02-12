@@ -8,6 +8,8 @@ from ..schemas import paper_schemas
 from ..services.gpt_service import GPTService
 from ..utils.auth import get_current_user
 from ..services.arxiv_service import ArxivService
+from datetime import datetime, timedelta
+from sqlalchemy import func
 
 router = APIRouter(
     prefix="/papers",
@@ -49,4 +51,30 @@ async def analyze_paper(
         return analysis
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) 
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/trending")
+async def get_trending_papers(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    # 최근 일주일 동안의 포스트 수를 기준으로 트렌딩 논문 선정
+    trending_papers = (
+        db.query(models.Paper)
+        .join(models.Post)
+        .filter(
+            models.Post.created_at >= datetime.utcnow() - timedelta(days=7)
+        )
+        .group_by(models.Paper.id)
+        .order_by(func.count(models.Post.id).desc())
+        .limit(3)
+        .all()
+    )
+    
+    # 각 논문의 포스트 수도 함께 반환
+    return [{
+        **paper.to_dict(),
+        'post_count': db.query(models.Post)
+            .filter(models.Post.paper_id == paper.id)
+            .count()
+    } for paper in trending_papers] 
