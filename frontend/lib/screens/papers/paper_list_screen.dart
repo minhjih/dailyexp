@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../providers/user_provider.dart';
 import '../../screens/papers/paper_search_screen.dart';
 import '../../screens/papers/paper_detail_screen.dart';
+import '../../widgets/workspace_selection_sheet.dart';
 
 class PaperListScreen extends StatefulWidget {
   final Function(ScrollDirection) onScroll;
@@ -308,7 +309,6 @@ class _PaperListScreenState extends State<PaperListScreen>
                     selectedPaper = null;
                   });
                 },
-                color: Colors.black87,
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -321,6 +321,11 @@ class _PaperListScreenState extends State<PaperListScreen>
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.add_to_photos_outlined),
+                onPressed: () => _showWorkspaceSelection(),
+                color: const Color(0xFF43A047),
               ),
             ],
           ),
@@ -427,6 +432,44 @@ class _PaperListScreenState extends State<PaperListScreen>
           ),
         ),
       ],
+    );
+  }
+
+  void _showWorkspaceSelection() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => WorkspaceSelectionSheet(
+        onWorkspaceSelected: (workspace) async {
+          try {
+            // TODO: API 호출로 선택된 워크스페이스에 논문 추가
+            // await AuthAPI().addPaperToWorkspace(workspace['id'], selectedPaper!['id']);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Paper added to ${workspace['name']}',
+                  style: GoogleFonts.poppins(),
+                ),
+                backgroundColor: const Color(0xFF43A047),
+              ),
+            );
+            Navigator.pop(context); // 바텀시트 닫기
+          } catch (e) {
+            print('Error adding paper to workspace: $e');
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Failed to add paper to workspace',
+                  style: GoogleFonts.poppins(),
+                ),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+      ),
     );
   }
 

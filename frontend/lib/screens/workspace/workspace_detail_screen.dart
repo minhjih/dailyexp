@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 class WorkspaceDetailScreen extends StatefulWidget {
   final Map<String, dynamic> workspace;
-  final VoidCallback onBack;
+  final Function onBack;
 
   const WorkspaceDetailScreen({
     super.key,
@@ -16,244 +16,187 @@ class WorkspaceDetailScreen extends StatefulWidget {
 }
 
 class _WorkspaceDetailScreenState extends State<WorkspaceDetailScreen> {
-  late ScrollController _scrollController;
+  List<Map<String, dynamic>> papers = [];
+  bool isLoading = true;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController();
+    _loadWorkspacePapers();
   }
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
+  Future<void> _loadWorkspacePapers() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      // TODO: API로 해당 워크스페이스의 논문 목록 가져오기
+      // final papers = await AuthAPI().getWorkspacePapers(widget.workspace['id']);
+      setState(() {
+        papers = []; // 임시로 빈 배열
+        isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading workspace papers: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  void _addPaper() {
+    // TODO: PaperListScreen에서 논문 추가 기능 구현 예정
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Coming soon: Add papers from Explore tab',
+          style: GoogleFonts.poppins(),
+        ),
+        backgroundColor: const Color(0xFF43A047),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      child: Column(
-        children: [
-          // 앱바
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(
-                bottom: BorderSide(
-                  color: Colors.grey.withOpacity(0.2),
-                  width: 1,
-                ),
+    return Column(
+      children: [
+        // 헤더
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border(
+              bottom: BorderSide(
+                color: Colors.grey.withOpacity(0.2),
+                width: 1,
               ),
             ),
-            child: Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: widget.onBack,
-                  color: Colors.black87,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          widget.workspace['name'],
-                          style: GoogleFonts.poppins(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ),
-                      Text(
-                        ' / ',
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      Text(
-                        '논문 목록',
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
           ),
-          // 필터 영역
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              children: [
-                OutlinedButton(
-                  onPressed: () {},
-                  style: OutlinedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                  child: Text(
-                    '전체 상태',
-                    style: GoogleFonts.poppins(
-                      color: Colors.black87,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                OutlinedButton(
-                  onPressed: () {},
-                  style: OutlinedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Text(
-                        '최신순',
-                        style: GoogleFonts.poppins(
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const Icon(Icons.arrow_drop_down, color: Colors.black87),
-                    ],
-                  ),
-                ),
-                const Spacer(),
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF43A047),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.add, size: 20),
-                      const SizedBox(width: 4),
-                      Text(
-                        '새 논문',
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // 논문 목록
-          Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.only(
-                left: 16,
-                right: 16,
-                top: 0,
-                bottom: 100,
+          child: Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => widget.onBack(),
               ),
-              itemCount: 3,
-              itemBuilder: (context, index) {
-                return Card(
-                  elevation: 0,
-                  margin: const EdgeInsets.only(bottom: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                '진행중',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  color: Colors.blue,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          '양자 협업 연구성의 실험적 검증',
-                          style: GoogleFonts.poppins(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '김도현, 이지원',
-                          style: GoogleFonts.poppins(
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            CircleAvatar(
-                              radius: 14,
-                              backgroundColor: Colors.grey[200],
-                              child: Text(
-                                '박',
-                                style: GoogleFonts.poppins(
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '담당: 박민준',
-                              style: GoogleFonts.poppins(
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                            const Spacer(),
-                            Text(
-                              '최근 업데이트: 2024.02.15',
-                              style: GoogleFonts.poppins(
-                                fontSize: 12,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.workspace['name'] ?? 'Workspace',
+                      style: GoogleFonts.poppins(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                );
-              },
-            ),
+                    Text(
+                      '${papers.length} papers',
+                      style: GoogleFonts.poppins(
+                        color: Colors.grey[600],
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.add),
+                onPressed: _addPaper,
+                color: const Color(0xFF43A047),
+              ),
+            ],
           ),
-        ],
+        ),
+        // 논문 목록
+        Expanded(
+          child: isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : papers.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.article_outlined,
+                              size: 48, color: Colors.grey[400]),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No papers yet',
+                            style: GoogleFonts.poppins(
+                              color: Colors.grey[600],
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          TextButton.icon(
+                            onPressed: _addPaper,
+                            icon: const Icon(Icons.add),
+                            label: const Text('Add Paper'),
+                            style: TextButton.styleFrom(
+                              foregroundColor: const Color(0xFF43A047),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : ListView.builder(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.all(16),
+                      itemCount: papers.length,
+                      itemBuilder: (context, index) {
+                        final paper = papers[index];
+                        return _buildPaperCard(paper);
+                      },
+                    ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPaperCard(Map<String, dynamic> paper) {
+    return Card(
+      elevation: 0,
+      margin: const EdgeInsets.only(bottom: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: InkWell(
+        onTap: () {
+          // TODO: 논문 상세 페이지로 이동
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                paper['title'],
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                paper['authors'].join(', '),
+                style: GoogleFonts.poppins(
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                paper['published_date'],
+                style: GoogleFonts.poppins(
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
