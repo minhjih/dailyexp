@@ -59,6 +59,11 @@ Glimpse is an innovative research tracking and knowledge sharing platform design
 - login & signup screens
 - feed screen, Workspaces_main, Workspace_detail_screen1, paper, social, profile screens
 
+✅ Paper Recommendation Section
+- Integrate OpenAI API for intelligent recommendations
+- Develop user interest-based recommendation algorithm
+- Design personalized research feed
+
 ### Ongoing Development
 🔨 Details of frontend
 
@@ -67,10 +72,10 @@ Glimpse is an innovative research tracking and knowledge sharing platform design
 - ✅ Link to user information to profile
 - 🔨 Database expansion
 
-🔨 Paper Recommendation Section
-- Integrate OpenAI API for intelligent recommendations
-- Develop user interest-based recommendation algorithm
-- Design personalized research feed
+🔨 Review Posting System
+- Develop paper review writing/editing page
+- Implement public/private review settings
+- Add tagging and categorization options
 
 ### Next Development Stages
 
@@ -78,11 +83,6 @@ Glimpse is an innovative research tracking and knowledge sharing platform design
 - Implement paper scraping mechanism
 - Design group sharing interface
 - Create annotation and highlight features
-
-2. Review Posting System
-- Develop paper review writing/editing page
-- Implement public/private review settings
-- Add tagging and categorization options
 
 ### Technical Considerations
 - State Management (Provider/Riverpod)
