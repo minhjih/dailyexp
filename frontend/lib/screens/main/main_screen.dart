@@ -22,7 +22,6 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   MotionTabBarController? _tabController;
-  final ScrollController _scrollController = ScrollController();
   AnimationController? _hideController;
   bool _isVisible = true;
   Animation<Offset>? _slideAnimation;
@@ -50,20 +49,15 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       end: const Offset(0, 4.0), // y축으로 400% 이동 (더 아래로)
     ).animate(_hideController!);
 
-    _scrollController.addListener(() {
-      if (_scrollController.position.userScrollDirection ==
-          ScrollDirection.reverse) {
-        if (_isVisible) {
+    _hideController?.addListener(() {
+      if (_hideController!.value == 1.0) {
+        setState(() {
           _isVisible = false;
-          _hideController?.forward(); // 아래로 스크롤 시 숨김
-        }
-      }
-      if (_scrollController.position.userScrollDirection ==
-          ScrollDirection.forward) {
-        if (!_isVisible) {
+        });
+      } else if (_hideController!.value == 0.0) {
+        setState(() {
           _isVisible = true;
-          _hideController?.reverse(); // 위로 스크롤 시 보임
-        }
+        });
       }
     });
   }
@@ -71,7 +65,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   @override
   void dispose() {
     _tabController?.dispose();
-    _scrollController.dispose();
     _hideController?.dispose();
     super.dispose();
   }
@@ -82,21 +75,32 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     });
   }
 
-  void _handleScroll(ScrollDirection direction) {
+  void handleScroll(ScrollDirection direction) {
     if (direction == ScrollDirection.reverse) {
-      // 네비게이션 바 숨기기
-    } else {
-      // 네비게이션 바 보이기
+      if (_isVisible) {
+        setState(() {
+          _isVisible = false;
+          _hideController?.forward();
+        });
+      }
+    }
+    if (direction == ScrollDirection.forward) {
+      if (!_isVisible) {
+        setState(() {
+          _isVisible = true;
+          _hideController?.reverse();
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final List<Widget> screens = [
-      FeedScreen(scrollController: _scrollController, onScroll: _handleScroll),
+      FeedScreen(onScroll: handleScroll),
       _selectedWorkspace == null
           ? WorkspaceScreen(
-              scrollController: _scrollController,
+              onScroll: handleScroll,
               tabController: _tabController,
               onWorkspaceSelected: (workspace) {
                 setState(() {
@@ -108,11 +112,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               workspace: _selectedWorkspace!,
               onBack: _goBackToWorkspaceList,
             ),
-      PaperListScreen(scrollController: _scrollController),
-      SocialScreen(
-          scrollController: _scrollController, onScroll: _handleScroll),
-      ProfileScreen(
-          scrollController: _scrollController, onScroll: _handleScroll),
+      PaperListScreen(onScroll: handleScroll),
+      SocialScreen(onScroll: handleScroll),
+      ProfileScreen(onScroll: handleScroll),
     ];
 
     return Scaffold(

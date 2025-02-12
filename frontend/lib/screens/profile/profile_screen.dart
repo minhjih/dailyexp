@@ -6,29 +6,43 @@ import '../../providers/user_provider.dart';
 import 'profile_edit.dart';
 
 class ProfileScreen extends StatefulWidget {
-  final ScrollController scrollController;
-  final Function(ScrollDirection)? onScroll;
+  final Function(ScrollDirection) onScroll;
 
   const ProfileScreen({
-    Key? key,
-    required this.scrollController,
-    this.onScroll,
-  }) : super(key: key);
+    super.key,
+    required this.onScroll,
+  });
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_handleScroll);
     // 프로필 데이터 로드
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final userProvider = context.read<UserProvider>();
       userProvider.fetchUserProfile();
       userProvider.fetchProfileStats(); // 프로필 통계도 함께 로드
     });
+  }
+
+  void _handleScroll() {
+    if (_scrollController.position.userScrollDirection !=
+        ScrollDirection.idle) {
+      widget.onScroll(_scrollController.position.userScrollDirection);
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -45,7 +59,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         }
 
         return ListView(
-          controller: widget.scrollController,
+          controller: _scrollController,
           padding: const EdgeInsets.only(bottom: 100),
           children: [
             Padding(
@@ -108,7 +122,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       TextButton(
                         onPressed: () {
                           Navigator.of(context).push(
-                            MaterialPageRoute(builder: (context) => ProfileEditPage()), // 프로필 수정 페이지로 이동
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    ProfileEditPage()), // 프로필 수정 페이지로 이동
                           );
                         },
                         child: Text(

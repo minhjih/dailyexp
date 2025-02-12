@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../api/auth_api.dart';
 import 'package:provider/provider.dart';
@@ -7,11 +8,11 @@ import '../../screens/papers/paper_search_screen.dart';
 import '../../screens/papers/paper_detail_screen.dart';
 
 class PaperListScreen extends StatefulWidget {
-  final ScrollController scrollController;
+  final Function(ScrollDirection) onScroll;
 
   const PaperListScreen({
     super.key,
-    required this.scrollController,
+    required this.onScroll,
   });
 
   @override
@@ -20,6 +21,8 @@ class PaperListScreen extends StatefulWidget {
 
 class _PaperListScreenState extends State<PaperListScreen>
     with AutomaticKeepAliveClientMixin {
+  final ScrollController _scrollController = ScrollController();
+
   @override
   bool get wantKeepAlive => true; // 상태 유지
 
@@ -34,9 +37,23 @@ class _PaperListScreenState extends State<PaperListScreen>
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_handleScroll);
     setState(() {
-      isLoading = false; // 초기 로딩 상태 false로 설정
+      isLoading = false;
     });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _handleScroll() {
+    if (_scrollController.position.userScrollDirection !=
+        ScrollDirection.idle) {
+      widget.onScroll(_scrollController.position.userScrollDirection);
+    }
   }
 
   Future<void> _loadInitialPapers() async {
@@ -100,10 +117,177 @@ class _PaperListScreenState extends State<PaperListScreen>
     return summary.replaceAll(RegExp(r'\s+'), ' ').trim();
   }
 
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Column(
+      children: [
+        // 검색창 (고정)
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border(
+              bottom: BorderSide(
+                color: Colors.grey.withOpacity(0.2),
+                width: 1,
+              ),
+            ),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search arXiv papers...',
+                    hintStyle: GoogleFonts.poppins(
+                      color: Colors.grey[400],
+                      fontSize: 14,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: Colors.grey[400],
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide.none,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide.none,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  onChanged: _searchPapers,
+                ),
+              ),
+              if (isSearching)
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() {
+                      isSearching = false;
+                      searchResults = [];
+                    });
+                  },
+                ),
+            ],
+          ),
+        ),
+        // 내용 부분
+        Expanded(
+          child: isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : selectedPaper != null
+                  ? _buildPaperDetail()
+                  : isSearching
+                      ? ListView.builder(
+                          controller: _scrollController,
+                          itemCount: searchResults.length,
+                          itemBuilder: (context, index) {
+                            final paper = searchResults[index];
+                            return _buildPaperCard(
+                              paper['title'],
+                              paper['authors'].join(', '),
+                              paper['published_date'],
+                              paper['categories'].join(', '),
+                              paperData: paper,
+                            );
+                          },
+                        )
+                      : ListView(
+                          controller: _scrollController,
+                          padding: const EdgeInsets.all(16),
+                          children: [
+                            // Recommended Papers
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Recommended for You',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.refresh),
+                                  onPressed: () {
+                                    setState(() {
+                                      isLoading = true;
+                                    });
+                                    _loadInitialPapers();
+                                  },
+                                  color: Colors.grey[600],
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            if (recommendedPapers.isEmpty && !isLoading)
+                              Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[100],
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  'Click refresh to load recommendations',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.grey[600],
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              )
+                            else
+                              ...recommendedPapers
+                                  .map((paper) => _buildPaperCard(
+                                        paper['title'],
+                                        paper['authors'].join(', '),
+                                        paper['published_date'],
+                                        paper['categories'].join(', '),
+                                        paperData: paper,
+                                      )),
+                            const SizedBox(height: 32),
+
+                            // Trending Papers
+                            Text(
+                              'Trending Papers',
+                              style: GoogleFonts.poppins(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            ...trendingPapers.map((paper) => _buildPaperCard(
+                                  paper['title'],
+                                  paper['authors'].join(', '),
+                                  paper['published_date'],
+                                  paper['categories'].join(', '),
+                                  rank: '#${trendingPapers.indexOf(paper) + 1}',
+                                  paperData: paper,
+                                )),
+                          ],
+                        ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildPaperDetail() {
     return Column(
       children: [
-        // 고정된 헤더
+        // 헤더 (고정)
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -141,9 +325,10 @@ class _PaperListScreenState extends State<PaperListScreen>
             ],
           ),
         ),
-        // 스크롤 가능한 내용
+        // 내용 (스크롤)
         Expanded(
           child: SingleChildScrollView(
+            controller: _scrollController,
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -240,172 +425,6 @@ class _PaperListScreenState extends State<PaperListScreen>
               ],
             ),
           ),
-        ),
-      ],
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    super.build(context); // AutomaticKeepAliveClientMixin 사용 시 필수
-    return Column(
-      children: [
-        // 검색창
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border(
-              bottom: BorderSide(
-                color: Colors.grey.withOpacity(0.2),
-                width: 1,
-              ),
-            ),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Search arXiv papers...',
-                    hintStyle: GoogleFonts.poppins(
-                      color: Colors.grey[400],
-                      fontSize: 14,
-                    ),
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: Colors.grey[400],
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey[100],
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide.none,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide.none,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                  onChanged: _searchPapers,
-                ),
-              ),
-              if (isSearching)
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () {
-                    _searchController.clear();
-                    setState(() {
-                      isSearching = false;
-                      searchResults = [];
-                    });
-                  },
-                ),
-            ],
-          ),
-        ),
-        // 논문 목록과 상세 정보
-        Expanded(
-          child: isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : selectedPaper != null
-                  ? _buildPaperDetail()
-                  : isSearching
-                      ? ListView.builder(
-                          itemCount: searchResults.length,
-                          itemBuilder: (context, index) {
-                            final paper = searchResults[index];
-                            return _buildPaperCard(
-                              paper['title'],
-                              paper['authors'].join(', '),
-                              paper['published_date'],
-                              paper['categories'].join(', '),
-                              paperData: paper,
-                            );
-                          },
-                        )
-                      : ListView(
-                          controller: widget.scrollController,
-                          padding: const EdgeInsets.all(16),
-                          children: [
-                            // Recommended Papers
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Recommended for You',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.refresh),
-                                  onPressed: () {
-                                    setState(() {
-                                      isLoading = true;
-                                    });
-                                    _loadInitialPapers();
-                                  },
-                                  color: Colors.grey[600],
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            if (recommendedPapers.isEmpty && !isLoading)
-                              Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[100],
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  'Click refresh to load recommendations',
-                                  style: GoogleFonts.poppins(
-                                    color: Colors.grey[600],
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              )
-                            else
-                              ...recommendedPapers
-                                  .map((paper) => _buildPaperCard(
-                                        paper['title'],
-                                        paper['authors'].join(', '),
-                                        paper['published_date'],
-                                        paper['categories'].join(', '),
-                                        paperData: paper,
-                                      )),
-                            const SizedBox(height: 32),
-
-                            // Trending Papers
-                            Text(
-                              'Trending Papers',
-                              style: GoogleFonts.poppins(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            ...trendingPapers.map((paper) => _buildPaperCard(
-                                  paper['title'],
-                                  paper['authors'].join(', '),
-                                  paper['published_date'],
-                                  paper['categories'].join(', '),
-                                  rank: '#${trendingPapers.indexOf(paper) + 1}',
-                                  paperData: paper,
-                                )),
-                          ],
-                        ),
         ),
       ],
     );

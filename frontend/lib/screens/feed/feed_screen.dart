@@ -4,24 +4,39 @@ import '../../theme/colors.dart';
 import 'package:flutter/rendering.dart' show ScrollDirection;
 
 class FeedScreen extends StatefulWidget {
-  final ScrollController scrollController;
-  final Function(ScrollDirection)? onScroll;
+  final Function(ScrollDirection) onScroll;
 
   const FeedScreen({
-    Key? key,
-    required this.scrollController,
-    this.onScroll,
-  }) : super(key: key);
+    super.key,
+    required this.onScroll,
+  });
 
   @override
-  _FeedScreenState createState() => _FeedScreenState();
+  State<FeedScreen> createState() => _FeedScreenState();
 }
 
 class _FeedScreenState extends State<FeedScreen> {
-  bool _isSaved = false; // 저장 상태 추가
-  bool _isLiked = false; // 좋아요 상태 추가
-  int _likeCount = 245; // 좋아요 개수 추가
-  bool _isCommentsVisible = false; // 댓글 섹션의 확장 상태 추가
+  bool _isCommentsVisible = false;
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_handleScroll);
+  }
+
+  void _handleScroll() {
+    if (_scrollController.position.userScrollDirection !=
+        ScrollDirection.idle) {
+      widget.onScroll(_scrollController.position.userScrollDirection);
+    }
+  }
+
+  void _toggleComments() {
+    setState(() {
+      _isCommentsVisible = !_isCommentsVisible;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +90,7 @@ class _FeedScreenState extends State<FeedScreen> {
         // 피드 목록
         Expanded(
           child: ListView.builder(
-            controller: widget.scrollController,
+            controller: _scrollController,
             itemCount: 10,
             itemBuilder: (context, index) {
               return buildPostCard();
@@ -156,18 +171,13 @@ class _FeedScreenState extends State<FeedScreen> {
             child: Row(
               children: [
                 _buildInteractionButton(Icons.favorite, Icons.favorite_border,
-                    _likeCount.toString(), _toggleLike, Colors.red, _isLiked),
+                    '245', _toggleLike, Colors.red),
                 const SizedBox(width: 24),
                 _buildInteractionButton(Icons.comment, Icons.comment_outlined,
-                    '18', _toggleComments, Colors.grey, _isCommentsVisible),
+                    '18', _toggleComments, Colors.grey),
                 const Spacer(),
-                _buildInteractionButton(
-                    Icons.bookmark,
-                    Icons.bookmark_border,
-                    _isSaved ? 'Saved' : 'Save',
-                    _toggleSave,
-                    const Color(0xFF43A047),
-                    _isSaved),
+                _buildInteractionButton(Icons.bookmark, Icons.bookmark_border,
+                    'Save', _toggleSave, const Color(0xFF43A047)),
               ],
             ),
           ),
@@ -198,19 +208,17 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   Widget _buildInteractionButton(IconData activeIcon, IconData inactiveIcon,
-      String text, VoidCallback onPressed, Color IconColor,
-      [bool isActive = false]) {
+      String text, VoidCallback onPressed, Color IconColor) {
     return GestureDetector(
       onTap: onPressed,
       child: Row(
         children: [
-          Icon(isActive ? activeIcon : inactiveIcon,
-              size: 20, color: isActive ? IconColor : Colors.grey[700]),
+          Icon(activeIcon, size: 20, color: IconColor),
           const SizedBox(width: 4),
           Text(
             text,
             style: TextStyle(
-              color: isActive ? IconColor : Colors.grey[700],
+              color: IconColor,
               fontSize: 14,
             ),
           ),
@@ -220,22 +228,11 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   void _toggleLike() {
-    setState(() {
-      _isLiked = !_isLiked;
-      _likeCount += _isLiked ? 1 : -1; // 좋아요 상태에 따라 카운트 증감
-    });
+    // Implementation of _toggleLike method
   }
 
   void _toggleSave() {
-    setState(() {
-      _isSaved = !_isSaved;
-    });
-  }
-
-  void _toggleComments() {
-    setState(() {
-      _isCommentsVisible = !_isCommentsVisible;
-    });
+    // Implementation of _toggleSave method
   }
 
   Widget buildCommentsSection() {

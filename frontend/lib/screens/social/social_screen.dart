@@ -10,14 +10,12 @@ import '../../models/workspace.dart';
 import '../../screens/social/workspace_detail_screen.dart';
 
 class SocialScreen extends StatefulWidget {
-  final ScrollController scrollController;
-  final Function(ScrollDirection)? onScroll;
+  final Function(ScrollDirection) onScroll;
 
   const SocialScreen({
-    Key? key,
-    required this.scrollController,
-    this.onScroll,
-  }) : super(key: key);
+    super.key,
+    required this.onScroll,
+  });
 
   @override
   State<SocialScreen> createState() => _SocialScreenState();
@@ -32,9 +30,7 @@ class _SocialScreenState extends State<SocialScreen>
   List<Workspace> filteredWorkspaces = [];
   bool isLoading = true;
   final TextEditingController _searchController = TextEditingController();
-  // 각 탭별로 별도의 스크롤 컨트롤러 사용
-  final ScrollController _researcherScrollController = ScrollController();
-  final ScrollController _workspaceScrollController = ScrollController();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   bool get wantKeepAlive => true; // 화면 유지
@@ -43,31 +39,20 @@ class _SocialScreenState extends State<SocialScreen>
   void initState() {
     super.initState();
     _loadRecommendedUsers();
-    _researcherScrollController.addListener(_scrollListener);
-    _workspaceScrollController.addListener(_scrollListener);
+    _scrollController.addListener(_handleScroll);
     _searchController.addListener(_onSearchChanged);
   }
 
-  void _scrollListener() {
-    if (widget.onScroll != null) {
-      final controller = isResearcherMode
-          ? _researcherScrollController
-          : _workspaceScrollController;
-      if (controller.position.userScrollDirection == ScrollDirection.reverse) {
-        widget.onScroll!(ScrollDirection.reverse);
-      } else if (controller.position.userScrollDirection ==
-          ScrollDirection.forward) {
-        widget.onScroll!(ScrollDirection.forward);
-      }
+  void _handleScroll() {
+    if (_scrollController.position.userScrollDirection !=
+        ScrollDirection.idle) {
+      widget.onScroll(_scrollController.position.userScrollDirection);
     }
   }
 
   @override
   void dispose() {
-    _researcherScrollController.removeListener(_scrollListener);
-    _researcherScrollController.dispose();
-    _workspaceScrollController.removeListener(_scrollListener);
-    _workspaceScrollController.dispose();
+    _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
   }
@@ -243,9 +228,7 @@ class _SocialScreenState extends State<SocialScreen>
                       }
                     },
                     child: ListView.builder(
-                      controller: isResearcherMode
-                          ? _researcherScrollController
-                          : _workspaceScrollController,
+                      controller: _scrollController,
                       physics: const AlwaysScrollableScrollPhysics(),
                       padding: EdgeInsets.zero,
                       itemCount: isResearcherMode
@@ -349,7 +332,7 @@ class _SocialScreenState extends State<SocialScreen>
     }
 
     return ListView.builder(
-      controller: _workspaceScrollController,
+      controller: _scrollController,
       padding: EdgeInsets.zero,
       itemCount: recommendedWorkspaces.length,
       itemBuilder: (context, index) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ScrollDirection;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:motion_tab_bar_v2/motion-tab-controller.dart';
 import '../../theme/colors.dart';
@@ -8,15 +9,15 @@ import '../../models/workspace.dart';
 import 'dart:math' show min;
 
 class WorkspaceScreen extends StatefulWidget {
-  final ScrollController scrollController;
+  final Function(ScrollDirection) onScroll;
   final MotionTabBarController? tabController;
-  final Function(Map<String, dynamic>)? onWorkspaceSelected;
+  final Function(Map<String, dynamic>) onWorkspaceSelected;
 
   const WorkspaceScreen({
     super.key,
-    required this.scrollController,
+    required this.onScroll,
     this.tabController,
-    this.onWorkspaceSelected,
+    required this.onWorkspaceSelected,
   });
 
   @override
@@ -26,11 +27,26 @@ class WorkspaceScreen extends StatefulWidget {
 class _WorkspaceScreenState extends State<WorkspaceScreen> {
   List<Workspace> workspaces = [];
   bool isLoading = true;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_handleScroll);
     _loadWorkspaces();
+  }
+
+  void _handleScroll() {
+    if (_scrollController.position.userScrollDirection !=
+        ScrollDirection.idle) {
+      widget.onScroll(_scrollController.position.userScrollDirection);
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadWorkspaces() async {
@@ -137,7 +153,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
           child: isLoading
               ? const Center(child: CircularProgressIndicator())
               : GridView.builder(
-                  controller: widget.scrollController,
+                  controller: _scrollController,
                   padding: const EdgeInsets.all(16),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
@@ -156,8 +172,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                       child: InkWell(
                         onTap: () {
                           if (widget.tabController != null) {
-                            widget.onWorkspaceSelected
-                                ?.call(workspace.toJson());
+                            widget.onWorkspaceSelected.call(workspace.toJson());
                             widget.tabController!
                                 .animateTo(widget.tabController!.index);
                           }
