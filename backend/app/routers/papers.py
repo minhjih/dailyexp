@@ -7,6 +7,7 @@ from ..models import models
 from ..schemas import paper_schemas
 from ..services.gpt_service import GPTService
 from ..utils.auth import get_current_user
+from ..services.arxiv_service import ArxivService
 
 router = APIRouter(
     prefix="/papers",
@@ -15,43 +16,16 @@ router = APIRouter(
 
 ieee_service = IEEEService()
 gpt_service = GPTService()
+arxiv_service = ArxivService()
 
 @router.get("/search")
 async def search_papers(
-    keywords: str,
-    start_record: int = 1,
-    max_records: int = 25,
-    start_year: Optional[str] = None,
-    end_year: Optional[str] = None,
-    db: Session = Depends(get_db)
+    query: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
 ):
-    try:
-        # IEEE API를 통해 논문 검색
-        search_results = await ieee_service.search_papers(
-            keywords=keywords,
-            start_record=start_record,
-            max_records=max_records,
-            start_year=start_year,
-            end_year=end_year
-        )
-
-        # 검색 결과가 없는 경우
-        if not search_results.get("articles"):
-            return {"message": "No papers found", "papers": []}
-
-        # 검색된 논문들을 파싱
-        papers = []
-        for article in search_results.get("articles", []):
-            parsed_paper = ieee_service.parse_paper_data(article)
-            papers.append(parsed_paper)
-
-        return {
-            "total_records": search_results.get("total_records", 0),
-            "papers": papers
-        }
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    papers = await arxiv_service.search_papers(query)
+    return papers
 
 @router.get("/analyze/{paper_id}")
 async def analyze_paper(
