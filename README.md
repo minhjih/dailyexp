@@ -60,7 +60,7 @@ Glimpse is an innovative research tracking and knowledge sharing platform design
 - feed screen, Workspaces_main, Workspace_detail_screen1, paper, social, profile screens
 
 ✅ Paper Recommendation Section
-- Integrate OpenAI API for intelligent recommendations
+- Integrate Arxiv API for intelligent recommendations
 - Develop user interest-based recommendation algorithm
 - Design personalized research feed
 
@@ -163,6 +163,11 @@ Project Link: [https://github.com/minhjih/dailyexp](https://github.com/minhjih/d
 - login & signup screens
 - feed screen, Workspaces_main, Workspace_detail_screen1
 
+✅ 논문 추천 섹션
+- 지능형 추천을 위한 Arxiv API 통합
+- 사용자 관심사 기반 추천 알고리즘 개발
+- 개인화된 연구 피드 설계
+
 ### 진행 중인 개발
 🔨 Frontend detail
 
@@ -171,22 +176,16 @@ Project Link: [https://github.com/minhjih/dailyexp](https://github.com/minhjih/d
 - ✅ 프로필 연결
 - 🔨 Posting 기능
 
-🔨 논문 추천 섹션
-- 지능형 추천을 위한 OpenAI API 통합
-- 사용자 관심사 기반 추천 알고리즘 개발
-- 개인화된 연구 피드 설계
+🔨 리뷰 게시 시스템
+- 논문 리뷰 작성/편집 페이지 개발
+- 공개/비공개 리뷰 설정 구현
+- 태깅 및 분류 옵션 추가
 
 ### 다음 개발 단계
-
 1. 스크랩 및 공유 기능
 - 논문 스크랩 메커니즘 구현
 - 그룹 공유 인터페이스 설계
 - 주석 및 하이라이트 기능 생성
-
-2. 리뷰 게시 시스템
-- 논문 리뷰 작성/편집 페이지 개발
-- 공개/비공개 리뷰 설정 구현
-- 태깅 및 분류 옵션 추가
 
 ### 기술적 고려사항
 - 상태 관리 (Provider/Riverpod)
