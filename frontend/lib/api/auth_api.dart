@@ -346,4 +346,20 @@ class AuthAPI {
       throw Exception('Failed to add paper to workspace: $e');
     }
   }
+
+  Future<List<Map<String, dynamic>>> getWorkspacePapers(int workspaceId) async {
+    try {
+      final token = await _getToken();
+      final response = await _dio.get(
+        '/workspaces/$workspaceId/papers',
+        options: Options(
+          headers: {'Authorization': 'Bearer $token'},
+        ),
+      );
+      return List<Map<String, dynamic>>.from(response.data);
+    } catch (e) {
+      print('Error getting workspace papers: $e');
+      throw Exception('Failed to load workspace papers');
+    }
+  }
 }

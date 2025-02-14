@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../workspace/paper_discussion_screen.dart';
+import '../../models/paper.dart';
+import '../../api/auth_api.dart';
 
 class WorkspaceDetailScreen extends StatefulWidget {
   final Map<String, dynamic> workspace;
@@ -32,10 +35,10 @@ class _WorkspaceDetailScreenState extends State<WorkspaceDetailScreen> {
     });
 
     try {
-      // TODO: API로 해당 워크스페이스의 논문 목록 가져오기
-      // final papers = await AuthAPI().getWorkspacePapers(widget.workspace['id']);
+      final loadedPapers =
+          await AuthAPI().getWorkspacePapers(widget.workspace['id']);
       setState(() {
-        papers = []; // 임시로 빈 배열
+        papers = loadedPapers;
         isLoading = false;
       });
     } catch (e) {
@@ -43,6 +46,11 @@ class _WorkspaceDetailScreenState extends State<WorkspaceDetailScreen> {
       setState(() {
         isLoading = false;
       });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load papers: $e')),
+        );
+      }
     }
   }
 
@@ -143,61 +151,61 @@ class _WorkspaceDetailScreenState extends State<WorkspaceDetailScreen> {
                       ),
                     )
                   : ListView.builder(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.all(16),
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
                       itemCount: papers.length,
                       itemBuilder: (context, index) {
-                        final paper = papers[index];
-                        return _buildPaperCard(paper);
+                        final workspacePaper = papers[index];
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          child: ListTile(
+                            title: Text(workspacePaper['paper']['title']),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(workspacePaper['paper']['authors']
+                                    .join(', ')),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Status: ${workspacePaper['status']}',
+                                  style: TextStyle(
+                                    color: workspacePaper['status'] == 'active'
+                                        ? Colors.green
+                                        : Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  DateTime.parse(workspacePaper['paper']
+                                          ['published_date'])
+                                      .year
+                                      .toString(),
+                                ),
+                                const Icon(Icons.chevron_right),
+                              ],
+                            ),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => PaperDiscussionScreen(
+                                    workspaceId: widget.workspace['id'],
+                                    paper:
+                                        Paper.fromJson(workspacePaper['paper']),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        );
                       },
                     ),
         ),
       ],
-    );
-  }
-
-  Widget _buildPaperCard(Map<String, dynamic> paper) {
-    return Card(
-      elevation: 0,
-      margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: InkWell(
-        onTap: () {
-          // TODO: 논문 상세 페이지로 이동
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                paper['title'],
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                paper['authors'].join(', '),
-                style: GoogleFonts.poppins(
-                  color: Colors.grey[600],
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                paper['published_date'],
-                style: GoogleFonts.poppins(
-                  color: Colors.grey[600],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
