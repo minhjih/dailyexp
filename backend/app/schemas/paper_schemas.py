@@ -18,11 +18,28 @@ class PaperBase(BaseModel):
 class PaperCreate(PaperBase):
     ieee_id: str
 
-class Paper(PaperBase):
+class Paper(BaseModel):
     id: int
-    ieee_id: str
+    title: str
+    authors: List[str]  # 문자열 리스트로 변경
+    abstract: str
+    published_date: str
+    arxiv_id: str
+    url: str
+    categories: List[str]
+    created_at: datetime
+    updated_at: datetime
     user_id: Optional[int] = None
-    ai_summary: Optional[str] = None
 
     class Config:
-        orm_mode = True 
+        from_attributes = True
+
+class PaperInWorkspace(BaseModel):
+    id: int
+    paper_id: int
+    added_at: datetime
+    status: str
+    paper: Paper
+
+    class Config:
+        from_attributes = True 

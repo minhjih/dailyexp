@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import os
 import datetime
 from passlib.context import CryptContext
+import random
 
 load_dotenv()
 
@@ -27,7 +28,12 @@ def get_db():
 
 def init_db():
     # 여기서 모든 모델을 import
-    from .models import User, Follow, Paper, Comment, Group, Workspace, WorkspaceMember
+    from .models import (
+        User, Follow, Paper, Comment, Group, 
+        Workspace, WorkspaceMember, WorkspacePaper,  # WorkspacePaper 추가
+        Scrap, Tag, ScrapTag, SharedScrap,          # 관련 모델들도 추가
+        GroupSharedPaper, GroupSharedScrap
+    )
     
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
@@ -343,21 +349,54 @@ def init_db():
 
     try:
         for workspace_data in workspaces:
-            workspace = Workspace(**workspace_data)
+            workspace = Workspace(
+                name=workspace_data["name"],
+                description=workspace_data["description"],
+                research_field=workspace_data["research_field"],
+                research_topics=workspace_data["research_topics"],
+                owner_id=workspace_data["owner_id"],
+                is_public=True,
+                member_count=1
+            )
             db.add(workspace)
-            db.flush()  # workspace.id 얻기 위해
+            db.flush()
 
             # owner를 멤버로 추가
             owner_member = WorkspaceMember(
                 workspace_id=workspace.id,
                 user_id=workspace_data["owner_id"],
-                role="admin",  # owner는 admin 권한
+                role="admin"
             )
             db.add(owner_member)
+            db.flush()
+
+            # 같은 연구 분야의 사용자들을 멤버로 추가
+            similar_users = [
+                user_data for user_data in test_users
+                if (user_data["research_field"] == workspace_data["research_field"] or 
+                    any(topic in user_data["research_interests"] for topic in workspace_data["research_topics"]))
+                and user_data["email"] != f"user{workspace_data['owner_id']}@test.com"
+            ]
             
+            # 유사한 연구 분야의 사용자 중 최대 3명을 랜덤하게 선택
+            selected_users = random.sample(similar_users, min(3, len(similar_users)))
+            
+            for user_data in selected_users:
+                user_id = int(user_data["email"].split("user")[1].split("@")[0])
+                member = WorkspaceMember(
+                    workspace_id=workspace.id,
+                    user_id=user_id,
+                    role="member"
+                )
+                db.add(member)
+            
+            # 멤버 수 업데이트
+            workspace.member_count = 1 + len(selected_users)
+
         db.commit()
+
     except Exception as e:
-        print(f"Error creating test workspaces: {e}")
+        print(f"Error creating workspaces: {e}")
         db.rollback()
     finally:
         db.close()

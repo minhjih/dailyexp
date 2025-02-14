@@ -8,11 +8,21 @@ from ..utils.auth import get_current_user
 import random
 from datetime import datetime
 from sqlalchemy import or_
+from pydantic import BaseModel
 
 router = APIRouter(
     prefix="/workspaces",
     tags=["workspaces"]
 )
+
+class PaperData(BaseModel):
+    title: str
+    authors: list
+    summary: str
+    published_date: str
+    arxiv_id: str
+    url: str
+    categories: list
 
 @router.get("/recommended", response_model=List[workspace_schemas.Workspace])
 async def get_recommended_workspaces(
@@ -141,17 +151,46 @@ async def get_my_workspaces(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
-    # 사용자가 가입한 워크스페이스 조회
-    workspaces = db.query(models.Workspace)\
-        .join(models.WorkspaceMember)\
-        .options(
-            joinedload(models.Workspace.members).joinedload(models.WorkspaceMember.user),
-            joinedload(models.Workspace.papers).joinedload(models.WorkspacePaper.paper)
-        )\
-        .filter(models.WorkspaceMember.user_id == current_user.id)\
-        .all()
-    
-    return workspaces
+    try:
+        workspaces = (
+            db.query(models.Workspace)
+            .join(
+                models.WorkspaceMember,
+                models.Workspace.id == models.WorkspaceMember.workspace_id
+            )
+            .filter(models.WorkspaceMember.user_id == current_user.id)
+            .options(
+                joinedload(models.Workspace.owner),
+                joinedload(models.Workspace.members).joinedload(models.WorkspaceMember.user),
+                joinedload(models.Workspace.papers).joinedload(models.WorkspacePaper.paper)
+            )
+            .all()
+        )
+
+        # 상세 디버그 로그
+        print("\n=== Workspace Data Debug ===")
+        for ws in workspaces:
+            print(f"\nWorkspace ID: {ws.id}")
+            print(f"Name: {ws.name}")
+            print(f"Owner ID: {ws.owner_id}")
+            print(f"Owner Name: {ws.owner.full_name if ws.owner else 'None'}")
+            print(f"Member Count: {ws.member_count}")
+            print("Members:")
+            for member in ws.members:
+                print(f"  - User ID: {member.user_id}, Name: {member.user.full_name}, Role: {member.role}")
+            print("Papers:")
+            for paper in ws.papers:
+                print(f"  - Paper ID: {paper.paper_id}, Title: {paper.paper.title}")
+            print("Raw Data:")
+            print(workspace_schemas.Workspace.from_orm(ws).dict())
+            print("========================\n")
+
+        return workspaces
+
+    except Exception as e:
+        print(f"Error getting workspaces: {e}")
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/search", response_model=List[workspace_schemas.Workspace])
 async def search_workspaces(
@@ -194,4 +233,109 @@ async def search_users(
         )\
         .all()
     
-    return users 
+    return users
+
+@router.post("/{workspace_id}/papers")
+async def add_paper_to_workspace(
+    workspace_id: int,
+    paper_data: PaperData,  # 타입 명시
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    try:
+        workspace = db.query(models.Workspace).filter(models.Workspace.id == workspace_id).first()
+        if not workspace:
+            raise HTTPException(status_code=404, detail="Workspace not found")
+        
+        # 워크스페이스 멤버인지 확인
+        member = db.query(models.WorkspaceMember).filter(
+            models.WorkspaceMember.workspace_id == workspace_id,
+            models.WorkspaceMember.user_id == current_user.id
+        ).first()
+        if not member:
+            raise HTTPException(status_code=403, detail="Not a member of this workspace")
+
+        # 논문이 이미 존재하는지 확인
+        existing_paper = db.query(models.Paper).filter(
+            models.Paper.arxiv_id == paper_data.arxiv_id
+        ).first()
+
+        if not existing_paper:
+            # 새 논문 생성
+            paper = models.Paper(
+                title=paper_data.title,
+                authors=paper_data.authors,
+                abstract=paper_data.summary,
+                published_date=paper_data.published_date,
+                arxiv_id=paper_data.arxiv_id,
+                url=paper_data.url,
+                categories=paper_data.categories
+            )
+            db.add(paper)
+            db.flush()
+        else:
+            paper = existing_paper
+
+        # 이미 워크스페이스에 추가된 논문인지 확인
+        existing_workspace_paper = db.query(models.WorkspacePaper).filter(
+            models.WorkspacePaper.workspace_id == workspace_id,
+            models.WorkspacePaper.paper_id == paper.id
+        ).first()
+
+        if existing_workspace_paper:
+            return {"message": "Paper already exists in workspace"}
+
+        # 워크스페이스에 논문 추가
+        workspace_paper = models.WorkspacePaper(
+            workspace_id=workspace_id,
+            paper_id=paper.id,
+            added_by=current_user.id,
+            status='active'
+        )
+        db.add(workspace_paper)
+        db.commit()
+
+        return {"message": "Paper added to workspace successfully"}
+        
+    except Exception as e:
+        db.rollback()
+        print(f"Error adding paper to workspace: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/{workspace_id}", response_model=workspace_schemas.Workspace)
+async def get_workspace(
+    workspace_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    try:
+        # 워크스페이스와 관련 데이터를 함께 로드
+        workspace = (
+            db.query(models.Workspace)
+            .options(
+                joinedload(models.Workspace.owner),
+                joinedload(models.Workspace.members).joinedload(models.WorkspaceMember.user),
+                joinedload(models.Workspace.papers).joinedload(models.WorkspacePaper.paper)
+            )
+            .filter(models.Workspace.id == workspace_id)
+            .first()
+        )
+
+        if not workspace:
+            raise HTTPException(status_code=404, detail="Workspace not found")
+
+        # 멤버 수 업데이트
+        member_count = len(workspace.members)
+        if workspace.member_count != member_count:
+            workspace.member_count = member_count
+            db.commit()
+
+        # 각 멤버의 owner 여부 설정
+        for member in workspace.members:
+            member.is_owner = (member.user_id == workspace.owner_id)
+
+        return workspace
+
+    except Exception as e:
+        print(f"Error getting workspace: {e}")
+        raise HTTPException(status_code=500, detail=str(e)) 

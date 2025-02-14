@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, JSON, Boolean, ARRAY
 from sqlalchemy.orm import relationship, backref
 from .database import Base
-import datetime
+from datetime import datetime
 
 class User(Base):
     __tablename__ = "users"
@@ -10,7 +10,7 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     full_name = Column(String)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow)
     
     # 추가되는 필드들
     institution = Column(String, nullable=True)  # 소속 기관/학교
@@ -34,20 +34,20 @@ class Paper(Base):
     __tablename__ = "papers"
 
     id = Column(Integer, primary_key=True, index=True)
-    ieee_id = Column(String, unique=True, index=True)
     title = Column(String)
+    authors = Column(ARRAY(String))
     abstract = Column(Text)
-    authors = Column(JSON)
-    published_date = Column(DateTime)
-    ai_summary = Column(JSON)
-    core_claims = Column(Text)
-    methodology = Column(Text)
-    key_findings = Column(Text)
-    visual_elements = Column(JSON)
-    future_research = Column(Text)
+    published_date = Column(String)
+    arxiv_id = Column(String, unique=True)
+    url = Column(String)
+    categories = Column(ARRAY(String))
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     user_id = Column(Integer, ForeignKey("users.id"))
-    
+
+    # Relationships
     user = relationship("User", back_populates="papers")
+    workspace_papers = relationship("WorkspacePaper", back_populates="paper")
     scraps = relationship("Scrap", back_populates="paper")
     group_shares = relationship("GroupSharedPaper", back_populates="paper")
 
@@ -60,8 +60,8 @@ class Scrap(Base):
     scrap_type = Column(String)  # 'text' 또는 'image'
     note = Column(Text)  # 사용자의 메모
     page_number = Column(Integer, nullable=True)  # 논문의 페이지 번호
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     is_public = Column(Boolean, default=False)  # 공개 여부
     search_vector = Column(Text)  # 검색을 위한 필드
     
@@ -80,7 +80,7 @@ class Tag(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="tags")
     scraps = relationship("ScrapTag", back_populates="tag")
@@ -100,7 +100,7 @@ class SharedScrap(Base):
     id = Column(Integer, primary_key=True, index=True)
     scrap_id = Column(Integer, ForeignKey("scraps.id"))
     shared_with_user_id = Column(Integer, ForeignKey("users.id"))
-    shared_at = Column(DateTime, default=datetime.datetime.utcnow)
+    shared_at = Column(DateTime, default=datetime.utcnow)
     
     scrap = relationship("Scrap", back_populates="shares")
     shared_with_user = relationship("User")
@@ -111,7 +111,7 @@ class Group(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
     description = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow)
     owner_id = Column(Integer, ForeignKey("users.id"))
     
     owner = relationship("User", back_populates="owned_groups")
@@ -126,7 +126,7 @@ class GroupMember(Base):
     group_id = Column(Integer, ForeignKey("groups.id"))
     user_id = Column(Integer, ForeignKey("users.id"))
     role = Column(String)  # 'admin' 또는 'member'
-    joined_at = Column(DateTime, default=datetime.datetime.utcnow)
+    joined_at = Column(DateTime, default=datetime.utcnow)
     
     group = relationship("Group", back_populates="members")
     user = relationship("User", back_populates="group_memberships")
@@ -138,7 +138,7 @@ class GroupSharedPaper(Base):
     paper_id = Column(Integer, ForeignKey("papers.id"))
     group_id = Column(Integer, ForeignKey("groups.id"))
     shared_by_id = Column(Integer, ForeignKey("users.id"))
-    shared_at = Column(DateTime, default=datetime.datetime.utcnow)
+    shared_at = Column(DateTime, default=datetime.utcnow)
     note = Column(Text, nullable=True)
     
     paper = relationship("Paper", back_populates="group_shares")
@@ -152,7 +152,7 @@ class GroupSharedScrap(Base):
     scrap_id = Column(Integer, ForeignKey("scraps.id"))
     group_id = Column(Integer, ForeignKey("groups.id"))
     shared_by_id = Column(Integer, ForeignKey("users.id"))
-    shared_at = Column(DateTime, default=datetime.datetime.utcnow)
+    shared_at = Column(DateTime, default=datetime.utcnow)
     note = Column(Text, nullable=True)
     
     scrap = relationship("Scrap", back_populates="group_shares")
@@ -164,8 +164,8 @@ class Comment(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     content = Column(Text)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # 댓글 작성자
     user_id = Column(Integer, ForeignKey("users.id"))
@@ -185,7 +185,7 @@ class Follow(Base):
     id = Column(Integer, primary_key=True, index=True)
     follower_id = Column(Integer, ForeignKey("users.id"))
     following_id = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
     # 관계 설정
     follower = relationship("User", foreign_keys=[follower_id], backref="following")
@@ -201,8 +201,8 @@ class Workspace(Base):
     research_topics = Column(ARRAY(String))
     owner_id = Column(Integer, ForeignKey("users.id"))
     is_public = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     member_count = Column(Integer, default=1)
     
     owner = relationship("User", back_populates="owned_workspaces")
@@ -216,7 +216,7 @@ class WorkspaceMember(Base):
     workspace_id = Column(Integer, ForeignKey("workspaces.id"))
     user_id = Column(Integer, ForeignKey("users.id"))
     role = Column(String, default="member")  # admin or member
-    joined_at = Column(DateTime, default=datetime.datetime.utcnow)
+    joined_at = Column(DateTime, default=datetime.utcnow)
 
     workspace = relationship("Workspace", back_populates="members")
     user = relationship("User", back_populates="workspace_memberships")
@@ -227,8 +227,10 @@ class WorkspacePaper(Base):
     id = Column(Integer, primary_key=True, index=True)
     workspace_id = Column(Integer, ForeignKey("workspaces.id"))
     paper_id = Column(Integer, ForeignKey("papers.id"))
-    added_at = Column(DateTime, default=datetime.datetime.utcnow)
+    added_by = Column(Integer, ForeignKey("users.id"))
+    added_at = Column(DateTime, default=datetime.utcnow)
     status = Column(String, default="in_progress")  # in_progress, completed, archived
 
     workspace = relationship("Workspace", back_populates="papers")
-    paper = relationship("Paper") 
+    paper = relationship("Paper")
+    added_by_user = relationship("User") 

@@ -2,14 +2,15 @@ from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
 from .user_schemas import User
-from .paper_schemas import Paper
+from .paper_schemas import Paper, PaperInWorkspace
 
-class WorkspaceMemberBase(BaseModel):
+class WorkspaceMember(BaseModel):
     id: int
     user_id: int
     role: str
     joined_at: datetime
     user: User
+    is_owner: bool = False
 
     class Config:
         from_attributes = True
@@ -41,12 +42,13 @@ class Workspace(BaseModel):
     research_field: str
     research_topics: List[str]
     owner_id: int
+    owner: User
     is_public: bool = True
     created_at: datetime
     updated_at: datetime
     member_count: int = 1
-    members: List[WorkspaceMemberBase]
-    papers: List[WorkspacePaperBase]
+    members: List[WorkspaceMember]
+    papers: List[PaperInWorkspace]
 
     class Config:
         from_attributes = True 
