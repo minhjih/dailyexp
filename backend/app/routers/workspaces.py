@@ -338,4 +338,61 @@ async def get_workspace(
 
     except Exception as e:
         print(f"Error getting workspace: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/{workspace_id}/papers")
+async def get_workspace_papers(
+    workspace_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    try:
+        # 워크스페이스 존재 확인
+        workspace = db.query(models.Workspace).filter(models.Workspace.id == workspace_id).first()
+        if not workspace:
+            raise HTTPException(status_code=404, detail="Workspace not found")
+        
+        # 워크스페이스 멤버인지 확인
+        member = db.query(models.WorkspaceMember).filter(
+            models.WorkspaceMember.workspace_id == workspace_id,
+            models.WorkspaceMember.user_id == current_user.id
+        ).first()
+        if not member:
+            raise HTTPException(status_code=403, detail="Not a member of this workspace")
+
+        # 워크스페이스의 논문 목록 조회 (Paper 정보 포함)
+        workspace_papers = (
+            db.query(models.WorkspacePaper)
+            .filter(models.WorkspacePaper.workspace_id == workspace_id)
+            .join(models.Paper)
+            .options(joinedload(models.WorkspacePaper.paper))  # Paper 정보를 함께 로드
+            .all()
+        )
+
+        # 응답 데이터 구조화
+        return [
+            {
+                "id": wp.id,
+                "paper_id": wp.paper_id,
+                "added_at": wp.added_at,
+                "status": wp.status,
+                "paper": {
+                    "id": wp.paper.id,
+                    "title": wp.paper.title,
+                    "authors": wp.paper.authors,
+                    "abstract": wp.paper.abstract,
+                    "published_date": wp.paper.published_date,
+                    "arxiv_id": wp.paper.arxiv_id,
+                    "url": wp.paper.url,
+                    "categories": wp.paper.categories,
+                    "created_at": wp.paper.created_at,
+                    "updated_at": wp.paper.updated_at,
+                    "user_id": wp.paper.user_id
+                }
+            }
+            for wp in workspace_papers
+        ]
+
+    except Exception as e:
+        print(f"Error getting workspace papers: {e}")
         raise HTTPException(status_code=500, detail=str(e)) 
