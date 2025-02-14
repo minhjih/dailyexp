@@ -73,7 +73,7 @@ class _WorkspaceDetailScreenState extends State<WorkspaceDetailScreen> {
       children: [
         // 헤더
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
             color: Colors.white,
             border: Border(
@@ -88,16 +88,19 @@ class _WorkspaceDetailScreenState extends State<WorkspaceDetailScreen> {
               IconButton(
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () => widget.onBack(),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       widget.workspace['name'] ?? 'Workspace',
                       style: GoogleFonts.poppins(
-                        fontSize: 20,
+                        fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -105,7 +108,7 @@ class _WorkspaceDetailScreenState extends State<WorkspaceDetailScreen> {
                       '${papers.length} papers',
                       style: GoogleFonts.poppins(
                         color: Colors.grey[600],
-                        fontSize: 14,
+                        fontSize: 12,
                       ),
                     ),
                   ],
@@ -115,95 +118,110 @@ class _WorkspaceDetailScreenState extends State<WorkspaceDetailScreen> {
                 icon: const Icon(Icons.add),
                 onPressed: _addPaper,
                 color: const Color(0xFF43A047),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
               ),
             ],
           ),
         ),
-        // 논문 목록
+        // 스크롤 가능한 컨텐츠
         Expanded(
-          child: isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : papers.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.article_outlined,
-                              size: 48, color: Colors.grey[400]),
-                          const SizedBox(height: 16),
-                          Text(
-                            'No papers yet',
-                            style: GoogleFonts.poppins(
-                              color: Colors.grey[600],
-                              fontSize: 16,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: isLoading
+                ? const Padding(
+                    padding: EdgeInsets.all(16),
+                    child: CircularProgressIndicator(),
+                  )
+                : papers.isEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const SizedBox(height: 32),
+                            Icon(Icons.article_outlined,
+                                size: 48, color: Colors.grey[400]),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No papers yet',
+                              style: GoogleFonts.poppins(
+                                color: Colors.grey[600],
+                                fontSize: 16,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          TextButton.icon(
-                            onPressed: _addPaper,
-                            icon: const Icon(Icons.add),
-                            label: const Text('Add Paper'),
-                            style: TextButton.styleFrom(
-                              foregroundColor: const Color(0xFF43A047),
+                            const SizedBox(height: 8),
+                            TextButton.icon(
+                              onPressed: _addPaper,
+                              icon: const Icon(Icons.add),
+                              label: const Text('Add Paper'),
+                              style: TextButton.styleFrom(
+                                foregroundColor: const Color(0xFF43A047),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
+                      )
+                    : Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: papers.length,
+                          itemBuilder: (context, index) {
+                            final workspacePaper = papers[index];
+                            return Card(
+                              margin: const EdgeInsets.only(bottom: 8),
+                              child: ListTile(
+                                title: Text(workspacePaper['paper']['title']),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(workspacePaper['paper']['authors']
+                                        .join(', ')),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Status: ${workspacePaper['status']}',
+                                      style: TextStyle(
+                                        color:
+                                            workspacePaper['status'] == 'active'
+                                                ? Colors.green
+                                                : Colors.grey,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      DateTime.parse(workspacePaper['paper']
+                                              ['published_date'])
+                                          .year
+                                          .toString(),
+                                    ),
+                                    const Icon(Icons.chevron_right),
+                                  ],
+                                ),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          PaperDiscussionScreen(
+                                        workspaceId: widget.workspace['id'],
+                                        paper: Paper.fromJson(
+                                            workspacePaper['paper']),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                        ),
                       ),
-                    )
-                  : ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: papers.length,
-                      itemBuilder: (context, index) {
-                        final workspacePaper = papers[index];
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          child: ListTile(
-                            title: Text(workspacePaper['paper']['title']),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(workspacePaper['paper']['authors']
-                                    .join(', ')),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Status: ${workspacePaper['status']}',
-                                  style: TextStyle(
-                                    color: workspacePaper['status'] == 'active'
-                                        ? Colors.green
-                                        : Colors.grey,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  DateTime.parse(workspacePaper['paper']
-                                          ['published_date'])
-                                      .year
-                                      .toString(),
-                                ),
-                                const Icon(Icons.chevron_right),
-                              ],
-                            ),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => PaperDiscussionScreen(
-                                    workspaceId: widget.workspace['id'],
-                                    paper:
-                                        Paper.fromJson(workspacePaper['paper']),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        );
-                      },
-                    ),
+          ),
         ),
       ],
     );
