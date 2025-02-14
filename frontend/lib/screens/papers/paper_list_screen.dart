@@ -5,7 +5,6 @@ import '../../api/auth_api.dart';
 import 'package:provider/provider.dart';
 import '../../providers/user_provider.dart';
 import '../../screens/papers/paper_search_screen.dart';
-import '../../screens/papers/paper_detail_screen.dart';
 import '../../widgets/workspace_selection_sheet.dart';
 
 class PaperListScreen extends StatefulWidget {
@@ -444,8 +443,11 @@ class _PaperListScreenState extends State<PaperListScreen>
       builder: (context) => WorkspaceSelectionSheet(
         onWorkspaceSelected: (workspace) async {
           try {
-            // TODO: API 호출로 선택된 워크스페이스에 논문 추가
-            // await AuthAPI().addPaperToWorkspace(workspace['id'], selectedPaper!['id']);
+            await AuthAPI().addPaperToWorkspace(
+              workspace['id'],
+              selectedPaper!,
+            );
+
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
@@ -455,7 +457,7 @@ class _PaperListScreenState extends State<PaperListScreen>
                 backgroundColor: const Color(0xFF43A047),
               ),
             );
-            Navigator.pop(context); // 바텀시트 닫기
+            Navigator.pop(context);
           } catch (e) {
             print('Error adding paper to workspace: $e');
             ScaffoldMessenger.of(context).showSnackBar(

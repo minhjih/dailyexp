@@ -326,4 +326,24 @@ class AuthAPI {
     );
     return response.data;
   }
+
+  Future<void> addPaperToWorkspace(
+      int workspaceId, Map<String, dynamic> paperData) async {
+    try {
+      final token = await _getToken();
+      final response = await _dio.post(
+        '/workspaces/$workspaceId/papers',
+        options: Options(
+          headers: {'Authorization': 'Bearer $token'},
+        ),
+        data: paperData,
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to add paper to workspace');
+      }
+    } catch (e) {
+      throw Exception('Failed to add paper to workspace: $e');
+    }
+  }
 }

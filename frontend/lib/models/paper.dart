@@ -1,48 +1,42 @@
 class Paper {
   final int id;
-  final String ieeeId;
   final String title;
+  final List<String> authors;
   final String abstract;
-  final List<dynamic> authors;
-  final DateTime publishedDate;
-  final Map<String, dynamic>? aiSummary;
-  final String? coreClaims;
-  final String? methodology;
-  final String? keyFindings;
-  final Map<String, dynamic>? visualElements;
-  final String? futureResearch;
-  final int userId;
+  final String publishedDate;
+  final String arxivId;
+  final String url;
+  final List<String> categories;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final int? userId;
 
   Paper({
     required this.id,
-    required this.ieeeId,
     required this.title,
-    required this.abstract,
     required this.authors,
+    required this.abstract,
     required this.publishedDate,
-    this.aiSummary,
-    this.coreClaims,
-    this.methodology,
-    this.keyFindings,
-    this.visualElements,
-    this.futureResearch,
-    required this.userId,
+    required this.arxivId,
+    required this.url,
+    required this.categories,
+    required this.createdAt,
+    required this.updatedAt,
+    this.userId,
   });
 
   factory Paper.fromJson(Map<String, dynamic> json) {
     return Paper(
       id: json['id'],
-      ieeeId: json['ieee_id'],
       title: json['title'],
+      authors: List<String>.from(json['authors']),
       abstract: json['abstract'],
-      authors: json['authors'],
-      publishedDate: DateTime.parse(json['published_date']),
-      aiSummary: json['ai_summary'],
-      coreClaims: json['core_claims'],
-      methodology: json['methodology'],
-      keyFindings: json['key_findings'],
-      visualElements: json['visual_elements'],
-      futureResearch: json['future_research'],
+      publishedDate: json['published_date'],
+      arxivId: json['arxiv_id'],
+      url: json['url'],
+      categories: List<String>.from(json['categories']),
+      createdAt: DateTime.parse(json['created_at']),
+      updatedAt: DateTime.parse(json['updated_at']),
       userId: json['user_id'],
     );
   }
@@ -50,18 +44,50 @@ class Paper {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'ieee_id': ieeeId,
       'title': title,
-      'abstract': abstract,
       'authors': authors,
-      'published_date': publishedDate.toIso8601String(),
-      'ai_summary': aiSummary,
-      'core_claims': coreClaims,
-      'methodology': methodology,
-      'key_findings': keyFindings,
-      'visual_elements': visualElements,
-      'future_research': futureResearch,
+      'abstract': abstract,
+      'published_date': publishedDate,
+      'arxiv_id': arxivId,
+      'url': url,
+      'categories': categories,
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt.toIso8601String(),
       'user_id': userId,
     };
+  }
+
+  DateTime get publishedDateTime => DateTime.parse(publishedDate);
+}
+
+class WorkspacePaper {
+  final int id;
+  final int paperId;
+  final DateTime addedAt;
+  final String status;
+  final Paper paper;
+
+  WorkspacePaper({
+    required this.id,
+    required this.paperId,
+    required this.addedAt,
+    required this.status,
+    required this.paper,
+  });
+
+  factory WorkspacePaper.fromJson(Map<String, dynamic> json) {
+    try {
+      return WorkspacePaper(
+        id: json['id'],
+        paperId: json['paper_id'],
+        addedAt: DateTime.parse(json['added_at']),
+        status: json['status'],
+        paper: Paper.fromJson(json['paper']),
+      );
+    } catch (e) {
+      print('Error parsing WorkspacePaper: $e');
+      print('Raw JSON: $json'); // 디버그를 위한 로그 추가
+      rethrow;
+    }
   }
 }

@@ -8,6 +8,7 @@ class Workspace {
   final String researchField;
   final List<String> researchTopics;
   final int ownerId;
+  final User owner;
   final bool isPublic;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -22,33 +23,59 @@ class Workspace {
     required this.researchField,
     required this.researchTopics,
     required this.ownerId,
-    this.isPublic = true,
+    required this.owner,
+    required this.isPublic,
     required this.createdAt,
     required this.updatedAt,
-    this.memberCount = 1,
+    required this.memberCount,
     required this.members,
     required this.papers,
   });
 
   factory Workspace.fromJson(Map<String, dynamic> json) {
-    return Workspace(
-      id: json['id'],
-      name: json['name'],
-      description: json['description'],
-      researchField: json['research_field'],
-      researchTopics: List<String>.from(json['research_topics']),
-      ownerId: json['owner_id'],
-      isPublic: json['is_public'] ?? true,
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
-      memberCount: json['member_count'] ?? 1,
-      members: (json['members'] as List)
-          .map((m) => WorkspaceMember.fromJson(m))
-          .toList(),
-      papers: (json['papers'] as List)
-          .map((p) => WorkspacePaper.fromJson(p))
-          .toList(),
-    );
+    try {
+      print('Parsing workspace: ${json['name']}');
+
+      final members = (json['members'] as List?)?.map((memberJson) {
+            try {
+              return WorkspaceMember.fromJson(memberJson);
+            } catch (e) {
+              print('Error parsing member: $e');
+              rethrow;
+            }
+          }).toList() ??
+          [];
+
+      final papers = (json['papers'] as List?)?.map((paperJson) {
+            try {
+              return WorkspacePaper.fromJson(paperJson);
+            } catch (e) {
+              print('Error parsing paper: $e');
+              rethrow;
+            }
+          }).toList() ??
+          [];
+
+      return Workspace(
+        id: json['id'],
+        name: json['name'],
+        description: json['description'],
+        researchField: json['research_field'],
+        researchTopics: List<String>.from(json['research_topics']),
+        ownerId: json['owner_id'],
+        owner: User.fromJson(json['owner']),
+        isPublic: json['is_public'],
+        createdAt: DateTime.parse(json['created_at']),
+        updatedAt: DateTime.parse(json['updated_at']),
+        memberCount: json['member_count'],
+        members: members,
+        papers: papers,
+      );
+    } catch (e, stackTrace) {
+      print('Error parsing workspace: $e');
+      print('Stack trace: $stackTrace');
+      rethrow;
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -121,13 +148,18 @@ class WorkspacePaper {
   });
 
   factory WorkspacePaper.fromJson(Map<String, dynamic> json) {
-    return WorkspacePaper(
-      id: json['id'],
-      paperId: json['paper_id'],
-      addedAt: DateTime.parse(json['added_at']),
-      status: json['status'],
-      paper: Paper.fromJson(json['paper']),
-    );
+    try {
+      return WorkspacePaper(
+        id: json['id'],
+        paperId: json['paper_id'],
+        addedAt: DateTime.parse(json['added_at']),
+        status: json['status'],
+        paper: Paper.fromJson(json['paper']),
+      );
+    } catch (e) {
+      print('Error parsing WorkspacePaper: $e');
+      rethrow;
+    }
   }
 
   Map<String, dynamic> toJson() {

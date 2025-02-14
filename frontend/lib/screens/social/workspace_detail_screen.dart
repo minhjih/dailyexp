@@ -203,7 +203,9 @@ class _WorkspaceDetailScreenState extends State<WorkspaceDetailScreen> {
                     title: Text(workspacePaper.paper.title),
                     subtitle: Text(workspacePaper.paper.authors.join(', ')),
                     trailing: Text(
-                        workspacePaper.paper.publishedDate.year.toString()),
+                        DateTime.parse(workspacePaper.paper.publishedDate)
+                            .year
+                            .toString()),
                   ),
                 );
               },
