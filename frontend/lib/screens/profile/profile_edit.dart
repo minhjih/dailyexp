@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart'; // 이미지 선택을 위해 image_picker 패키지 사용
-import 'dart:io'; // File 클래스 사용을 위해 필요
+import 'package:frontend/screens/profile/BasicInfoPage.dart';
+import 'package:frontend/screens/profile/AffiliationInfoPage.dart';
+import 'package:frontend/screens/profile/ResearchInfoPage.dart';
+import 'package:frontend/screens/profile/ProfileInfoPage.dart';
 
 class ProfileEditPage extends StatefulWidget {
   const ProfileEditPage({Key? key}) : super(key: key);
@@ -11,124 +13,131 @@ class ProfileEditPage extends StatefulWidget {
 }
 
 class _ProfileEditPageState extends State<ProfileEditPage> {
-  final _formKey = GlobalKey<FormState>();
-  String? name = '';
-  String? email = '';
-  String? password = '';
-  XFile? _image; // 선택된 이미지 파일
-
-  final ImagePicker _picker = ImagePicker();
-
-  Future<void> _pickImage() async {
-    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _image = pickedFile;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('프로필 수정', style: GoogleFonts.poppins()),
-        backgroundColor: Colors.green,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              GestureDetector(
-                onTap: _pickImage, // 이미지 변경을 위해 탭 핸들러 추가
-                child: CircleAvatar(
-                  radius: 60,
-                  backgroundColor: Colors.grey.shade300,
-                  backgroundImage: _image != null ? FileImage(File(_image!.path)) : null,
-                  child: _image == null ? Icon(Icons.camera_alt, size: 60, color: Colors.grey.shade800) : null,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(60.0),  // 상단바 높이 조정
+        child: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: Colors.green),
+            onPressed: () {
+              Navigator.pop(context); // 뒤로가기 버튼
+            },
+          ),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center, // 중앙 정렬
+            children: [
+              //Expanded(child: Container()), // 왼쪽 빈 공간
+              Text(
+                '프로필 수정',
+                style: GoogleFonts.poppins(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green,
                 ),
               ),
-              SizedBox(height: 20),
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: '이름',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return '이름을 입력해주세요.';
-                  }
-                  return null;
-                },
-                onSaved: (value) => name = value,
-              ),
-              SizedBox(height: 20),
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: '이메일',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || !value.contains('@')) {
-                    return '유효한 이메일 주소를 입력해주세요.';
-                  }
-                  return null;
-                },
-                onSaved: (value) => email = value,
-              ),
-              SizedBox(height: 20),
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: '새 비밀번호',
-                  border: OutlineInputBorder(),
-                ),
-                obscureText: true,
-                validator: (value) {
-                  if (value == null || value.length < 6) {
-                    return '비밀번호는 최소 6자 이상이어야 합니다.';
-                  }
-                  return null;
-                },
-                onSaved: (value) => password = value,
-              ),
-              SizedBox(height: 40),
-              ElevatedButton(
-                onPressed: _submit,
-                child: Text('저장하기', style: GoogleFonts.poppins()),
-              ),
+              Expanded(child: Container()), // 오른쪽 빈 공간
             ],
           ),
         ),
       ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            // "계정설정" 텍스트
+            Text(
+              '계정설정',
+              style: GoogleFonts.poppins(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.green,
+              ),
+            ),
+            SizedBox(height: 10), // 텍스트와 버튼 사이에 간격 추가
+
+            // 버튼들을 묶는 테두리
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade400),
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: Column(
+                children: <Widget>[
+                  _buildSectionButton(context, '기본정보', Icons.info, _navigateToBasicInfo),
+                  _buildSectionButton(context, '소속정보', Icons.business, _navigateToAffiliationInfo),
+                  _buildSectionButton(context, '연구정보', Icons.science, _navigateToResearchInfo),
+                  _buildSectionButton(context, '프로필정보', Icons.person, _navigateToProfileInfo),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
-  void _submit() {
-    final form = _formKey.currentState;
-    if (form != null && form.validate()) {
-      form.save();
-      // 여기에 프로필 정보를 업데이트하는 로직을 추가합니다. 예: 서버 API 호출
 
-      // 데이터 업데이트 후 다이얼로그 표시
-      showDialog(
-        context: context,
-        builder: (context) =>
-            AlertDialog(
-              title: Text('저장 완료'),
-              content: Text('변경사항이 저장되었습니다.'),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(); // 다이얼로그 닫기
-                    Navigator.of(context).pop(); // 프로필 수정 페이지 닫고 이전 화면으로 돌아가기
-                  },
-                  child: Text('확인'),
+  // 섹션 버튼을 만드는 함수
+  Widget _buildSectionButton(BuildContext context, String title, IconData icon, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(color: Colors.grey.shade300),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Icon(icon, size: 32, color: Colors.green), // 아이콘 추가
+                SizedBox(width: 10),
+                Text(
+                  title,
+                  style: GoogleFonts.poppins(fontSize: 16, color: Colors.green),
                 ),
               ],
             ),
-      );
-    }
+            Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 각각의 섹션에 대한 페이지로 이동하는 함수들
+  void _navigateToBasicInfo() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => BasicInfoPage()),
+    );
+  }
+
+  void _navigateToAffiliationInfo() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AffiliationInfoPage()),
+    );
+  }
+
+  void _navigateToResearchInfo() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ResearchInfoPage()),
+    );
+  }
+
+  void _navigateToProfileInfo() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ProfileInfoPage()),
+    );
   }
 }
