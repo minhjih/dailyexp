@@ -29,6 +29,9 @@ class User(Base):
     comments = relationship("Comment", back_populates="user")
     owned_workspaces = relationship("Workspace", back_populates="owner")
     workspace_memberships = relationship("WorkspaceMember", back_populates="user")
+    posts = relationship("Post", back_populates="author")
+    post_likes = relationship("PostLike", back_populates="user")
+    post_saves = relationship("PostSave", back_populates="user")
 
 class Paper(Base):
     __tablename__ = "papers"
@@ -50,6 +53,65 @@ class Paper(Base):
     workspace_papers = relationship("WorkspacePaper", back_populates="paper")
     scraps = relationship("Scrap", back_populates="paper")
     group_shares = relationship("GroupSharedPaper", back_populates="paper")
+    posts = relationship("Post", foreign_keys="Post.paper_id", back_populates="paper")
+
+class Post(Base):
+    __tablename__ = "posts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String)
+    content = Column(Text)
+    paper_title = Column(String, nullable=True)
+    key_insights = Column(ARRAY(String), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    author_id = Column(Integer, ForeignKey("users.id"))
+    paper_id = Column(Integer, ForeignKey("papers.id"), nullable=True)
+
+    author = relationship("User", back_populates="posts")
+    paper = relationship("Paper", foreign_keys=[paper_id], back_populates="posts")
+    likes = relationship("PostLike", back_populates="post", cascade="all, delete-orphan")
+    saves = relationship("PostSave", back_populates="post", cascade="all, delete-orphan")
+    comments = relationship("PostComment", back_populates="post", cascade="all, delete-orphan")
+
+class PostLike(Base):
+    __tablename__ = "post_likes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    post_id = Column(Integer, ForeignKey("posts.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    post = relationship("Post", back_populates="likes")
+    user = relationship("User", back_populates="post_likes")
+
+class PostSave(Base):
+    __tablename__ = "post_saves"
+
+    id = Column(Integer, primary_key=True, index=True)
+    post_id = Column(Integer, ForeignKey("posts.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    post = relationship("Post", back_populates="saves")
+    user = relationship("User", back_populates="post_saves")
+
+class PostComment(Base):
+    __tablename__ = "post_comments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    content = Column(Text)
+    post_id = Column(Integer, ForeignKey("posts.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # 대댓글을 위한 필드
+    parent_id = Column(Integer, ForeignKey("post_comments.id"), nullable=True)
+    
+    post = relationship("Post", back_populates="comments")
+    user = relationship("User")
+    replies = relationship("PostComment", backref=backref("parent", remote_side=[id]))
 
 class Scrap(Base):
     __tablename__ = "scraps"
