@@ -71,11 +71,7 @@ Glimpse is an innovative research tracking and knowledge sharing platform design
 
 ### Ongoing Development
 🔨 Details of frontend
-
-🔨 User information maintain
-- ✅ POST much more user information (such as organization, ages, sex etc..)
-- ✅ Link to user information to profile
-- 🔨 Database expansion
+- posting details
 
 🔨 Review Posting System
 - Develop paper review writing/editing page
@@ -180,12 +176,7 @@ Project Link: [https://github.com/minhjih/dailyexp](https://github.com/minhjih/d
 
 ### 진행 중인 개발
 🔨 Frontend detail
-
-🔨 사용자 정보 관리
-- ✅ 더 많은 사용자 정보 유지 (조직, 나이, 성별 등)
-- ✅ 프로필 연결
-- ✅ Posting 기능 백엔드 구현
-- 🔨 Posting 기능 프론트엔드 연동
+- 게시물 디테일 수정
 
 🔨 리뷰 게시 시스템
 - 논문 리뷰 작성/편집 페이지 개발
