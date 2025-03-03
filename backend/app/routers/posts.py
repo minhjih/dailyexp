@@ -197,13 +197,19 @@ def add_comment(
                 detail="유효하지 않은 부모 댓글입니다."
             )
     
-    return PostService.add_comment(
+    new_comment = PostService.add_comment(
         db=db, 
         post_id=post_id, 
         user_id=current_user.id, 
         content=comment.content, 
         parent_id=comment.parent_id
     )
+    
+    # 댓글 작성자 정보 추가
+    new_comment.user_name = current_user.full_name
+    new_comment.user_profile_image = current_user.profile_image_url
+    
+    return new_comment
 
 @router.get("/{post_id}/comments", response_model=List[PostComment])
 def get_comments(
@@ -219,4 +225,13 @@ def get_comments(
             detail="포스트를 찾을 수 없습니다."
         )
     
-    return PostService.get_comments(db=db, post_id=post_id) 
+    comments = PostService.get_comments(db=db, post_id=post_id)
+    
+    # 댓글 작성자 정보 추가
+    for comment in comments:
+        user = db.query(User).filter(User.id == comment.user_id).first()
+        if user:
+            comment.user_name = user.full_name
+            comment.user_profile_image = user.profile_image_url
+    
+    return comments 

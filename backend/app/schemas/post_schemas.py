@@ -17,6 +17,8 @@ class PostComment(PostCommentBase):
     created_at: datetime
     updated_at: datetime
     parent_id: Optional[int] = None
+    user_name: Optional[str] = None
+    user_profile_image: Optional[str] = None
     
     class Config:
         orm_mode = True
