@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
+from sqlalchemy.sql import desc, func
 
 from ..utils.auth import get_current_user
 from ..models.database import get_db
-from ..models.models import User
+from ..models.models import User, Post, PostLike, PostSave, PostComment
 from ..schemas.post_schemas import Post, PostDetail, PostCreate, PostUpdate, PostComment, PostCommentCreate
 from ..services.post_service import PostService
 
@@ -33,7 +34,43 @@ def get_posts(
 ):
     """포스트 목록을 조회합니다. user_id가 제공되면 해당 사용자의 포스트만 조회합니다."""
     if user_id:
-        return PostService.get_posts_by_user(db=db, user_id=user_id, skip=skip, limit=limit)
+        posts = db.query(Post).filter(Post.author_id == user_id).order_by(desc(Post.created_at)).offset(skip).limit(limit).all()
+        
+        # 포스트 작성자 정보 추가
+        result = []
+        for post in posts:
+            author = db.query(User).filter(User.id == post.author_id).first()
+            
+            # 좋아요, 저장, 댓글 수 계산
+            like_count = db.query(func.count(PostLike.id)).filter(PostLike.post_id == post.id).scalar()
+            save_count = db.query(func.count(PostSave.id)).filter(PostSave.post_id == post.id).scalar()
+            comment_count = db.query(func.count(PostComment.id)).filter(PostComment.post_id == post.id).scalar()
+            
+            # 현재 사용자가 좋아요/저장했는지 확인
+            is_liked = db.query(PostLike).filter(PostLike.post_id == post.id, PostLike.user_id == current_user.id).first() is not None
+            is_saved = db.query(PostSave).filter(PostSave.post_id == post.id, PostSave.user_id == current_user.id).first() is not None
+            
+            post_dict = {
+                "id": post.id,
+                "title": post.title,
+                "content": post.content,
+                "paper_title": post.paper_title,
+                "key_insights": post.key_insights,
+                "created_at": post.created_at,
+                "updated_at": post.updated_at,
+                "author_id": post.author_id,
+                "paper_id": post.paper_id,
+                "author_name": author.full_name if author else "Unknown",
+                "author_profile_image": author.profile_image_url if author else None,
+                "like_count": like_count,
+                "save_count": save_count,
+                "comment_count": comment_count,
+                "is_liked": is_liked,
+                "is_saved": is_saved
+            }
+            result.append(post_dict)
+        
+        return result
     else:
         # 모든 포스트 조회 로직 (필요시 구현)
         raise HTTPException(

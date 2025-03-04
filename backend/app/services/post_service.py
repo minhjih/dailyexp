@@ -29,9 +29,45 @@ class PostService:
         return db.query(Post).filter(Post.id == post_id).first()
     
     @staticmethod
-    def get_posts_by_user(db: Session, user_id: int, skip: int = 0, limit: int = 100) -> List[Post]:
+    def get_posts_by_user(db: Session, user_id: int, skip: int = 0, limit: int = 100) -> List[dict]:
         """특정 사용자의 포스트를 조회합니다."""
-        return db.query(Post).filter(Post.author_id == user_id).order_by(desc(Post.created_at)).offset(skip).limit(limit).all()
+        posts = db.query(Post).filter(Post.author_id == user_id).order_by(desc(Post.created_at)).offset(skip).limit(limit).all()
+        
+        # 포스트 작성자 정보 추가
+        result = []
+        for post in posts:
+            author = db.query(User).filter(User.id == post.author_id).first()
+            
+            # 좋아요, 저장, 댓글 수 계산
+            like_count = db.query(func.count(PostLike.id)).filter(PostLike.post_id == post.id).scalar()
+            save_count = db.query(func.count(PostSave.id)).filter(PostSave.post_id == post.id).scalar()
+            comment_count = db.query(func.count(PostComment.id)).filter(PostComment.post_id == post.id).scalar()
+            
+            # 현재 사용자가 좋아요/저장했는지 확인
+            is_liked = db.query(PostLike).filter(PostLike.post_id == post.id, PostLike.user_id == user_id).first() is not None
+            is_saved = db.query(PostSave).filter(PostSave.post_id == post.id, PostSave.user_id == user_id).first() is not None
+            
+            post_dict = {
+                "id": post.id,
+                "title": post.title,
+                "content": post.content,
+                "paper_title": post.paper_title,
+                "key_insights": post.key_insights,
+                "created_at": post.created_at,
+                "updated_at": post.updated_at,
+                "author_id": post.author_id,
+                "paper_id": post.paper_id,
+                "author_name": author.full_name if author else "Unknown",
+                "author_profile_image": author.profile_image_url if author else None,
+                "like_count": like_count,
+                "save_count": save_count,
+                "comment_count": comment_count,
+                "is_liked": is_liked,
+                "is_saved": is_saved
+            }
+            result.append(post_dict)
+        
+        return result
     
     @staticmethod
     def get_feed_posts(db: Session, user_id: int, skip: int = 0, limit: int = 20) -> List[dict]:
