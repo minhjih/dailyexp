@@ -40,10 +40,15 @@ class PostAPI {
         final List<dynamic> postsJson = response.data;
         return postsJson.map((json) => Post.fromJson(json)).toList();
       } else {
-        throw Exception('Failed to fetch posts');
+        print(
+            'Error fetching feed posts: ${response.statusCode} - ${response.data}');
+        // 404 에러인 경우 빈 리스트 반환 (팔로우한 사용자가 없는 경우)
+        if (response.statusCode == 404) {
+          return [];
+        }
+        throw Exception('Failed to fetch posts: ${response.statusMessage}');
       }
     } catch (e) {
-      // 404 에러인 경우 빈 리스트 반환 (팔로우한 사용자가 없는 경우)
       print('Error fetching feed posts: $e');
       return [];
     }
@@ -56,6 +61,13 @@ class PostAPI {
       final token = await _getToken();
       if (token == null) {
         throw Exception('No token found');
+      }
+
+      // 백엔드 라우터 형식에 맞게 수정
+      // GET /posts?user_id=1&skip=0&limit=100
+      // user_id는 필수 파라미터입니다
+      if (userId <= 0) {
+        throw Exception('유효한 사용자 ID가 필요합니다');
       }
 
       final response = await _dio.get(
@@ -76,12 +88,15 @@ class PostAPI {
         final List<dynamic> postsJson = response.data;
         return postsJson.map((json) => Post.fromJson(json)).toList();
       } else {
-        throw Exception('Failed to fetch user posts');
+        print(
+            'Error fetching user posts: ${response.statusCode} - ${response.data}');
+        throw Exception(
+            'Failed to fetch user posts: ${response.statusMessage}');
       }
     } catch (e) {
-      // 개발 중에는 더미 데이터 반환
+      // 에러 발생 시 빈 리스트 반환
       print('Error fetching user posts: $e');
-      return _getDummyPosts();
+      return [];
     }
   }
 
@@ -279,30 +294,5 @@ class PostAPI {
       print('Error fetching comments: $e');
       return [];
     }
-  }
-
-  // 개발용 더미 포스트 데이터
-  List<Post> _getDummyPosts() {
-    return List.generate(
-      10,
-      (index) => Post(
-        id: index + 1,
-        authorId: index % 3 + 1,
-        authorName: '사용자 ${index % 3 + 1}',
-        authorProfileImage: 'https://i.pravatar.cc/150?img=${index % 10 + 1}',
-        title: '포스트 제목 ${index + 1}',
-        content:
-            '이것은 포스트 내용입니다. 여기에 포스트의 자세한 내용이 들어갑니다. 이 포스트는 개발 중에 사용되는 더미 데이터입니다.',
-        createdAt: DateTime.now().subtract(Duration(days: index)),
-        updatedAt: DateTime.now().subtract(Duration(days: index)),
-        paperTitle: index % 2 == 0 ? '관련 논문 제목 ${index + 1}' : null,
-        keyInsights: index % 2 == 0 ? ['주요 인사이트 1', '주요 인사이트 2'] : null,
-        likeCount: index * 5,
-        saveCount: index * 2,
-        commentCount: index * 3,
-        isLiked: index % 2 == 0,
-        isSaved: index % 3 == 0,
-      ),
-    );
   }
 }

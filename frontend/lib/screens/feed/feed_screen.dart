@@ -222,24 +222,38 @@ class _FeedScreenState extends State<FeedScreen> {
                   await postProvider.fetchFeedPosts(refresh: true);
                 },
                 color: const Color(0xFF43A047),
-                child: ListView.builder(
-                  controller: _scrollController,
-                  itemCount: postProvider.posts.length +
-                      (postProvider.hasMorePosts ? 1 : 0),
-                  itemBuilder: (context, index) {
-                    if (index == postProvider.posts.length) {
-                      return const Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: CircularProgressIndicator(
-                            color: Color(0xFF43A047),
-                          ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return SingleChildScrollView(
+                      controller: _scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: constraints.maxHeight,
                         ),
-                      );
-                    }
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: postProvider.posts.length +
+                              (postProvider.hasMorePosts ? 1 : 0),
+                          itemBuilder: (context, index) {
+                            if (index == postProvider.posts.length) {
+                              return const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(16.0),
+                                  child: CircularProgressIndicator(
+                                    color: Color(0xFF43A047),
+                                  ),
+                                ),
+                              );
+                            }
 
-                    final post = postProvider.posts[index];
-                    return buildPostCard(post);
+                            final post = postProvider.posts[index];
+                            return buildPostCard(post);
+                          },
+                        ),
+                      ),
+                    );
                   },
                 ),
               );

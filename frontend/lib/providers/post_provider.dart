@@ -227,4 +227,30 @@ class PostProvider with ChangeNotifier {
       developer.log('Error fetching comments: $e');
     }
   }
+
+  // 사용자의 포스트 가져오기
+  List<Post> _userPosts = [];
+  bool _isLoadingUserPosts = false;
+  bool _hasErrorUserPosts = false;
+
+  List<Post> get userPosts => _userPosts;
+  bool get isLoadingUserPosts => _isLoadingUserPosts;
+  bool get hasErrorUserPosts => _hasErrorUserPosts;
+
+  Future<void> fetchUserPosts(int userId) async {
+    try {
+      _isLoadingUserPosts = true;
+      _hasErrorUserPosts = false;
+      notifyListeners();
+
+      final posts = await _postAPI.getUserPosts(userId);
+      _userPosts = posts;
+    } catch (e) {
+      _hasErrorUserPosts = true;
+      developer.log('Error fetching user posts: $e');
+    } finally {
+      _isLoadingUserPosts = false;
+      notifyListeners();
+    }
+  }
 }

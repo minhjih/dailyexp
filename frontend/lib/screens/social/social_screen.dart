@@ -227,28 +227,43 @@ class _SocialScreenState extends State<SocialScreen>
                         await _loadRecommendedWorkspaces();
                       }
                     },
-                    child: ListView.builder(
-                      controller: _scrollController,
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: EdgeInsets.zero,
-                      itemCount: isResearcherMode
-                          ? filteredUsers.length
-                          : filteredWorkspaces.length,
-                      itemBuilder: (context, index) {
-                        if (filteredUsers.isEmpty && isResearcherMode) {
-                          return const Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(16.0),
-                              child: Text('No researchers found'),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        return SingleChildScrollView(
+                          controller: _scrollController,
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minHeight: constraints.maxHeight,
                             ),
-                          );
-                        }
-                        return isResearcherMode
-                            ? ResearcherListTile(user: filteredUsers[index])
-                            : WorkspaceListTile(
-                                workspace: filteredWorkspaces[index],
-                                onWorkspaceUpdated: _loadRecommendedWorkspaces,
-                              );
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              padding: EdgeInsets.zero,
+                              itemCount: isResearcherMode
+                                  ? filteredUsers.length
+                                  : filteredWorkspaces.length,
+                              itemBuilder: (context, index) {
+                                if (filteredUsers.isEmpty && isResearcherMode) {
+                                  return const Center(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(16.0),
+                                      child: Text('No researchers found'),
+                                    ),
+                                  );
+                                }
+                                return isResearcherMode
+                                    ? ResearcherListTile(
+                                        user: filteredUsers[index])
+                                    : WorkspaceListTile(
+                                        workspace: filteredWorkspaces[index],
+                                        onWorkspaceUpdated:
+                                            _loadRecommendedWorkspaces,
+                                      );
+                              },
+                            ),
+                          ),
+                        );
                       },
                     ),
                   ),
