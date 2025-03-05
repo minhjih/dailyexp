@@ -94,6 +94,16 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     }
   }
 
+  // 터치 시 네비게이션 바와 앱바를 원상복귀하는 메소드
+  void showNavigationBars() {
+    if (!_isVisible) {
+      setState(() {
+        _isVisible = true;
+        _hideController?.reverse();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final List<Widget> screens = [
@@ -117,118 +127,127 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       ProfileScreen(onScroll: handleScroll),
     ];
 
-    return Scaffold(
-      extendBody: true,
-      extendBodyBehindAppBar: true,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight),
-        child: SlideTransition(
-          position: Tween<Offset>(
-            begin: Offset.zero,
-            end: const Offset(0, -1.5),
-          ).animate(_hideController!),
-          child: Container(
-            color: Colors.white,
-            child: SafeArea(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Transform.translate(
-                      offset: Offset(0, -3), // y축으로 -10 픽셀 만큼 이동
-                      child: Text(
-                        'glimpse',
-                        style: GoogleFonts.pacifico(
-                          fontSize: 24,
-                          color: const Color(0xFF43A047),
-                        ),
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.notifications_outlined),
-                          onPressed: null,
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.mail_outline),
-                          onPressed: null,
-                        ),
-                        const SizedBox(width: 10),
-                        GestureDetector(
-                          onTap: () {
-                            _tabController?.index = 4;
-                          },
-                          child: CircleAvatar(
-                            radius: 16,
-                            backgroundColor: Colors.grey[200],
-                            backgroundImage: const NetworkImage(
-                                'https://via.placeholder.com/150'),
+    return GestureDetector(
+      onTap: showNavigationBars,
+      child: Scaffold(
+        extendBody: true,
+        extendBodyBehindAppBar: true,
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(kToolbarHeight),
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: Offset.zero,
+              end: const Offset(0, -1.5),
+            ).animate(_hideController!),
+            child: Container(
+              color: Colors.white,
+              child: SafeArea(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Transform.translate(
+                        offset: Offset(0, -3), // y축으로 -10 픽셀 만큼 이동
+                        child: Text(
+                          'glimpse',
+                          style: GoogleFonts.pacifico(
+                            fontSize: 24,
+                            color: const Color(0xFF43A047),
                           ),
                         ),
-                      ],
-                    ),
-                  ],
+                      ),
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.notifications_outlined),
+                            onPressed: null,
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.mail_outline),
+                            onPressed: null,
+                          ),
+                          const SizedBox(width: 10),
+                          GestureDetector(
+                            onTap: () {
+                              _tabController?.index = 4;
+                            },
+                            child: CircleAvatar(
+                              radius: 16,
+                              backgroundColor: Colors.grey[200],
+                              backgroundImage: const NetworkImage(
+                                  'https://via.placeholder.com/150'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
         ),
-      ),
-      body: AnimatedBuilder(
-        animation: _hideController!,
-        builder: (context, child) {
-          return Container(
-            padding: EdgeInsets.only(
-              top: kToolbarHeight + 20,
-            ).copyWith(
-              top: ((kToolbarHeight + 20) * (1 - _hideController!.value)),
-              bottom: 44 * (1 - _hideController!.value),
-            ),
-            child: TabBarView(
-              physics: const NeverScrollableScrollPhysics(),
-              controller: _tabController,
-              children: screens,
-            ),
-          );
-        },
-      ),
-      bottomNavigationBar: SlideTransition(
-        position: Tween<Offset>(
-          begin: Offset(0, 0.1),
-          end: const Offset(0, 1.5),
-        ).animate(_hideController!),
-        child: MotionTabBar(
-          controller: _tabController,
-          initialSelectedTab: "Feed",
-          labels: const ["Feed", "Workspace", "Explore", "Network", "Profile"],
-          icons: const [
-            Icons.home_outlined,
-            Icons.work_outline,
-            Icons.explore_outlined,
-            Icons.people_outline,
-            Icons.person_outline
-          ],
-          tabSize: 30,
-          tabBarHeight: 40,
-          textStyle: const TextStyle(
-            fontSize: 12,
-            color: Color(0xFF43A047),
-            fontWeight: FontWeight.w500,
-          ),
-          tabIconColor: Colors.grey[600],
-          tabIconSize: 24.0,
-          tabIconSelectedSize: 22.0,
-          tabSelectedColor: const Color(0xFF43A047),
-          tabIconSelectedColor: Colors.white,
-          tabBarColor: Colors.white,
-          onTabItemSelected: (int value) {
-            setState(() {
-              _tabController?.index = value;
-            });
+        body: AnimatedBuilder(
+          animation: _hideController!,
+          builder: (context, child) {
+            return Container(
+              padding: EdgeInsets.only(
+                top: kToolbarHeight + 20,
+              ).copyWith(
+                top: ((kToolbarHeight + 20) * (1 - _hideController!.value)),
+                bottom: 44 * (1 - _hideController!.value),
+              ),
+              child: TabBarView(
+                physics: const NeverScrollableScrollPhysics(),
+                controller: _tabController,
+                children: screens,
+              ),
+            );
           },
+        ),
+        bottomNavigationBar: SlideTransition(
+          position: Tween<Offset>(
+            begin: Offset(0, 0.1),
+            end: const Offset(0, 1.5),
+          ).animate(_hideController!),
+          child: MotionTabBar(
+            controller: _tabController,
+            initialSelectedTab: "Feed",
+            labels: const [
+              "Feed",
+              "Workspace",
+              "Explore",
+              "Network",
+              "Profile"
+            ],
+            icons: const [
+              Icons.home_outlined,
+              Icons.work_outline,
+              Icons.explore_outlined,
+              Icons.people_outline,
+              Icons.person_outline
+            ],
+            tabSize: 30,
+            tabBarHeight: 40,
+            textStyle: const TextStyle(
+              fontSize: 12,
+              color: Color(0xFF43A047),
+              fontWeight: FontWeight.w500,
+            ),
+            tabIconColor: Colors.grey[600],
+            tabIconSize: 24.0,
+            tabIconSelectedSize: 22.0,
+            tabSelectedColor: const Color(0xFF43A047),
+            tabIconSelectedColor: Colors.white,
+            tabBarColor: Colors.white,
+            onTabItemSelected: (int value) {
+              setState(() {
+                _tabController?.index = value;
+              });
+            },
+          ),
         ),
       ),
     );
