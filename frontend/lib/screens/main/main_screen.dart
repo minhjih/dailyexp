@@ -106,34 +106,23 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> screens = [
-      FeedScreen(onScroll: handleScroll),
-      _selectedWorkspace == null
-          ? WorkspaceScreen(
-              onScroll: handleScroll,
-              tabController: _tabController,
-              onWorkspaceSelected: (workspace) {
-                setState(() {
-                  _selectedWorkspace = workspace;
-                });
-              },
-            )
-          : WorkspaceDetailScreen(
-              workspace: _selectedWorkspace!,
-              onBack: _goBackToWorkspaceList,
-            ),
-      PaperListScreen(onScroll: handleScroll),
-      SocialScreen(onScroll: handleScroll),
-      ProfileScreen(onScroll: handleScroll),
-    ];
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
+    final double appBarHeight = kToolbarHeight + statusBarHeight;
+
+    // 네비게이션 바 높이 계산 (모션탭바 높이 + 하단 안전 영역)
+    final double motionTabBarHeight =
+        40.0; // MotionTabBar의 실제 높이 (tabBarHeight: 40)
+    final double bottomPadding =
+        MediaQuery.of(context).padding.bottom; // 하단 안전 영역 (노치 등)
+    final double bottomNavHeight = motionTabBarHeight + bottomPadding;
 
     return GestureDetector(
       onTap: showNavigationBars,
       child: Scaffold(
-        extendBody: true,
-        extendBodyBehindAppBar: true,
+        extendBody: true, // 네비게이션 바가 컨텐츠 위에 겹쳐지도록 설정
+        extendBodyBehindAppBar: true, // 앱바가 컨텐츠 위에 겹쳐지도록 설정
         appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(kToolbarHeight),
+          preferredSize: Size.fromHeight(kToolbarHeight),
           child: SlideTransition(
             position: Tween<Offset>(
               begin: Offset.zero,
@@ -149,7 +138,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Transform.translate(
-                        offset: Offset(0, -3), // y축으로 -10 픽셀 만큼 이동
+                        offset: Offset(0, -3), // y축으로 -3 픽셀 만큼 이동
                         child: Text(
                           'glimpse',
                           style: GoogleFonts.pacifico(
@@ -192,17 +181,45 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         body: AnimatedBuilder(
           animation: _hideController!,
           builder: (context, child) {
-            return Container(
-              padding: EdgeInsets.only(
-                top: kToolbarHeight + 20,
-              ).copyWith(
-                top: ((kToolbarHeight + 20) * (1 - _hideController!.value)),
-                bottom: 44 * (1 - _hideController!.value),
-              ),
-              child: TabBarView(
-                physics: const NeverScrollableScrollPhysics(),
-                controller: _tabController,
-                children: screens,
+            return SafeArea(
+              top: false, // 상단 SafeArea는 비활성화하여 앱바 아래부터 시작하도록 함
+              bottom: false, // 하단 SafeArea도 비활성화하여 컨텐츠가 전체 화면을 차지하도록 함
+              child: Stack(
+                children: [
+                  // 컨텐츠 영역은 앱바 아래부터 화면 전체를 차지하도록 설정
+                  Positioned.fill(
+                    top: appBarHeight *
+                        (1 -
+                            _hideController!
+                                .value), // 앱바 애니메이션에 맞춰 동적으로 상단 여백 조정
+                    // 하단 여백 없이 화면 끝까지 컨텐츠 표시 (네비게이션 바는 컨텐츠 위에 겹쳐짐)
+                    bottom: 0,
+                    child: TabBarView(
+                      physics: const NeverScrollableScrollPhysics(),
+                      controller: _tabController,
+                      children: [
+                        FeedScreen(onScroll: handleScroll),
+                        _selectedWorkspace == null
+                            ? WorkspaceScreen(
+                                onScroll: handleScroll,
+                                tabController: _tabController,
+                                onWorkspaceSelected: (workspace) {
+                                  setState(() {
+                                    _selectedWorkspace = workspace;
+                                  });
+                                },
+                              )
+                            : WorkspaceDetailScreen(
+                                workspace: _selectedWorkspace!,
+                                onBack: _goBackToWorkspaceList,
+                              ),
+                        PaperListScreen(onScroll: handleScroll),
+                        SocialScreen(onScroll: handleScroll),
+                        ProfileScreen(onScroll: handleScroll),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             );
           },

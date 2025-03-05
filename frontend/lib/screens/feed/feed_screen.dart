@@ -106,7 +106,12 @@ class _FeedScreenState extends State<FeedScreen> {
       children: [
         // 검색창
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 8,
+            bottom: 4, // 하단 패딩을 줄임
+          ),
           decoration: BoxDecoration(
             color: Colors.white,
             border: Border(
@@ -149,6 +154,9 @@ class _FeedScreenState extends State<FeedScreen> {
             cursorColor: const Color(0xFF43A047),
           ),
         ),
+
+        // 검색창과 포스트 목록 사이의 간격 조정
+        const SizedBox(height: 2),
 
         // 피드 목록
         Expanded(
@@ -234,6 +242,7 @@ class _FeedScreenState extends State<FeedScreen> {
                         child: ListView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
+                          padding: EdgeInsets.zero, // 리스트뷰의 기본 패딩 제거
                           itemCount: postProvider.posts.length +
                               (postProvider.hasMorePosts ? 1 : 0),
                           itemBuilder: (context, index) {
@@ -267,7 +276,12 @@ class _FeedScreenState extends State<FeedScreen> {
   Widget buildPostCard(Post post) {
     return Card(
       elevation: 0,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.only(
+        left: 16,
+        right: 16,
+        bottom: 8,
+        top: 4,
+      ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
