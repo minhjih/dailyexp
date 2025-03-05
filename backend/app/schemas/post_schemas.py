@@ -51,7 +51,7 @@ class Post(PostBase):
         orm_mode = True
 
 class PostDetail(Post):
-    author_name: str
+    author_name: Optional[str] = None
     author_profile_image: Optional[str] = None
     like_count: int = 0
     save_count: int = 0

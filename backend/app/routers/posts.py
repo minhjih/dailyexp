@@ -5,8 +5,8 @@ from sqlalchemy.sql import desc, func
 
 from ..utils.auth import get_current_user
 from ..models.database import get_db
-from ..models.models import User, Post, PostLike, PostSave, PostComment
-from ..schemas.post_schemas import Post, PostDetail, PostCreate, PostUpdate, PostComment, PostCommentCreate
+from ..models.models import User, Post as PostModel, PostLike, PostSave, PostComment
+from ..schemas.post_schemas import Post, PostDetail, PostCreate, PostUpdate, PostComment as PostCommentSchema, PostCommentCreate
 from ..services.post_service import PostService
 
 router = APIRouter(
@@ -34,7 +34,10 @@ def get_posts(
 ):
     """포스트 목록을 조회합니다. user_id가 제공되면 해당 사용자의 포스트만 조회합니다."""
     if user_id:
-        posts = db.query(Post).filter(Post.author_id == user_id).order_by(desc(Post.created_at)).offset(skip).limit(limit).all()
+        # 직접 PostDetail 객체를 생성하여 반환
+        from ..schemas.post_schemas import PostDetail
+        
+        posts = db.query(PostModel).filter(PostModel.author_id == user_id).order_by(desc(PostModel.created_at)).offset(skip).limit(limit).all()
         
         # 포스트 작성자 정보 추가
         result = []
@@ -50,25 +53,26 @@ def get_posts(
             is_liked = db.query(PostLike).filter(PostLike.post_id == post.id, PostLike.user_id == current_user.id).first() is not None
             is_saved = db.query(PostSave).filter(PostSave.post_id == post.id, PostSave.user_id == current_user.id).first() is not None
             
-            post_dict = {
-                "id": post.id,
-                "title": post.title,
-                "content": post.content,
-                "paper_title": post.paper_title,
-                "key_insights": post.key_insights,
-                "created_at": post.created_at,
-                "updated_at": post.updated_at,
-                "author_id": post.author_id,
-                "paper_id": post.paper_id,
-                "author_name": author.full_name if author else "Unknown",
-                "author_profile_image": author.profile_image_url if author else None,
-                "like_count": like_count,
-                "save_count": save_count,
-                "comment_count": comment_count,
-                "is_liked": is_liked,
-                "is_saved": is_saved
-            }
-            result.append(post_dict)
+            # PostDetail 객체 생성
+            post_detail = PostDetail(
+                id=post.id,
+                title=post.title,
+                content=post.content,
+                paper_title=post.paper_title,
+                key_insights=post.key_insights,
+                created_at=post.created_at,
+                updated_at=post.updated_at,
+                author_id=post.author_id,
+                paper_id=post.paper_id,
+                author_name=author.full_name if author else "Unknown",
+                author_profile_image=author.profile_image_url,
+                like_count=like_count,
+                save_count=save_count,
+                comment_count=comment_count,
+                is_liked=is_liked,
+                is_saved=is_saved
+            )
+            result.append(post_detail)
         
         return result
     else:
@@ -210,7 +214,7 @@ def unsave_post(
         )
     return {"detail": "포스트 저장을 취소했습니다."}
 
-@router.post("/{post_id}/comments", response_model=PostComment, status_code=status.HTTP_201_CREATED)
+@router.post("/{post_id}/comments", response_model=PostCommentSchema, status_code=status.HTTP_201_CREATED)
 def add_comment(
     post_id: int,
     comment: PostCommentCreate,
@@ -248,7 +252,7 @@ def add_comment(
     
     return new_comment
 
-@router.get("/{post_id}/comments", response_model=List[PostComment])
+@router.get("/{post_id}/comments", response_model=List[PostCommentSchema])
 def get_comments(
     post_id: int,
     db: Session = Depends(get_db),
