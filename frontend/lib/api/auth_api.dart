@@ -483,4 +483,33 @@ class AuthAPI {
       throw Exception('프로필 사진 업로드 중 오류 발생: $e');
     }
   }
+
+  // 모든 사용자 목록 가져오기
+  Future<List<User>> getAllUsers() async {
+    try {
+      final token = await _getToken();
+      if (token == null) {
+        throw Exception('No token found');
+      }
+
+      final response = await _dio.get(
+        '/users',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> usersJson = response.data;
+        return usersJson.map((json) => User.fromJson(json)).toList();
+      } else {
+        throw Exception('Failed to fetch users: ${response.statusMessage}');
+      }
+    } catch (e) {
+      print('Error fetching all users: $e');
+      return [];
+    }
+  }
 }

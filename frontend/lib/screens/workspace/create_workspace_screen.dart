@@ -4,6 +4,7 @@ import '../../api/auth_api.dart';
 import '../../models/user.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class CreateWorkspaceScreen extends StatefulWidget {
   const CreateWorkspaceScreen({super.key});
@@ -546,10 +547,20 @@ class _CreateWorkspaceScreenState extends State<CreateWorkspaceScreen> {
                           final user = _searchResults[index];
                           return ListTile(
                             leading: CircleAvatar(
-                              backgroundImage: NetworkImage(
-                                user.profileImageUrl ??
-                                    'https://via.placeholder.com/150',
-                              ),
+                              backgroundImage: (() {
+                                final String imageUrl = user.profileImageUrl ??
+                                    'https://via.placeholder.com/150';
+                                // 이미지 URL이 http로 시작하지 않으면 .env 파일의 API_URL을 추가
+                                if (imageUrl.startsWith('http') ||
+                                    imageUrl ==
+                                        'https://via.placeholder.com/150') {
+                                  return NetworkImage(imageUrl);
+                                } else {
+                                  final String apiUrl = dotenv.env['API_URL'] ??
+                                      'http://10.0.2.2:8000';
+                                  return NetworkImage('$apiUrl$imageUrl');
+                                }
+                              })(),
                             ),
                             title: Text(user.fullName),
                             subtitle: Column(
@@ -615,10 +626,21 @@ class _CreateWorkspaceScreenState extends State<CreateWorkspaceScreen> {
                           margin: const EdgeInsets.only(bottom: 8),
                           child: ListTile(
                             leading: CircleAvatar(
-                              backgroundImage: NetworkImage(
-                                member.user.profileImageUrl ??
-                                    'https://via.placeholder.com/150',
-                              ),
+                              backgroundImage: (() {
+                                final String imageUrl =
+                                    member.user.profileImageUrl ??
+                                        'https://via.placeholder.com/150';
+                                // 이미지 URL이 http로 시작하지 않으면 .env 파일의 API_URL을 추가
+                                if (imageUrl.startsWith('http') ||
+                                    imageUrl ==
+                                        'https://via.placeholder.com/150') {
+                                  return NetworkImage(imageUrl);
+                                } else {
+                                  final String apiUrl = dotenv.env['API_URL'] ??
+                                      'http://10.0.2.2:8000';
+                                  return NetworkImage('$apiUrl$imageUrl');
+                                }
+                              })(),
                             ),
                             title: Text(member.user.fullName),
                             subtitle: Text(member.user.institution ?? '소속 없음'),

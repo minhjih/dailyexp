@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart' show ScrollDirection;
 import '../../providers/post_provider.dart';
 import '../../models/post.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class FeedScreen extends StatefulWidget {
   final Function(ScrollDirection) onScroll;
@@ -290,9 +291,19 @@ class _FeedScreenState extends State<FeedScreen> {
         children: [
           ListTile(
             leading: CircleAvatar(
-              backgroundImage: NetworkImage(
-                post.authorProfileImage ?? 'https://via.placeholder.com/150',
-              ),
+              backgroundImage: (() {
+                final String imageUrl = post.authorProfileImage ??
+                    'https://via.placeholder.com/150';
+                // 이미지 URL이 http로 시작하지 않으면 .env 파일의 API_URL을 추가
+                if (imageUrl.startsWith('http') ||
+                    imageUrl == 'https://via.placeholder.com/150') {
+                  return NetworkImage(imageUrl);
+                } else {
+                  final String apiUrl =
+                      dotenv.env['API_URL'] ?? 'http://10.0.2.2:8000';
+                  return NetworkImage('$apiUrl$imageUrl');
+                }
+              })(),
             ),
             title: Text(
               post.authorName ?? '익명',
@@ -464,9 +475,19 @@ class _FeedScreenState extends State<FeedScreen> {
           ),
         ...post.comments.map((comment) => ListTile(
               leading: CircleAvatar(
-                backgroundImage: NetworkImage(
-                  comment.userProfileImage ?? 'https://via.placeholder.com/150',
-                ),
+                backgroundImage: (() {
+                  final String imageUrl = comment.userProfileImage ??
+                      'https://via.placeholder.com/150';
+                  // 이미지 URL이 http로 시작하지 않으면 .env 파일의 API_URL을 추가
+                  if (imageUrl.startsWith('http') ||
+                      imageUrl == 'https://via.placeholder.com/150') {
+                    return NetworkImage(imageUrl);
+                  } else {
+                    final String apiUrl =
+                        dotenv.env['API_URL'] ?? 'http://10.0.2.2:8000';
+                    return NetworkImage('$apiUrl$imageUrl');
+                  }
+                })(),
               ),
               title: Row(
                 children: [

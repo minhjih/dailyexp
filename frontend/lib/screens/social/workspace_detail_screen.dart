@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../models/workspace.dart';
 import '../../api/auth_api.dart';
 import '../../theme/colors.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class WorkspaceDetailScreen extends StatefulWidget {
   final Workspace workspace;
@@ -168,7 +169,17 @@ class _WorkspaceDetailScreenState extends State<WorkspaceDetailScreen> {
                 return ListTile(
                   leading: CircleAvatar(
                     backgroundImage: member.user.profileImageUrl != null
-                        ? NetworkImage(member.user.profileImageUrl!)
+                        ? (() {
+                            final String imageUrl =
+                                member.user.profileImageUrl!;
+                            // 이미지 URL이 http로 시작하지 않으면 .env 파일의 API_URL을 추가
+                            final String apiUrl =
+                                dotenv.env['API_URL'] ?? 'http://10.0.2.2:8000';
+                            final String fullUrl = imageUrl.startsWith('http')
+                                ? imageUrl
+                                : '$apiUrl$imageUrl';
+                            return NetworkImage(fullUrl);
+                          })()
                         : null,
                     child: member.user.profileImageUrl == null
                         ? Text(member.user.fullName[0])

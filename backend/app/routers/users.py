@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from ..models.database import get_db
@@ -9,7 +9,8 @@ from sqlalchemy import or_
 
 router = APIRouter(
     prefix="/users",
-    tags=["users"]
+    tags=["users"],
+    responses={404: {"description": "Not found"}},
 )
 
 @router.get("/search", response_model=List[user_schemas.User])
@@ -33,4 +34,13 @@ async def search_users(
         )\
         .all()
     
+    return users
+
+@router.get("/", response_model=List[user_schemas.User])
+def get_users(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """모든 사용자 목록을 반환합니다."""
+    users = db.query(models.User).all()
     return users 

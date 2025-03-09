@@ -8,6 +8,7 @@ import '../../api/auth_api.dart';
 import 'package:flutter/rendering.dart' show ScrollDirection;
 import '../../models/workspace.dart';
 import '../../screens/social/workspace_detail_screen.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class SocialScreen extends StatefulWidget {
   final Function(ScrollDirection) onScroll;
@@ -124,6 +125,7 @@ class _SocialScreenState extends State<SocialScreen>
                   ),
                   child: TextField(
                     controller: _searchController,
+                    enabled: true,
                     decoration: InputDecoration(
                       hintText: isResearcherMode
                           ? 'Search researchers...'
@@ -155,6 +157,7 @@ class _SocialScreenState extends State<SocialScreen>
                         borderSide: BorderSide.none,
                       ),
                     ),
+                    onChanged: _filterItems,
                   ),
                 ),
                 // 탭 버튼
@@ -286,40 +289,36 @@ class _SocialScreenState extends State<SocialScreen>
       await userProvider.loadProfileStats(); // 팔로잉 상태 업데이트
       final followingIds = await AuthAPI().getFollowingIds();
 
-      List<User> users = [];
+      // 모든 사용자 목록 가져오기
+      final allUsers = await AuthAPI().getAllUsers();
       List<MapEntry<User, int>> userScores = [];
 
-      for (int i = 1; i <= 10; i++) {
-        if (currentUser?.id != i && !followingIds.contains(i)) {
-          try {
-            User user = await userProvider.loadUserProfile(i);
+      // 현재 사용자와 이미 팔로우 중인 사용자 제외
+      for (var user in allUsers) {
+        if (user.id != currentUser?.id && !followingIds.contains(user.id)) {
+          // 매칭 점수 계산
+          int score = 0;
 
-            // 매칭 점수 계산
-            int score = 0;
-
-            if (user.researchField == currentUser?.researchField) {
-              score += 3;
-            }
-
-            if (user.institution == currentUser?.institution) {
-              score += 2;
-            }
-
-            final commonInterests = user.researchInterests
-                .where((interest) =>
-                    currentUser?.researchInterests.contains(interest) ?? false)
-                .length;
-            score += commonInterests;
-
-            userScores.add(MapEntry(user, score));
-          } catch (e) {
-            print('Failed to load user $i: $e');
+          if (user.researchField == currentUser?.researchField) {
+            score += 3;
           }
+
+          if (user.institution == currentUser?.institution) {
+            score += 2;
+          }
+
+          final commonInterests = user.researchInterests
+              .where((interest) =>
+                  currentUser?.researchInterests.contains(interest) ?? false)
+              .length;
+          score += commonInterests;
+
+          userScores.add(MapEntry(user, score));
         }
       }
 
       userScores.sort((a, b) => b.value.compareTo(a.value));
-      users = userScores.take(5).map((entry) => entry.key).toList();
+      final users = userScores.take(5).map((entry) => entry.key).toList();
 
       if (mounted) {
         setState(() {
@@ -403,6 +402,38 @@ class _SocialScreenState extends State<SocialScreen>
       }
     });
   }
+
+  void _filterItems(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        // 검색어가 비어있으면 모든 항목 표시
+        filteredUsers = recommendedUsers;
+        filteredWorkspaces = recommendedWorkspaces;
+      } else {
+        // 검색어에 따라 필터링
+        if (isResearcherMode) {
+          filteredUsers = recommendedUsers.where((user) {
+            return user.fullName.toLowerCase().contains(query.toLowerCase()) ||
+                (user.institution
+                        ?.toLowerCase()
+                        .contains(query.toLowerCase()) ??
+                    false) ||
+                (user.researchField
+                        ?.toLowerCase()
+                        .contains(query.toLowerCase()) ??
+                    false);
+          }).toList();
+        } else {
+          filteredWorkspaces = recommendedWorkspaces.where((workspace) {
+            return workspace.name.toLowerCase().contains(query.toLowerCase()) ||
+                workspace.description
+                    .toLowerCase()
+                    .contains(query.toLowerCase());
+          }).toList();
+        }
+      }
+    });
+  }
 }
 
 class ResearcherListTile extends StatefulWidget {
@@ -427,7 +458,16 @@ class _ResearcherListTileState extends State<ResearcherListTile> {
           CircleAvatar(
             radius: 24,
             backgroundImage: widget.user.profileImageUrl != null
-                ? NetworkImage(widget.user.profileImageUrl!)
+                ? (() {
+                    final String imageUrl = widget.user.profileImageUrl!;
+                    // 이미지 URL이 http로 시작하지 않으면 .env 파일의 API_URL을 추가
+                    final String apiUrl =
+                        dotenv.env['API_URL'] ?? 'http://10.0.2.2:8000';
+                    final String fullUrl = imageUrl.startsWith('http')
+                        ? imageUrl
+                        : '$apiUrl$imageUrl';
+                    return NetworkImage(fullUrl);
+                  })()
                 : null,
             child: widget.user.profileImageUrl == null
                 ? Text(widget.user.fullName[0],
@@ -519,9 +559,19 @@ class WorkspaceListTile extends StatelessWidget {
     return '${followingMembers[0]} and ${followingMembers.length - 1} others are members';
   }
 
+  // 팔로우하는 멤버 목록 가져오기
+  List<WorkspaceMember> _getFollowingMembers(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final followingIds = userProvider.followingIds;
+    return workspace.members
+        .where((member) => followingIds.contains(member.userId))
+        .toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final followingMembersText = _getFollowingMembersText(context);
+    final followingMembers = _getFollowingMembers(context);
 
     return InkWell(
       onTap: () async {
@@ -586,12 +636,103 @@ class WorkspaceListTile extends StatelessWidget {
                     ],
                   ),
                   if (followingMembersText.isNotEmpty)
-                    Text(
-                      followingMembersText,
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        color: const Color(0xFF00BFA5),
-                      ),
+                    Row(
+                      children: [
+                        // 멤버 프로필 이미지 표시
+                        SizedBox(
+                          height: 30,
+                          child: Stack(
+                            children: [
+                              for (int i = 0;
+                                  i < followingMembers.length && i < 3;
+                                  i++)
+                                Positioned(
+                                  left: i * 20.0,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.white,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    child: CircleAvatar(
+                                      radius: 12,
+                                      backgroundImage: followingMembers[i]
+                                                  .user
+                                                  .profileImageUrl !=
+                                              null
+                                          ? (() {
+                                              final String imageUrl =
+                                                  followingMembers[i]
+                                                      .user
+                                                      .profileImageUrl!;
+                                              // 이미지 URL이 http로 시작하지 않으면 .env 파일의 API_URL을 추가
+                                              final String apiUrl =
+                                                  dotenv.env['API_URL'] ??
+                                                      'http://10.0.2.2:8000';
+                                              final String fullUrl =
+                                                  imageUrl.startsWith('http')
+                                                      ? imageUrl
+                                                      : '$apiUrl$imageUrl';
+                                              return NetworkImage(fullUrl);
+                                            })()
+                                          : null,
+                                      child: followingMembers[i]
+                                                  .user
+                                                  .profileImageUrl ==
+                                              null
+                                          ? Text(
+                                              followingMembers[i]
+                                                  .user
+                                                  .fullName[0],
+                                              style:
+                                                  const TextStyle(fontSize: 10),
+                                            )
+                                          : null,
+                                    ),
+                                  ),
+                                ),
+                              if (followingMembers.length > 3)
+                                Positioned(
+                                  left: 3 * 20.0,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.white,
+                                        width: 2,
+                                      ),
+                                      color: Colors.grey[300],
+                                    ),
+                                    child: CircleAvatar(
+                                      radius: 12,
+                                      backgroundColor: Colors.grey[300],
+                                      child: Text(
+                                        '+${followingMembers.length - 3}',
+                                        style: const TextStyle(
+                                          fontSize: 10,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            followingMembersText,
+                            style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              color: const Color(0xFF00BFA5),
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
                   Text(
                     'Last updated ${_getTimeAgo()}',
