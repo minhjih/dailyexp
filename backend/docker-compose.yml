@@ -24,7 +24,7 @@ services:
       - DATABASE_URL=postgresql://postgres:password@db:5432/researchdb
     depends_on:
       - db
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: sh /app/start.sh
 
 volumes:
   postgres_data:

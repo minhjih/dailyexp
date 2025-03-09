@@ -1,9 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from ..models.database import get_db
 from ..models import models
 from ..schemas import user_schemas
 from ..utils.auth import get_current_user
+import os
+import uuid
+import shutil
+from ..config import PROFILE_IMAGES_DIR, ALLOWED_IMAGE_EXTENSIONS, MAX_IMAGE_SIZE
+from fastapi.responses import FileResponse
+from typing import Optional
 
 router = APIRouter(
     prefix="/profile",
@@ -110,3 +116,70 @@ async def get_following(
     ).all()
     
     return following or []  # 팔로잉이 없으면 빈 리스트 반환 
+
+@router.post("/me/upload")
+async def upload_profile_image(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """프로필 사진을 업로드합니다."""
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="No file uploaded")
+
+    # 파일 확장자 확인
+    file_ext = os.path.splitext(file.filename)[1].lower()
+    if file_ext not in ALLOWED_IMAGE_EXTENSIONS:
+        raise HTTPException(status_code=400, detail="Invalid file format")
+
+    # 파일 크기 확인
+    content = await file.read()
+    await file.seek(0)
+    if len(content) > MAX_IMAGE_SIZE:
+        raise HTTPException(status_code=400, detail="File size exceeds the limit")
+
+    # 파일 저장 경로 설정 - 파일명 길이 제한
+    filename = f"{str(uuid.uuid4())[:8]}{file_ext}"
+    filepath = os.path.join(PROFILE_IMAGES_DIR, filename)
+    
+    print(f"Saving profile image to: {filepath}")
+
+    # 파일 저장
+    with open(filepath, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    # 기존 프로필 사진 삭제
+    if current_user.profile_image_url:
+        try:
+            old_filename = os.path.basename(current_user.profile_image_url)
+            old_filepath = os.path.join(PROFILE_IMAGES_DIR, old_filename)
+            print(f"Trying to remove old profile image: {old_filepath}")
+            if os.path.exists(old_filepath):
+                os.remove(old_filepath)
+                print(f"Removed old profile image: {old_filepath}")
+        except Exception as e:
+            print(f"Error removing old profile image: {e}")
+
+    # 프로필 사진 URL 설정 (정적 파일 경로로 수정)
+    profile_image_url = f"/media/profile_images/{filename}"
+    current_user.profile_image_url = profile_image_url
+    db.commit()
+    db.refresh(current_user)
+    
+    print(f"Profile image URL: {profile_image_url}")
+    
+    return {
+        "message": "Profile image uploaded successfully", 
+        "profile_image_url": profile_image_url
+    }
+
+@router.get("/image/{filename}")
+async def get_profile_image(
+    filename: str
+):
+    """프로필 사진 파일을 반환합니다."""
+    filepath = os.path.join(PROFILE_IMAGES_DIR, filename)
+    if not os.path.exists(filepath):
+        raise HTTPException(status_code=404, detail="Profile image not found")
+
+    return FileResponse(filepath) 

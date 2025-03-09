@@ -21,3 +21,6 @@ venv/
 
 # Logs
 *.log 
+
+# Media
+app/media/
