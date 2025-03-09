@@ -433,4 +433,54 @@ class AuthAPI {
       throw Exception('워크스페이스 생성 중 오류 발생: $e');
     }
   }
+
+  // 프로필 사진 업로드
+  Future<String> uploadProfileImage(dynamic imageFile) async {
+    try {
+      final token = await _getToken();
+      if (token == null) {
+        throw Exception('인증 토큰이 없습니다. 다시 로그인해주세요.');
+      }
+
+      print('API URL: ${_dio.options.baseUrl}');
+
+      // FormData 생성
+      final formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(
+          imageFile.path,
+          filename: imageFile.path.split('/').last,
+        ),
+      });
+
+      final response = await _dio.post(
+        '/profile/me/upload',
+        data: formData,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'multipart/form-data',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        print('Profile image upload response: ${response.data}');
+        // 백엔드에서 반환하는 상대 경로 사용
+        final relativeUrl = response.data['profile_image_url'];
+        print('Relative profile image URL: $relativeUrl');
+
+        // .env 파일의 API_URL을 사용하여 전체 URL 구성
+        final apiUrl = dotenv.env['API_URL'] ?? 'http://10.0.2.2:8000';
+        final fullUrl = '$apiUrl$relativeUrl';
+        print('Full profile image URL: $fullUrl');
+
+        return fullUrl;
+      } else {
+        throw Exception('프로필 사진 업로드 실패: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error uploading profile image: $e');
+      throw Exception('프로필 사진 업로드 중 오류 발생: $e');
+    }
+  }
 }

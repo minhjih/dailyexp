@@ -18,8 +18,6 @@ class UserProvider with ChangeNotifier {
   List<int> get followingIds => _followingIds;
 
   Future<void> fetchUserProfile() async {
-    if (_user != null) return; // 이미 데이터가 있으면 다시 요청하지 않음
-
     try {
       _isLoading = true;
       notifyListeners();
@@ -100,6 +98,44 @@ class UserProvider with ChangeNotifier {
     } catch (e) {
       print('Error following user: $e');
       throw e;
+    }
+  }
+
+  Future<void> updateProfileImage(String profileImageUrl) async {
+    try {
+      print(
+          'UserProvider.updateProfileImage called with URL: $profileImageUrl');
+
+      if (_user != null) {
+        // 새로운 User 객체 생성 (이전 정보는 유지하고 profileImageUrl만 업데이트)
+        _user = User(
+          id: _user!.id,
+          email: _user!.email,
+          fullName: _user!.fullName,
+          institution: _user!.institution,
+          department: _user!.department,
+          researchField: _user!.researchField,
+          researchInterests: _user!.researchInterests,
+          bio: _user!.bio,
+          externalLinks: _user!.externalLinks,
+          profileImageUrl: profileImageUrl,
+          createdAt: _user!.createdAt,
+          isFollowing: _user!.isFollowing,
+        );
+
+        print('User profile image updated to: ${_user!.profileImageUrl}');
+
+        // 화면 갱신을 위해 리스너에게 알림
+        notifyListeners();
+
+        // 프로필 정보 다시 로드 (서버에서 최신 정보 가져오기)
+        await fetchUserProfile();
+      } else {
+        print('Error: User is null in updateProfileImage');
+      }
+    } catch (e) {
+      print('Error updating profile image: $e');
+      rethrow;
     }
   }
 }

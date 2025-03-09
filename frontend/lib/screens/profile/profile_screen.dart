@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/rendering.dart' show ScrollDirection;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/post_provider.dart';
 import '../../models/post.dart';
 import 'profile_edit.dart';
 import 'package:intl/intl.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import '../../api/auth_api.dart';
 
 class ProfileScreen extends StatefulWidget {
   final Function(ScrollDirection) onScroll;
@@ -27,6 +31,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _scrollController.addListener(_handleScroll);
+    _loadProfileData();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 화면이 다시 표시될 때마다 프로필 정보를 다시 로드
+    _loadProfileData();
+  }
+
+  void _handleScroll() {
+    if (_scrollController.position.userScrollDirection !=
+        ScrollDirection.idle) {
+      widget.onScroll(_scrollController.position.userScrollDirection);
+    }
+  }
+
+  void _loadProfileData() {
     // 프로필 데이터 로드
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final userProvider = context.read<UserProvider>();
@@ -40,13 +62,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       });
       userProvider.fetchProfileStats(); // 프로필 통계도 함께 로드
     });
-  }
-
-  void _handleScroll() {
-    if (_scrollController.position.userScrollDirection !=
-        ScrollDirection.idle) {
-      widget.onScroll(_scrollController.position.userScrollDirection);
-    }
   }
 
   @override
@@ -68,6 +83,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           return const Center(child: Text('사용자 정보를 불러올 수 없습니다.'));
         }
 
+        // 디버깅 정보 출력
+        print('Building ProfileScreen with user: ${user.fullName}');
+        print('Profile image URL: ${user.profileImageUrl}');
+
         return LayoutBuilder(
           builder: (context, constraints) {
             return SingleChildScrollView(
@@ -88,12 +107,59 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           children: [
                             Row(
                               children: [
-                                CircleAvatar(
-                                  radius: 40,
-                                  backgroundImage: user.profileImageUrl != null
-                                      ? NetworkImage(user.profileImageUrl!)
-                                      : const NetworkImage(
-                                          'https://via.placeholder.com/150'),
+                                GestureDetector(
+                                  onTap: () => _showImageOptions(context),
+                                  child: Stack(
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 40,
+                                        backgroundImage: user.profileImageUrl !=
+                                                    null &&
+                                                user.profileImageUrl!.isNotEmpty
+                                            ? (() {
+                                                final String imageUrl =
+                                                    user.profileImageUrl!;
+                                                print(
+                                                    'Using profile image URL: $imageUrl');
+                                                // 이미지 URL이 http로 시작하지 않으면 .env 파일의 API_URL을 추가
+                                                final String apiUrl =
+                                                    dotenv.env['API_URL'] ??
+                                                        'http://10.0.2.2:8000';
+                                                // 캐시 무효화를 위해 타임스탬프 추가
+                                                final String fullUrl = imageUrl
+                                                        .startsWith('http')
+                                                    ? '$imageUrl?t=${DateTime.now().millisecondsSinceEpoch}'
+                                                    : '$apiUrl$imageUrl?t=${DateTime.now().millisecondsSinceEpoch}';
+                                                print(
+                                                    'Full image URL with cache busting: $fullUrl');
+                                                return NetworkImage(fullUrl);
+                                              })()
+                                            : (() {
+                                                print(
+                                                    'Using placeholder image');
+                                                return const NetworkImage(
+                                                    'https://via.placeholder.com/150');
+                                              })(),
+                                        backgroundColor: Colors.grey[200],
+                                      ),
+                                      Positioned(
+                                        right: 0,
+                                        bottom: 0,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(4),
+                                          decoration: const BoxDecoration(
+                                            color: Color(0xFF43A047),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.camera_alt,
+                                            color: Colors.white,
+                                            size: 16,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                                 const SizedBox(width: 16),
                                 Expanded(
@@ -366,5 +432,103 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
     );
+  }
+
+  void _showImageOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('갤러리에서 선택'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickAndCropImage(ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_camera),
+                title: const Text('카메라로 촬영'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickAndCropImage(ImageSource.camera);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _pickAndCropImage(ImageSource source) async {
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(
+        source: source,
+        maxWidth: 800,
+        maxHeight: 800,
+        imageQuality: 85,
+        preferredCameraDevice: CameraDevice.front,
+      );
+
+      if (pickedFile != null) {
+        _uploadProfileImage(File(pickedFile.path));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('이미지 선택 중 오류가 발생했습니다: $e')),
+      );
+    }
+  }
+
+  Future<void> _uploadProfileImage(File imageFile) async {
+    try {
+      // 로딩 표시
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator()),
+      );
+
+      print('Uploading profile image: ${imageFile.path}');
+
+      // 이미지 업로드
+      final authAPI = AuthAPI();
+      final profileImageUrl = await authAPI.uploadProfileImage(imageFile);
+
+      print('Received profile image URL: $profileImageUrl');
+
+      // 사용자 정보 업데이트
+      final userProvider = context.read<UserProvider>();
+      await userProvider.updateProfileImage(profileImageUrl);
+
+      print(
+          'Updated user profile with image URL: ${userProvider.user?.profileImageUrl}');
+
+      // 로딩 닫기
+      Navigator.pop(context);
+
+      // 화면 갱신을 위해 setState 호출
+      setState(() {});
+
+      // 성공 메시지
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('프로필 사진이 업데이트되었습니다.')),
+      );
+    } catch (e) {
+      // 로딩 닫기
+      Navigator.pop(context);
+
+      print('Error in _uploadProfileImage: $e');
+
+      // 오류 메시지
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('프로필 사진 업로드 중 오류가 발생했습니다: $e')),
+      );
+    }
   }
 }
