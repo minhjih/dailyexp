@@ -480,6 +480,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('카메라 접근에 실패했습니다. 갤러리에서 선택해주세요.')),
           );
+          // 갤러리로 대체
+          _pickAndCropImage(ImageSource.gallery);
         }
       } else {
         // 갤러리에서 이미지 선택
