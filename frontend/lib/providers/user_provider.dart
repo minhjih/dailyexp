@@ -129,7 +129,8 @@ class UserProvider with ChangeNotifier {
         notifyListeners();
 
         // 프로필 정보 다시 로드 (서버에서 최신 정보 가져오기)
-        await fetchUserProfile();
+        // 불필요한 네트워크 요청을 줄이기 위해 제거
+        // await fetchUserProfile();
       } else {
         print('Error: User is null in updateProfileImage');
       }

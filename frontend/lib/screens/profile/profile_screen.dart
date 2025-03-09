@@ -34,13 +34,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _loadProfileData();
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // 화면이 다시 표시될 때마다 프로필 정보를 다시 로드
-    _loadProfileData();
-  }
-
   void _handleScroll() {
     if (_scrollController.position.userScrollDirection !=
         ScrollDirection.idle) {
@@ -125,13 +118,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                 final String apiUrl =
                                                     dotenv.env['API_URL'] ??
                                                         'http://10.0.2.2:8000';
-                                                // 캐시 무효화를 위해 타임스탬프 추가
-                                                final String fullUrl = imageUrl
-                                                        .startsWith('http')
-                                                    ? '$imageUrl?t=${DateTime.now().millisecondsSinceEpoch}'
-                                                    : '$apiUrl$imageUrl?t=${DateTime.now().millisecondsSinceEpoch}';
+                                                // 캐시를 활용하기 위해 타임스탬프를 제거
+                                                final String fullUrl =
+                                                    imageUrl.startsWith('http')
+                                                        ? imageUrl
+                                                        : '$apiUrl$imageUrl';
                                                 print(
-                                                    'Full image URL with cache busting: $fullUrl');
+                                                    'Full image URL: $fullUrl');
                                                 return NetworkImage(fullUrl);
                                               })()
                                             : (() {
@@ -467,18 +460,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _pickAndCropImage(ImageSource source) async {
     try {
       final picker = ImagePicker();
-      final pickedFile = await picker.pickImage(
-        source: source,
-        maxWidth: 800,
-        maxHeight: 800,
-        imageQuality: 85,
-        preferredCameraDevice: CameraDevice.front,
-      );
 
-      if (pickedFile != null) {
-        _uploadProfileImage(File(pickedFile.path));
+      // 카메라 권한 확인 및 요청 (iOS에서 중요)
+      if (source == ImageSource.camera) {
+        try {
+          final pickedFile = await picker.pickImage(
+            source: source,
+            maxWidth: 800,
+            maxHeight: 800,
+            imageQuality: 85,
+          );
+
+          if (pickedFile != null) {
+            _uploadProfileImage(File(pickedFile.path));
+          }
+        } catch (e) {
+          print('카메라 접근 오류: $e');
+          // 카메라 접근 실패 시 갤러리로 대체
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('카메라 접근에 실패했습니다. 갤러리에서 선택해주세요.')),
+          );
+        }
+      } else {
+        // 갤러리에서 이미지 선택
+        final pickedFile = await picker.pickImage(
+          source: source,
+          maxWidth: 800,
+          maxHeight: 800,
+          imageQuality: 85,
+        );
+
+        if (pickedFile != null) {
+          _uploadProfileImage(File(pickedFile.path));
+        }
       }
     } catch (e) {
+      print('이미지 선택 오류: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('이미지 선택 중 오류가 발생했습니다: $e')),
       );

@@ -64,14 +64,14 @@ class PostAPI {
       }
 
       // 백엔드 라우터 형식에 맞게 수정
-      // GET /posts?user_id=1&skip=0&limit=100
+      // GET /posts/?user_id=1&skip=0&limit=100
       // user_id는 필수 파라미터입니다
       if (userId <= 0) {
         throw Exception('유효한 사용자 ID가 필요합니다');
       }
 
       final response = await _dio.get(
-        '/posts',
+        '/posts/',
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
@@ -90,6 +90,10 @@ class PostAPI {
       } else {
         print(
             'Error fetching user posts: ${response.statusCode} - ${response.data}');
+        // 404 에러인 경우 빈 리스트 반환
+        if (response.statusCode == 404) {
+          return [];
+        }
         throw Exception(
             'Failed to fetch user posts: ${response.statusMessage}');
       }
