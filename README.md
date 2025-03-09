@@ -69,6 +69,28 @@ Glimpse is an innovative research tracking and knowledge sharing platform design
 - Implement like, save, and comment functionality
 - Implement following-based feed retrieval functionality
 
+✅ Profile Management
+- User profile creation and editing
+- Profile image upload and management
+- Research interests and bio information management
+
+✅ UI/UX Enhancements
+- Improved navigation bar with hide/show animation
+- Optimized layout for different screen sizes
+- Enhanced profile image handling with cache busting
+
+### Recent Updates
+✅ Profile Image Management
+- Added profile image upload functionality
+- Implemented image cache invalidation for immediate updates
+- Configured Docker to clean media directory on restart
+- Fixed image URL handling between frontend and backend
+
+✅ UI Responsiveness
+- Fixed app bar and navigation bar overlap issues
+- Improved content area sizing and positioning
+- Enhanced screen transitions and animations
+
 ### Ongoing Development
 🔨 Details of frontend
 - posting details
@@ -173,6 +195,28 @@ Project Link: [https://github.com/minhjih/dailyexp](https://github.com/minhjih/d
 - 포스트 생성, 조회, 수정, 삭제 API 구현
 - 좋아요, 저장, 댓글 기능 구현
 - 팔로우 기반 피드 조회 기능 구현
+
+✅ 프로필 관리
+- 사용자 프로필 생성 및 편집
+- 프로필 이미지 업로드 및 관리
+- 연구 관심사 및 자기소개 정보 관리
+
+✅ UI/UX 개선
+- 숨기기/보이기 애니메이션이 있는 개선된 내비게이션 바
+- 다양한 화면 크기에 최적화된 레이아웃
+- 캐시 무효화를 통한 향상된 프로필 이미지 처리
+
+### 최근 업데이트
+✅ 프로필 이미지 관리
+- 프로필 이미지 업로드 기능 추가
+- 즉각적인 업데이트를 위한 이미지 캐시 무효화 구현
+- 도커 재시작 시 미디어 디렉토리 초기화 설정
+- 프론트엔드와 백엔드 간 이미지 URL 처리 개선
+
+✅ UI 반응성
+- 앱 바와 내비게이션 바 겹침 문제 해결
+- 콘텐츠 영역 크기 조정 및 위치 개선
+- 화면 전환 및 애니메이션 향상
 
 ### 진행 중인 개발
 🔨 Frontend detail
