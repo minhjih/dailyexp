@@ -290,15 +290,56 @@ class AuthAPI {
   }
 
   Future<List<User>> searchUsers(String query) async {
-    final token = await _getToken();
-    final response = await _dio.get(
-      '/workspaces/users/search',
-      options: Options(
-        headers: {'Authorization': 'Bearer $token'},
-      ),
-      queryParameters: {'query': query},
-    );
-    return (response.data as List).map((json) => User.fromJson(json)).toList();
+    try {
+      final token = await _getToken();
+      if (token == null) {
+        throw Exception('인증 토큰이 없습니다. 다시 로그인해주세요.');
+      }
+
+      // 팔로잉 목록 가져오기
+      final followingIds = await getFollowingIds();
+
+      // 사용자 검색 - 기존 엔드포인트 사용
+      final response = await _dio.get(
+        '/workspaces/users/search', // 기존에 있는 엔드포인트로 변경
+        options: Options(
+          headers: {'Authorization': 'Bearer $token'},
+        ),
+        queryParameters: {'query': query},
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('사용자 검색 실패: ${response.statusCode}');
+      }
+
+      // 검색 결과에 팔로잉 정보 추가
+      final List<User> users = (response.data as List).map((json) {
+        final user = User.fromJson(json);
+        // 팔로잉 여부 설정
+        final isFollowing = followingIds.contains(user.id);
+
+        // 새 User 객체 생성하여 isFollowing 속성 설정
+        return User(
+          id: user.id,
+          email: user.email,
+          fullName: user.fullName,
+          institution: user.institution,
+          department: user.department,
+          researchField: user.researchField,
+          researchInterests: user.researchInterests,
+          bio: user.bio,
+          externalLinks: user.externalLinks,
+          profileImageUrl: user.profileImageUrl,
+          createdAt: user.createdAt,
+          isFollowing: isFollowing,
+        );
+      }).toList();
+
+      return users;
+    } catch (e) {
+      print('사용자 검색 중 오류 발생: $e');
+      throw Exception('사용자 검색 중 오류 발생: $e');
+    }
   }
 
   Future<List<Workspace>> searchWorkspaces(String query) async {
@@ -360,6 +401,36 @@ class AuthAPI {
     } catch (e) {
       print('Error getting workspace papers: $e');
       throw Exception('Failed to load workspace papers');
+    }
+  }
+
+  // 워크스페이스 생성
+  Future<Map<String, dynamic>> createWorkspace(
+      Map<String, dynamic> workspaceData) async {
+    try {
+      final token = await _getToken();
+
+      if (token == null) {
+        throw Exception('인증 토큰이 없습니다. 다시 로그인해주세요.');
+      }
+
+      final response = await _dio.post(
+        '/workspaces/new', // 새로운 워크스페이스 생성 엔드포인트
+        data: workspaceData,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception('워크스페이스 생성 실패: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('워크스페이스 생성 중 오류 발생: $e');
     }
   }
 }

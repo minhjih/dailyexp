@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Body
 from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 from ..models.database import get_db
@@ -23,6 +23,15 @@ class PaperData(BaseModel):
     arxiv_id: str
     url: str
     categories: list
+
+class WorkspaceCreate(BaseModel):
+    name: str
+    description: str
+    research_field: str
+    research_topics: List[str]
+    is_public: bool
+    creator_role: str = "maintainer"  # 기본값은 maintainer
+    members: List[dict] = []
 
 @router.get("/recommended", response_model=List[workspace_schemas.Workspace])
 async def get_recommended_workspaces(
@@ -395,4 +404,81 @@ async def get_workspace_papers(
 
     except Exception as e:
         print(f"Error getting workspace papers: {e}")
-        raise HTTPException(status_code=500, detail=str(e)) 
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/new", response_model=workspace_schemas.Workspace)
+async def create_new_workspace(
+    workspace_data: WorkspaceCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    워크스페이스 생성 엔드포인트
+    생성자의 역할을 지정할 수 있으며, 다른 멤버도 초대할 수 있습니다.
+    """
+    try:
+        # 워크스페이스 생성
+        new_workspace = models.Workspace(
+            name=workspace_data.name,
+            description=workspace_data.description,
+            research_field=workspace_data.research_field,
+            research_topics=workspace_data.research_topics,
+            is_public=workspace_data.is_public,
+            owner_id=current_user.id,
+            created_at=datetime.utcnow(),
+            updated_at=datetime.utcnow(),
+            member_count=1 + len(workspace_data.members)  # 생성자 + 초대된 멤버
+        )
+        
+        db.add(new_workspace)
+        db.flush()  # ID 생성을 위해 flush
+        
+        # 생성자를 멤버로 추가
+        creator_member = models.WorkspaceMember(
+            workspace_id=new_workspace.id,
+            user_id=current_user.id,
+            role=workspace_data.creator_role,  # 생성자 역할 설정
+            joined_at=datetime.utcnow()
+        )
+        db.add(creator_member)
+        
+        # 초대된 멤버 추가
+        for member_data in workspace_data.members:
+            # 사용자 존재 확인
+            user_id = member_data.get('user_id')
+            user = db.query(models.User).filter(models.User.id == user_id).first()
+            if not user:
+                continue  # 사용자가 없으면 건너뜀
+                
+            # 이미 멤버인지 확인 (중복 방지)
+            if user_id == current_user.id:
+                continue  # 생성자는 이미 추가됨
+                
+            # 멤버 추가
+            member = models.WorkspaceMember(
+                workspace_id=new_workspace.id,
+                user_id=user_id,
+                role=member_data.get('role', 'member'),  # 기본 역할은 member
+                joined_at=datetime.utcnow()
+            )
+            db.add(member)
+        
+        db.commit()
+        
+        # 생성된 워크스페이스 조회 (관련 데이터 포함)
+        created_workspace = (
+            db.query(models.Workspace)
+            .options(
+                joinedload(models.Workspace.owner),
+                joinedload(models.Workspace.members).joinedload(models.WorkspaceMember.user)
+            )
+            .filter(models.Workspace.id == new_workspace.id)
+            .first()
+        )
+        
+        return created_workspace
+        
+    except Exception as e:
+        db.rollback()
+        print(f"Error creating workspace: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to create workspace: {str(e)}") 

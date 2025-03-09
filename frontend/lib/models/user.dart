@@ -10,6 +10,7 @@ class User {
   final Map<String, String>? externalLinks;
   final String? profileImageUrl;
   final DateTime? createdAt;
+  final bool isFollowing;
 
   User({
     this.id,
@@ -23,6 +24,7 @@ class User {
     this.externalLinks,
     this.profileImageUrl,
     this.createdAt,
+    this.isFollowing = false,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -44,6 +46,7 @@ class User {
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
           : null,
+      isFollowing: json['is_following'] ?? false,
     );
   }
 
@@ -60,6 +63,7 @@ class User {
       'bio': bio,
       'external_links': externalLinks,
       'profile_image_url': profileImageUrl,
+      'is_following': isFollowing,
     };
   }
 }

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import papers, auth, scraps, groups, comments, profile, workspaces, posts
+from .routers import papers, auth, scraps, groups, comments, profile, workspaces, posts, users
 from .models.database import init_db, engine, Base
 import uvicorn
 
@@ -8,6 +8,7 @@ app = FastAPI(
     title="DailyExp API",
     description="DailyExp 애플리케이션을 위한 API",
     version="0.1.0",
+    redirect_slashes=False,
 )
 
 # CORS 설정
@@ -37,6 +38,7 @@ app.include_router(comments.router)
 app.include_router(profile.router)
 app.include_router(workspaces.router)
 app.include_router(posts.router)
+app.include_router(users.router)
 
 @app.get("/")
 async def root():

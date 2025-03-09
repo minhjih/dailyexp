@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:motion_tab_bar_v2/motion-tab-controller.dart';
 import '../../theme/colors.dart';
 import './workspace_detail_screen.dart';
+import './create_workspace_screen.dart';
 import '../../api/auth_api.dart';
 import '../../models/workspace.dart';
 import 'dart:math' show min;
@@ -137,8 +138,19 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                   ),
                 ),
                 TextButton.icon(
-                  onPressed: () {
-                    // TODO: New workspace 생성
+                  onPressed: () async {
+                    // 워크스페이스 생성 화면으로 이동
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const CreateWorkspaceScreen(),
+                      ),
+                    );
+
+                    // 워크스페이스가 생성되었으면 목록 새로고침
+                    if (result == true) {
+                      _loadWorkspaces();
+                    }
                   },
                   icon: const Icon(
                     Icons.add,
