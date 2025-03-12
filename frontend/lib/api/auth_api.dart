@@ -493,7 +493,7 @@ class AuthAPI {
       }
 
       final response = await _dio.get(
-        '/users',
+        '/users/',
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',

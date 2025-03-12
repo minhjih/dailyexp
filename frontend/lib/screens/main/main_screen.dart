@@ -12,6 +12,9 @@ import '../profile/profile_screen.dart';
 import '../workspace/workspace_detail_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../papers/paper_list_screen.dart';
+import 'package:provider/provider.dart';
+import '../../providers/user_provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -36,6 +39,12 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       length: 5,
       vsync: this,
     );
+
+    // 사용자 정보 로드
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      userProvider.loadCurrentUser();
+    });
 
     _hideController = AnimationController(
       vsync: this,
@@ -162,11 +171,31 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                             onTap: () {
                               _tabController?.index = 4;
                             },
-                            child: CircleAvatar(
-                              radius: 16,
-                              backgroundColor: Colors.grey[200],
-                              backgroundImage: const NetworkImage(
-                                  'https://via.placeholder.com/150'),
+                            child: Consumer<UserProvider>(
+                              builder: (context, userProvider, child) {
+                                final user = userProvider.user;
+                                String? profileImageUrl = user?.profileImageUrl;
+
+                                return CircleAvatar(
+                                  radius: 16,
+                                  backgroundColor: Colors.grey[200],
+                                  backgroundImage: (profileImageUrl != null &&
+                                          profileImageUrl.isNotEmpty)
+                                      ? (() {
+                                          // 이미지 URL이 http로 시작하지 않으면 .env 파일의 API_URL을 추가
+                                          final String apiUrl =
+                                              dotenv.env['API_URL'] ??
+                                                  'http://10.0.2.2:8000';
+                                          final String fullUrl =
+                                              profileImageUrl.startsWith('http')
+                                                  ? profileImageUrl
+                                                  : '$apiUrl$profileImageUrl';
+                                          return NetworkImage(fullUrl);
+                                        })()
+                                      : const NetworkImage(
+                                          'https://via.placeholder.com/150'),
+                                );
+                              },
                             ),
                           ),
                         ],
