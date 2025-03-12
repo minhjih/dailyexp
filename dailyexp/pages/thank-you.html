@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>감사합니다 - Glimpse</title>
+    <meta name="description" content="Glimpse 프로젝트에 관심을 가져주셔서 감사합니다.">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <style>
+        .thank-you-container {
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .thank-you-icon {
+            font-size: 5rem;
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+            animation: bounce 2s ease infinite;
+        }
+        
+        .thank-you-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+        
+        .thank-you-message {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-20px);
+            }
+            60% {
+                transform: translateY(-10px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="navbar">
+            <div class="logo">
+                <img src="assets/favicon.svg" alt="Glimpse 로고">
+                <span>Glimpse</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html#features">기능</a></li>
+                <li><a href="index.html#about">소개</a></li>
+                <li><a href="index.html#business-model">비즈니스 모델</a></li>
+                <li><a href="index.html#contact">문의하기</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="thank-you-container">
+        <div class="thank-you-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h1 class="thank-you-title">메시지가 전송되었습니다!</h1>
+        <p class="thank-you-message">Glimpse 프로젝트에 관심을 가져주셔서 감사합니다. 보내주신 메시지를 확인한 후 빠른 시일 내에 답변 드리겠습니다.</p>
+        <a href="index.html" class="btn btn-primary">홈으로 돌아가기</a>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-info">
+                <div class="footer-logo">
+                    <img src="assets/favicon.svg" alt="Glimpse 로고">
+                    <span>Glimpse</span>
+                </div>
+                <p>연구자를 위한 혁신적인 지식 공유 플랫폼</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h4>서비스</h4>
+                    <ul>
+                        <li><a href="index.html#features">기능</a></li>
+                        <li><a href="index.html#about">소개</a></li>
+                        <li><a href="index.html#business-model">비즈니스 모델</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>지원</h4>
+                    <ul>
+                        <li><a href="index.html#contact">협업 문의</a></li>
+                        <li><a href="https://github.com/minhjih/dailyexp" target="_blank">GitHub</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Glimpse. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <button class="dark-mode-toggle">
+        <i class="fas fa-moon"></i>
+    </button>
+
+    <script src="script.js"></script>
+</body>
+</html> 

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glimpse - 연구자를 위한 지식 공유 플랫폼</title>
+    <meta name="description" content="Glimpse는 대학원생을 위한 혁신적인 연구 추적 및 지식 공유 플랫폼입니다. 관심 분야의 최신 논문에 대한 추천을 받고, 핵심 통찰력을 포착하며, 연구 그룹과 공유하세요.">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+</head>
+<body>
+    <header class="header">
+        <nav class="navbar">
+            <div class="logo">
+                <img src="assets/favicon.svg" alt="Glimpse 로고">
+                <span>Glimpse</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#features">기능</a></li>
+                <li><a href="#about">소개</a></li>
+                <li><a href="#business-model">비즈니스 모델</a></li>
+                <li><a href="#contact">문의하기</a></li>
+            </ul>
+            <div class="cta-buttons">
+                <a href="#contact" class="btn btn-primary">협업 문의</a>
+            </div>
+        </nav>
+        <div class="hero">
+            <div class="hero-content">
+                <h1 class="hero-title">연구자를 위한<br><span class="typing-effect">지식 공유</span> 플랫폼</h1>
+                <p class="hero-subtitle">Glimpse는 대학원생을 위한 혁신적인 연구 추적 및 지식 공유 플랫폼입니다. 관심 분야의 최신 논문에 대한 추천을 받고, 핵심 통찰력을 포착하며, 연구 그룹과 공유하세요.</p>
+                <div class="hero-cta">
+                    <a href="#contact" class="btn btn-primary btn-large">협업 문의하기</a>
+                    <a href="#features" class="btn btn-secondary btn-large">자세히 알아보기</a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="assets/feeed.png" alt="앱 스크린샷" class="app-screenshot">
+                <div class="floating-elements">
+                    <div class="floating-element fe-1">
+                        <i class="fas fa-newspaper"></i>
+                        <span>논문 추천</span>
+                    </div>
+                    <div class="floating-element fe-2">
+                        <i class="fas fa-users"></i>
+                        <span>연구 협업</span>
+                    </div>
+                    <div class="floating-element fe-3">
+                        <i class="fas fa-lightbulb"></i>
+                        <span>지식 공유</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section id="features" class="features">
+        <div class="section-header fade-in">
+            <h2 class="section-title">주요 기능</h2>
+            <p class="section-subtitle">Glimpse는 연구자들의 효율적인 연구 활동을 위한 다양한 기능을 제공합니다.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card fade-in">
+                <i class="fas fa-newspaper feature-icon"></i>
+                <h3 class="feature-title">맞춤형 논문 추천</h3>
+                <p class="feature-description">관심 분야의 주요 저널에서 매일 논문 추천을 받아보세요. 최신 연구 동향을 놓치지 않고 파악할 수 있습니다.</p>
+            </div>
+            <div class="feature-card fade-in">
+                <i class="fas fa-file-alt feature-icon"></i>
+                <h3 class="feature-title">직관적인 요약</h3>
+                <p class="feature-description">추천된 논문의 간결한 요약과 핵심 직관을 제공받아 빠르게 내용을 파악할 수 있습니다.</p>
+            </div>
+            <div class="feature-card fade-in">
+                <i class="fas fa-bookmark feature-icon"></i>
+                <h3 class="feature-title">스크랩 및 공유</h3>
+                <p class="feature-description">중요한 섹션을 쉽게 스크랩하고 연구 그룹과 즉시 공유하여 효율적인 협업이 가능합니다.</p>
+            </div>
+            <div class="feature-card fade-in">
+                <i class="fas fa-share-alt feature-icon"></i>
+                <h3 class="feature-title">리뷰 게시</h3>
+                <p class="feature-description">논문 리뷰를 공개적으로 게시하여 지식을 전파하고 다른 연구자들과 의견을 나눌 수 있습니다.</p>
+            </div>
+            <div class="feature-card fade-in">
+                <i class="fas fa-user-plus feature-icon"></i>
+                <h3 class="feature-title">팔로우 시스템</h3>
+                <p class="feature-description">다른 연구자들을 팔로우하여 그들의 작업과 리뷰에서 통찰력을 얻고 네트워크를 확장하세요.</p>
+            </div>
+            <div class="feature-card fade-in">
+                <i class="fas fa-project-diagram feature-icon"></i>
+                <h3 class="feature-title">통합 워크스페이스</h3>
+                <p class="feature-description">개인 및 그룹 연구 활동을 위한 통합 워크스페이스로 효율적인 연구 관리가 가능합니다.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="about">
+        <div class="about-content fade-in">
+            <div class="section-header" style="text-align: left;">
+                <h2 class="section-title">Glimpse 소개</h2>
+                <p class="section-subtitle" style="margin: 0 0 1.5rem;">연구자를 위한 혁신적인 지식 공유 플랫폼</p>
+            </div>
+            <p class="about-text">Glimpse는 대학원생을 위해 설계된 혁신적인 연구 추적 및 지식 공유 플랫폼입니다. 관심 분야의 최신 논문에 대한 추천을 받고, 핵심 통찰력을 포착하며, 연구 그룹과 공유하고, 논문 리뷰를 공개적으로 게시하여 빠른 연구 변화에 숏폼 형태로 지식을 전파, 수용할 수 있는 종합적인 솔루션을 제공합니다.</p>
+            <p class="about-text">우리는 연구 커뮤니티의 벽을 허물고, 다양한 분야의 연구자들이 서로의 지식과 경험을 나눌 수 있는 공간을 만들고자 합니다. Glimpse를 통해 연구자들은 최신 연구 동향을 파악하고, 새로운 협업 기회를 발견하며, 자신의 연구를 더 넓은 커뮤니티에 알릴 수 있습니다.</p>
+            <div class="stats-container">
+                <div class="stat-item">
+                    <span class="stat-number" data-target="0">5000만명</span>
+                    <span class="stat-label">목표 사용자</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" data-target="80">0</span>
+                    <span class="stat-label">개발 진행률(%)</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" data-target="2">0</span>
+                    <span class="stat-label">개발 참여자</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" data-target="0">0</span>
+                    <span class="stat-label">협업 기관</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="business-model" class="business-model">
+        <div class="section-header fade-in">
+            <h2 class="section-title">비즈니스 모델</h2>
+            <p class="section-subtitle">Glimpse는 연구자와 기업 간의 연결을 통해 지속 가능한 가치를 창출합니다.</p>
+        </div>
+        <div class="business-model-container">
+            <div class="business-card fade-in">
+                <div class="business-icon">
+                    <i class="fas fa-handshake"></i>
+                </div>
+                <h3 class="business-title">산학 협력 중개</h3>
+                <p class="business-description">연구자와 기업 간의 과제 협약 과정을 중개하고 팔로업하여 성공적인 협업을 지원합니다. 협약 성사 시 중개 수수료를 통해 수익을 창출합니다.</p>
+            </div>
+            <div class="business-card fade-in">
+                <div class="business-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3 class="business-title">연구 트렌드 분석</h3>
+                <p class="business-description">축적된 연구 데이터를 기반으로 산업별 연구 트렌드 분석 리포트를 제공하여 기업의 R&D 방향 설정을 지원합니다.</p>
+            </div>
+            <div class="business-card fade-in">
+                <div class="business-icon">
+                    <i class="fas fa-users-cog"></i>
+                </div>
+                <h3 class="business-title">인재 매칭</h3>
+                <p class="business-description">기업의 연구 프로젝트에 적합한 연구자를 추천하고 매칭하여 효율적인 인재 확보를 지원합니다. 성공적인 채용 시 수수료를 받습니다.</p>
+            </div>
+        </div>
+        <div class="business-process fade-in">
+            <h3 class="process-title">협업 프로세스</h3>
+            <div class="process-steps">
+                <div class="process-step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>연구자 프로필 등록</h4>
+                        <p>연구자가 자신의 전문 분야와 연구 실적을 등록합니다.</p>
+                    </div>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>기업 과제 등록</h4>
+                        <p>기업이 연구 과제와 협업 조건을 플랫폼에 등록합니다.</p>
+                    </div>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>매칭 및 협의</h4>
+                        <p>AI 기반 매칭 시스템으로 최적의 연구자와 기업을 연결하고 협의를 진행합니다.</p>
+                    </div>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>계약 체결 및 관리</h4>
+                        <p>협약 체결 후 프로젝트 진행 상황을 모니터링하고 지속적인 지원을 제공합니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="contact">
+        <div class="section-header fade-in">
+            <h2 class="section-title">협업 문의</h2>
+            <p class="section-subtitle">Glimpse 프로젝트에 관심이 있으시면 언제든지 문의해주세요.</p>
+        </div>
+        <div class="contact-container">
+            <div class="contact-info fade-in">
+                <div class="contact-item">
+                    <i class="fas fa-user"></i>
+                    <div>
+                        <h4>프로젝트 관리자</h4>
+                        <p>@minji - jhchoi0226@snu.ac.kr</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-code"></i>
+                    <div>
+                        <h4>프론트엔드 협업</h4>
+                        <p>@jadestarmin - jadestar@postech.ac.kr</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-link"></i>
+                    <div>
+                        <h4>프로젝트 링크</h4>
+                        <p><a href="https://github.com/minhjih/dailyexp" target="_blank">github.com/minhjih/dailyexp</a></p>
+                    </div>
+                </div>
+                <div class="social-links">
+                    <a href="https://www.linkedin.com/in/minhjih" target="_blank" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="https://github.com/minhjih" target="_blank" class="social-link"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+            <form class="contact-form fade-in" action="https://formsubmit.co/jhchoi0226@snu.ac.kr" method="POST">
+                <!-- FormSubmit 설정 -->
+                <input type="hidden" name="_subject" value="Glimpse 프로젝트 문의">
+                <input type="hidden" name="_template" value="table">
+                <input type="hidden" name="_captcha" value="false">
+                <input type="hidden" name="_next" value="https://minhjih.github.io/dailyexp/pages/thank-you.html">
+                
+                <div class="form-group">
+                    <label for="name">이름</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">이메일</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="message">메시지</label>
+                    <textarea id="message" name="message" rows="5" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-large">문의하기</button>
+            </form>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-info">
+                <div class="footer-logo">
+                    <img src="assets/favicon.svg" alt="Glimpse 로고">
+                    <span>Glimpse</span>
+                </div>
+                <p>연구자를 위한 혁신적인 지식 공유 플랫폼</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h4>서비스</h4>
+                    <ul>
+                        <li><a href="#features">기능</a></li>
+                        <li><a href="#about">소개</a></li>
+                        <li><a href="#business-model">비즈니스 모델</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>지원</h4>
+                    <ul>
+                        <li><a href="#contact">협업 문의</a></li>
+                        <li><a href="https://github.com/minhjih/dailyexp" target="_blank">GitHub</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>연락처</h4>
+                    <ul>
+                        <li><a href="mailto:jhchoi0226@snu.ac.kr">jhchoi0226@snu.ac.kr</a></li>
+                        <li><a href="https://www.linkedin.com/in/minhjih" target="_blank">LinkedIn</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>법적 고지</h4>
+                    <ul>
+                        <li><a href="#">이용약관</a></li>
+                        <li><a href="#">개인정보처리방침</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Glimpse. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html> 
