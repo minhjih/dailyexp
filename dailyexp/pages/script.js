@@ -144,30 +144,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const contactForm = document.querySelector('.contact-form');
     if (contactForm) {
         // FormSubmit 서비스를 사용하므로 자바스크립트 처리는 필요 없음
-        // 첫 번째 폼 제출 시 FormSubmit에서 확인 이메일을 보내므로 안내 메시지 추가
+        // 폼 제출은 그대로 진행되며 FormSubmit에 의해 처리됨
         contactForm.addEventListener('submit', function(e) {
-            // 폼 제출은 그대로 진행됨 (e.preventDefault() 호출 안 함)
             console.log('폼이 제출되었습니다. FormSubmit 서비스로 처리됩니다.');
-            
-            // 첫 번째 제출 시 FormSubmit 안내 메시지 표시
-            const formSubmitMessage = document.createElement('div');
-            formSubmitMessage.className = 'success-message';
-            formSubmitMessage.style.position = 'fixed';
-            formSubmitMessage.style.bottom = '20px';
-            formSubmitMessage.style.right = '20px';
-            formSubmitMessage.style.padding = '15px';
-            formSubmitMessage.style.zIndex = '9999';
-            formSubmitMessage.textContent = '첫 번째 제출 시 FormSubmit에서 확인 이메일을 보낼 수 있습니다. 이메일을 확인해주세요.';
-            
-            document.body.appendChild(formSubmitMessage);
-            
-            // 5초 후 메시지 제거
-            setTimeout(() => {
-                formSubmitMessage.style.opacity = '0';
-                setTimeout(() => {
-                    document.body.removeChild(formSubmitMessage);
-                }, 500);
-            }, 5000);
+            // 메시지 창 표시 코드 제거 - 바로 리다이렉트됨
         });
     }
 
