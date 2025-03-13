@@ -36,6 +36,12 @@ class PostProvider with ChangeNotifier {
       final newPosts =
           await _postAPI.getFeedPosts(skip: (_currentPage - 1) * 20);
 
+      // 디버깅: 프로필 이미지 URL 확인
+      for (var post in newPosts) {
+        developer.log(
+            '포스트 ID: ${post.id}, 작성자: ${post.authorName}, 프로필 이미지: ${post.authorProfileImage}');
+      }
+
       if (refresh) {
         _posts = newPosts;
       } else {
@@ -156,11 +162,17 @@ class PostProvider with ChangeNotifier {
   // 댓글 추가
   Future<void> addComment(int postId, String content) async {
     try {
-      final newComment = await _postAPI.addComment(postId, content);
+      developer.log('PostProvider: 댓글 추가 시작 - 포스트 ID=$postId, 내용=$content',
+          name: 'PostProvider');
 
+      final comment = await _postAPI.addComment(postId, content);
+      developer.log('PostProvider: API 호출 성공 - 댓글 ID=${comment.id}',
+          name: 'PostProvider');
+
+      // 포스트 목록에서 해당 포스트 찾아 댓글 추가
       _posts = _posts.map((post) {
         if (post.id == postId) {
-          final updatedComments = [...post.comments, newComment];
+          final updatedComments = [...post.comments, comment];
           return Post(
             id: post.id,
             authorId: post.authorId,
@@ -185,9 +197,11 @@ class PostProvider with ChangeNotifier {
       }).toList();
 
       notifyListeners();
+      developer.log('댓글이 성공적으로 추가되었습니다: ${comment.content}',
+          name: 'PostProvider');
     } catch (e) {
-      // 에러 처리
-      developer.log('Error adding comment: $e');
+      developer.log('Error adding comment: $e', name: 'PostProvider');
+      rethrow;
     }
   }
 

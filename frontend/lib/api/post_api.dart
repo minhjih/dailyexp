@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/post.dart';
+import '../models/comment.dart';
 
 class PostAPI {
   final Dio _dio = Dio(BaseOptions(
@@ -38,6 +39,13 @@ class PostAPI {
 
       if (response.statusCode == 200) {
         final List<dynamic> postsJson = response.data;
+
+        // 디버깅: 백엔드에서 받은 원본 데이터 확인
+        for (var postJson in postsJson) {
+          print(
+              '백엔드 응답 - 포스트 ID: ${postJson['id']}, 작성자 이미지: ${postJson['author_profile_image']}');
+        }
+
         return postsJson.map((json) => Post.fromJson(json)).toList();
       } else {
         print(
@@ -232,45 +240,7 @@ class PostAPI {
     }
   }
 
-  // 댓글 작성
-  Future<Comment> addComment(int postId, String content,
-      {int? parentId}) async {
-    try {
-      final token = await _getToken();
-      if (token == null) {
-        throw Exception('No token found');
-      }
-
-      final data = {
-        'content': content,
-        'post_id': postId,
-      };
-
-      if (parentId != null) {
-        data['parent_id'] = parentId;
-      }
-
-      final response = await _dio.post(
-        '/posts/$postId/comments',
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-          },
-        ),
-        data: data,
-      );
-
-      if (response.statusCode == 201) {
-        return Comment.fromJson(response.data);
-      } else {
-        throw Exception('Failed to add comment');
-      }
-    } catch (e) {
-      throw Exception('Failed to add comment: $e');
-    }
-  }
-
-  // 댓글 목록 가져오기
+  // 댓글 가져오기
   Future<List<Comment>> getComments(int postId) async {
     try {
       final token = await _getToken();
@@ -294,9 +264,64 @@ class PostAPI {
         throw Exception('Failed to fetch comments');
       }
     } catch (e) {
-      // 개발 중에는 빈 리스트 반환
       print('Error fetching comments: $e');
       return [];
+    }
+  }
+
+  // 댓글 추가
+  Future<Comment> addComment(int postId, String content) async {
+    try {
+      final token = await _getToken();
+      if (token == null) {
+        throw Exception('No token found');
+      }
+
+      print('댓글 추가 요청: 포스트 ID=$postId, 내용=$content');
+
+      // 백엔드 API 요구사항에 맞게 요청 본문 구성
+      // PostCommentCreate 스키마는 content와 post_id 필드가 모두 필요함
+      // post_id는 URL 경로의 값과 동일해야 함
+      final response = await _dio.post(
+        '/posts/$postId/comments',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
+        data: {
+          'content': content,
+          'post_id': postId, // URL 경로의 post_id와 동일한 값 사용
+        },
+      );
+
+      print('댓글 추가 응답: 상태 코드=${response.statusCode}, 데이터=${response.data}');
+
+      // 응답 데이터 구조 자세히 로깅
+      print('응답 데이터 타입: ${response.data.runtimeType}');
+      if (response.data is Map) {
+        response.data.forEach((key, value) {
+          print('  $key: $value (${value.runtimeType})');
+        });
+      }
+
+      if (response.statusCode == 201) {
+        try {
+          final comment = Comment.fromJson(response.data);
+          print('댓글 파싱 성공: id=${comment.id}, authorId=${comment.authorId}');
+          return comment;
+        } catch (parseError) {
+          print('댓글 파싱 오류: $parseError');
+          rethrow;
+        }
+      } else {
+        print('댓글 추가 실패: ${response.statusCode} - ${response.data}');
+        throw Exception('Failed to add comment: ${response.statusMessage}');
+      }
+    } catch (e) {
+      print('댓글 추가 중 오류 발생: $e');
+      throw Exception('Failed to add comment: $e');
     }
   }
 }

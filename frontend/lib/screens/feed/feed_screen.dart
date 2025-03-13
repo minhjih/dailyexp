@@ -7,6 +7,8 @@ import '../../providers/post_provider.dart';
 import '../../models/post.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'post_detail_screen.dart';
+import '../../utils/image_utils.dart';
 
 class FeedScreen extends StatefulWidget {
   final Function(ScrollDirection) onScroll;
@@ -22,7 +24,7 @@ class FeedScreen extends StatefulWidget {
 
 class _FeedScreenState extends State<FeedScreen> {
   final ScrollController _scrollController = ScrollController();
-  final TextEditingController _commentController = TextEditingController();
+  Map<int, TextEditingController> _commentControllers = {};
   Map<int, bool> _isCommentsVisible = {};
 
   @override
@@ -40,7 +42,8 @@ class _FeedScreenState extends State<FeedScreen> {
   @override
   void dispose() {
     _scrollController.dispose();
-    _commentController.dispose();
+    // 모든 컨트롤러 해제
+    _commentControllers.forEach((_, controller) => controller.dispose());
     super.dispose();
   }
 
@@ -65,6 +68,11 @@ class _FeedScreenState extends State<FeedScreen> {
     // 댓글이 표시될 때 댓글 데이터 로드
     if (_isCommentsVisible[postId] ?? false) {
       Provider.of<PostProvider>(context, listen: false).fetchComments(postId);
+
+      // 해당 포스트의 댓글 컨트롤러가 없으면 생성
+      if (!_commentControllers.containsKey(postId)) {
+        _commentControllers[postId] = TextEditingController();
+      }
     }
   }
 
@@ -77,10 +85,24 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   void _submitComment(int postId) {
-    if (_commentController.text.trim().isNotEmpty) {
+    // 해당 포스트의 댓글 컨트롤러 가져오기
+    final controller = _commentControllers[postId];
+    if (controller != null && controller.text.trim().isNotEmpty) {
+      print('피드 화면에서 댓글 추가 시도: 포스트 ID=$postId, 내용=${controller.text.trim()}');
+
       Provider.of<PostProvider>(context, listen: false)
-          .addComment(postId, _commentController.text.trim());
-      _commentController.clear();
+          .addComment(postId, controller.text.trim())
+          .then((_) {
+        // 성공적으로 댓글이 추가되면 텍스트 필드 초기화
+        controller.clear();
+        print('피드 화면에서 댓글 추가 성공');
+      }).catchError((error) {
+        // 에러 처리
+        print('피드 화면에서 댓글 추가 실패: $error');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('댓글 추가 중 오류가 발생했습니다: $error')),
+        );
+      });
     }
   }
 
@@ -275,131 +297,132 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   Widget buildPostCard(Post post) {
-    return Card(
-      elevation: 0,
-      margin: const EdgeInsets.only(
-        left: 16,
-        right: 16,
-        bottom: 8,
-        top: 4,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ListTile(
-            leading: CircleAvatar(
-              backgroundImage: (() {
-                final String imageUrl = post.authorProfileImage ??
-                    'https://via.placeholder.com/150';
-                // 이미지 URL이 http로 시작하지 않으면 .env 파일의 API_URL을 추가
-                if (imageUrl.startsWith('http') ||
-                    imageUrl == 'https://via.placeholder.com/150') {
-                  return NetworkImage(imageUrl);
-                } else {
-                  final String apiUrl =
-                      dotenv.env['API_URL'] ?? 'http://10.0.2.2:8000';
-                  return NetworkImage('$apiUrl$imageUrl');
-                }
-              })(),
-            ),
-            title: Text(
-              post.authorName ?? '익명',
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            subtitle: Text(
-              '연구자 ID: ${post.authorId}',
-              style: GoogleFonts.poppins(
-                color: Colors.grey[600],
-              ),
-            ),
-            trailing: Text(
-              _formatDate(post.createdAt),
-              style: GoogleFonts.poppins(
-                color: Colors.grey[500],
-                fontSize: 12,
-              ),
-            ),
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => PostDetailScreen(post: post),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  post.title,
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+        );
+      },
+      child: Card(
+        elevation: 0,
+        margin: const EdgeInsets.only(
+          left: 16,
+          right: 16,
+          bottom: 8,
+          top: 4,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ListTile(
+              leading: CircleAvatar(
+                radius: 20,
+                backgroundImage: NetworkImage(
+                  getFullImageUrl(post.authorProfileImage),
                 ),
-                if (post.paperTitle != null) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    '논문: ${post.paperTitle}',
-                    style: GoogleFonts.poppins(
-                      color: const Color(0xFF43A047),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 8),
-                Text(
-                  post.content,
-                  style: GoogleFonts.poppins(
-                    color: Colors.grey[700],
-                  ),
+              ),
+              title: Text(
+                post.authorName ?? '익명',
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.w600,
                 ),
-                if (post.keyInsights != null &&
-                    post.keyInsights!.isNotEmpty) ...[
-                  const SizedBox(height: 12),
+              ),
+              subtitle: Text(
+                '연구자 ID: ${post.authorId}',
+                style: GoogleFonts.poppins(
+                  color: Colors.grey[600],
+                ),
+              ),
+              trailing: Text(
+                _formatDate(post.createdAt),
+                style: GoogleFonts.poppins(
+                  color: Colors.grey[500],
+                  fontSize: 12,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    '주요 인사이트:',
+                    post.title,
                     style: GoogleFonts.poppins(
+                      fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  ...post.keyInsights!
-                      .map((insight) => _buildKeyInsight(insight))
-                      .toList(),
+                  if (post.paperTitle != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      '논문: ${post.paperTitle}',
+                      style: GoogleFonts.poppins(
+                        color: const Color(0xFF43A047),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 8),
+                  Text(
+                    post.content,
+                    style: GoogleFonts.poppins(
+                      color: Colors.grey[700],
+                    ),
+                  ),
+                  if (post.keyInsights != null &&
+                      post.keyInsights!.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      '주요 인사이트:',
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    ...post.keyInsights!
+                        .map((insight) => _buildKeyInsight(insight))
+                        .toList(),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                _buildInteractionButton(
-                  post.isLiked ? Icons.favorite : Icons.favorite_border,
-                  '${post.likeCount}',
-                  () => _toggleLike(post.id),
-                  post.isLiked ? Colors.red : Colors.grey,
-                ),
-                const SizedBox(width: 24),
-                _buildInteractionButton(
-                  Icons.comment_outlined,
-                  '${post.commentCount}',
-                  () => _toggleComments(post.id),
-                  Colors.grey,
-                ),
-                const Spacer(),
-                _buildInteractionButton(
-                  post.isSaved ? Icons.bookmark : Icons.bookmark_border,
-                  '저장',
-                  () => _toggleSave(post.id),
-                  post.isSaved ? const Color(0xFF43A047) : Colors.grey,
-                ),
-              ],
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  _buildInteractionButton(
+                    post.isLiked ? Icons.favorite : Icons.favorite_border,
+                    '${post.likeCount}',
+                    () => _toggleLike(post.id),
+                    post.isLiked ? Colors.red : Colors.grey,
+                  ),
+                  const SizedBox(width: 24),
+                  _buildInteractionButton(
+                    Icons.comment_outlined,
+                    '${post.commentCount}',
+                    () => _toggleComments(post.id),
+                    Colors.grey,
+                  ),
+                  const Spacer(),
+                  _buildInteractionButton(
+                    post.isSaved ? Icons.bookmark : Icons.bookmark_border,
+                    '저장',
+                    () => _toggleSave(post.id),
+                    post.isSaved ? const Color(0xFF43A047) : Colors.grey,
+                  ),
+                ],
+              ),
             ),
-          ),
-          if (_isCommentsVisible[post.id] ?? false) buildCommentsSection(post),
-        ],
+            if (_isCommentsVisible[post.id] ?? false)
+              buildCommentsSection(post),
+          ],
+        ),
       ),
     );
   }
@@ -449,6 +472,11 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   Widget buildCommentsSection(Post post) {
+    // 해당 포스트의 댓글 컨트롤러가 없으면 생성
+    if (!_commentControllers.containsKey(post.id)) {
+      _commentControllers[post.id] = TextEditingController();
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -475,24 +503,14 @@ class _FeedScreenState extends State<FeedScreen> {
           ),
         ...post.comments.map((comment) => ListTile(
               leading: CircleAvatar(
-                backgroundImage: (() {
-                  final String imageUrl = comment.userProfileImage ??
-                      'https://via.placeholder.com/150';
-                  // 이미지 URL이 http로 시작하지 않으면 .env 파일의 API_URL을 추가
-                  if (imageUrl.startsWith('http') ||
-                      imageUrl == 'https://via.placeholder.com/150') {
-                    return NetworkImage(imageUrl);
-                  } else {
-                    final String apiUrl =
-                        dotenv.env['API_URL'] ?? 'http://10.0.2.2:8000';
-                    return NetworkImage('$apiUrl$imageUrl');
-                  }
-                })(),
+                backgroundImage: NetworkImage(
+                  getFullImageUrl(comment.authorProfileImage),
+                ),
               ),
               title: Row(
                 children: [
                   Text(
-                    comment.userName ?? '익명',
+                    comment.authorName ?? '익명',
                     style: GoogleFonts.poppins(
                       fontWeight: FontWeight.w600,
                     ),
@@ -521,7 +539,7 @@ class _FeedScreenState extends State<FeedScreen> {
             children: [
               Expanded(
                 child: TextField(
-                  controller: _commentController,
+                  controller: _commentControllers[post.id],
                   decoration: InputDecoration(
                     hintText: '댓글 작성...',
                     hintStyle: GoogleFonts.poppins(

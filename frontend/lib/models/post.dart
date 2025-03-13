@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'user.dart';
+import 'comment.dart';
 
 class Post {
   final int id;
@@ -79,56 +80,5 @@ class Post {
     if (paperId != null) data['paper_id'] = paperId;
 
     return data;
-  }
-}
-
-class Comment {
-  final int id;
-  final int postId;
-  final int userId;
-  final String content;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-  final int? parentId;
-  final String? userName;
-  final String? userProfileImage;
-  final List<Comment> replies;
-
-  Comment({
-    required this.id,
-    required this.postId,
-    required this.userId,
-    required this.content,
-    required this.createdAt,
-    required this.updatedAt,
-    this.parentId,
-    this.userName,
-    this.userProfileImage,
-    this.replies = const [],
-  });
-
-  factory Comment.fromJson(Map<String, dynamic> json) {
-    return Comment(
-      id: json['id'],
-      postId: json['post_id'],
-      userId: json['user_id'],
-      content: json['content'],
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
-      parentId: json['parent_id'],
-      userName: json['user_name'],
-      userProfileImage: json['user_profile_image'],
-      replies: json['replies'] != null
-          ? List<Comment>.from(json['replies'].map((x) => Comment.fromJson(x)))
-          : [],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'content': content,
-      'post_id': postId,
-      'parent_id': parentId,
-    };
   }
 }
